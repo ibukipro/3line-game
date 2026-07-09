@@ -6,7 +6,6 @@
   <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
   <title>3（スリー）ライン！</title>
 
 
@@ -1281,6 +1280,7 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
                 </div>
               </div>
               
+             
               <div className="flex items-start gap-2.5">
                 <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
                 <div className="flex-1">
@@ -1647,9 +1647,18 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
             {!winResult && <button onClick={openInstructionsFromGame} className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform">📄 試合を中断して説明を読む</button>}
              
             <div className="flex gap-4 mt-4">
-              <button 
-                onClick={resetGame} 
-                className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
+
+
+
+            <button 
+  onClick={() => {
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // 👈 ココ！100ミリ秒震えて、50ミリ秒休んで、100ミリ秒震える
+    resetGame();
+  }}
+
+
+
+  className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
               >
                 Reset
               </button>
