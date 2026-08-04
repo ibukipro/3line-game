@@ -4,7 +4,8 @@
 
 <head>
   <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
 
   <title>3（スリー）ライン！</title>
 
@@ -288,10 +289,6 @@ filter: brightness(1.2); }
 
 
 
-
-
-
-
 .cell-interactive {
   cursor: pointer;
 }
@@ -470,6 +467,140 @@ filter: brightness(1.2); }
   font-weight: bold;
   font-size: 14px;
 }
+
+
+/* ==========================================
+   ⏱️ タイマー表示のスタイル（上下中央揃え版）
+   ========================================== */
+.timer-display {
+  display: flex;           /* 💡 Flexboxを使う！（これで中身を整列させる） */
+  justify-content: center; /* 💡 横方向を真ん中に寄せる */
+  align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
+  
+  font-size: 1rem;        /* 通常の文字サイズ */
+  font-weight: bold;       
+  color: #e0e0ff;          
+  padding-top:3px;
+　margin-bottom: 2px;     
+  text-align: center;      /* Flexboxが効かない環境への保険 */
+}
+
+/* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
+.timer-display .timer-icon {
+  font-size: 1.5rem;       /* 絵文字を大きくする */
+  margin-right: 4px;       /* 文字との間の隙間 */
+  
+  /* Flexboxで縦中央に揃えるので、vertical-alignは不要になるよ */
+  vertical-align: unset;   /* 👈 もし前の設定が残っていたらリセット */
+  line-height: 1;          /* 👈 絵文字自身の高さをスッキリさせる */
+}
+
+/* 🌟 ラスト10秒の赤点滅（点滅処理はそのまま） */
+.timer-display.warning {
+  color: #ff4d4d;
+  animation: timerBlink 0.8s infinite alternate;
+}
+
+
+/* ==========================================
+   🏆 トロフィー・連勝表示のスタイル
+   ========================================== */
+/* 🏆 トロフィーを並べる箱（5個並ぶように最適化！） */
+.trophy-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;                /* 💡 隙間を 10px → 4px にキュッと詰める */
+  flex-wrap: wrap;         /* 6個以上になったら綺麗に2段目に折り返す */
+  max-width: 90%;          /* カードからはみ出ないように制御 */
+  margin: 10px auto;
+}
+
+/* 🏆 トロフィーのサイズ調整 */
+.trophy-icon {
+  font-size: 2.2rem;       /* 💡 サイズを 3.2rem → 2.2rem に少しコンパクトに */
+  line-height: 1;
+  display: inline-block;
+  animation: trophyPop 0.3s ease-out;
+}
+/* 🥇 金トロフィー（オリジナルの黄金色 ＋ 金色のオーラ） */
+.trophy-icon.gold {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+}
+
+/* 🥈 銀トロフィー（モノクロ化 ＋ 明るさアップで白銀に！） */
+.trophy-icon.silver {
+  filter: grayscale(100%) brightness(1.4) drop-shadow(0 0 10px rgba(220, 225, 255, 0.8));
+}
+
+
+/* 🥉 銅トロフィー（一旦モノクロ化して渋い赤銅色を乗せる！） */
+.trophy-icon.bronze {
+  filter: 
+    grayscale(100%)     /* 💡 1. 元の黄色を完全に消して白黒にする */
+    sepia(100%)     /* 💡 2. レトロなセピア調（ブラウン）に染める */
+    hue-rotate(-50deg)   /* 💡 3. 色相を赤寄りにシフトして銅の色を作る */
+    saturate(500%)   /* 💡 4. 銅の赤み・深みを強調する */
+    contrast(1.2)    /* 💡 5. 陰影のメリハリをつける */
+    brightness(0.7)   /* 💡 6. 金より少しトーンを落として重厚感を出す */
+    drop-shadow(0 0 8px rgba(184, 115, 51, 0.7)); /* 💡 7. 銅色のオーラ */
+}
+
+
+/* 🔥 連勝テキスト（ほんのりキラリと光る上品仕様） */
+.streak-count-text {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fbbf24;             /* パッと目を引く温かいゴールド */
+  
+  /* 💡 文字の周りに少ししっかりめの「光のオーラ」を入れる */
+  text-shadow: 
+    0 0 8px rgba(251, 191, 36, 0.6),
+    0 0 16px rgba(245, 158, 11, 0.4);
+  
+  margin-top: -2px;
+  margin-bottom: 16px;
+  letter-spacing: 1.5px;
+  display: inline-block;
+  
+  /* 💡 ゆっくり呼吸するように優しく光が強弱するアニメーション */
+  animation: streakGlow 2s infinite ease-in-out;
+}
+
+/* 💡 優しくふわ〜っと光が巡るアニメーション */
+@keyframes streakGlow {
+  0%, 100% {
+    opacity: 0.9;
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    /* ほんの少しだけ明るくなってキュッと輝く */
+    filter: brightness(1.25);
+    transform: scale(1.03);
+  }
+}
+
+/* 💡 トロフィーが飛び出すアニメーション */
+@keyframes trophyPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+
+
+
 
 
  </style>
@@ -1097,27 +1228,53 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
 
 
 
-// 🌟 引数はシンプルに、元の onClick={backToMenu} がそのまま動くように調整したよ
-function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
+// 💡 引数に difficulty と winStreak を追加！
+function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStreak }) {
   const nameMap = { 
     blue: 'プレイヤー1（青）', 
     yellow: gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）' 
   };
   const name = nameMap[winner];
   const color = winner === 'blue' ? 'text-blue-400' : 'text-amber-400';
-  const emoji = (gameMode !== '2p' && winner === 'yellow') ? '\u{1F916}' : '\u{1F3C6}';
+
+  // 💡 CPU勝利かどうかの判定
+  const isCpuWin = gameMode !== '2p' && winner === 'yellow';
+
+  // 💡 トロフィーの色クラスを決める（デフォルトは金）
+  let trophyClass = 'gold';
+  if (gameMode === 'ai') {
+    if (difficulty === 'easy') trophyClass = 'bronze';      // よわい：銅
+    if (difficulty === 'normal') trophyClass = 'silver';   // ふつう：銀
+  }
 
   return (
     <div className="overlay-backdrop">
       <div className="overlay-card overlay-enter flex flex-col items-center">
         
-        {/* 絵文字 */}
-        <div className="text-4xl mb-3">{emoji}</div>
+        {/* 🏆 トロフィー／ロボット表示エリア */}
+        <div className="trophy-container">
+          {isCpuWin ? (
+            // CPU勝利のときはロボット1個
+            <span className="trophy-icon">🤖</span>
+          ) : (
+            // 人間勝利のときは連勝数（最低1個）の分だけトロフィーを並べる！
+            Array.from({ length: Math.max(1, winStreak) }).map((_, index) => (
+              <span key={index} className={`trophy-icon ${trophyClass}`}>
+                🏆
+              </span>
+            ))
+          )}
+        </div>
         
         {/* 1. 誰の勝ち */}
         <p className={`text-xl font-black ${color} mb-3 tracking-wide whitespace-nowrap`}>
           {name} の勝利！
         </p>
+
+        {/* 💡 2連勝以上なら連勝数を表示（テンション上がるオマケ！） */}
+        {winStreak > 1 && !isCpuWin && (
+          <p className="streak-count-text">🔥 {winStreak} 連勝中！</p>
+        )}
         
         {/* 2. ゲーム終了 */}
         <h2 className="text-base font-bold text-gray-400 mt-2 mb-8 tracking-widest">
@@ -1130,13 +1287,9 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
           <button onClick={onReset} className="overlay-btn w-full">
             もう一度遊ぶ
           </button>
-          
-          {/* 🌟 4. メニューへ：見せてくれたボタンと全く同じ「onClick={backToMenu}」にしました！ */}
-          <button 
-            onClick={backToMenu} 
-            className="overlay-btn w-full !bg-emerald-500 hover:!bg-emerald-400 text-white font-black"
-          >
-            メニューへ
+          {/* メニューに戻るボタン */}
+          <button onClick={backToMenu} className="overlay-btn w-full secondary">
+            メニューに戻る
           </button>
         </div>
 
@@ -1160,7 +1313,12 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
 
      <h3 className="instruction-title">🏆 基本ルール（勝利条件）</h3>
 
-  <p>上から見て、自分の持ち駒を縦、横、斜めのいずれかに、<strong>先に3つ並べた方が勝ち</strong>となります。</p>
+ <p>
+  上から見て、自分の持ち駒を縦、横、斜めのいずれかに、<strong>先に3つ並べた方が勝ち</strong>となります。<br />
+  <span style={{ fontSize: '0.9em', color: '#f59e0b', marginTop: '4px', display: 'inline-block' }}>
+    ⏱️ 思考時間は<strong>1分（60秒）</strong>まで！時間を過ぎると負けになります。
+  </span>
+</p>
     
   </div>
 
@@ -1280,7 +1438,16 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
                 </div>
               </div>
               
-             
+              <div className="flex items-start gap-2.5">
+                <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+                <div className="flex-1">
+                  <h4 className="text-white font-black text-base mb-1">指先の器用さ</h4>
+                  <p className="text-gray-300 leading-relaxed">
+                    駒を重ねたり、重ねた駒を周りの駒を倒さずに取ったりと、指先の器用さが身に付きます。脳力を高めるには、指先の神経が重要だと言われています。
+                  </p>
+                </div>
+              </div>
+
               <div className="flex items-start gap-2.5">
                 <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
                 <div className="flex-1">
@@ -1414,6 +1581,15 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
   const [aiThinking, setAiThinking] = useState(false);
   const [lastMove, setLastMove] = useState(null);
   const [hasActiveGame, setHasActiveGame] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60); // 60秒タイマー
+
+　const [streaks, setStreaks] = useState({
+  '2p_blue': 0,    //  2P：プレイヤー1（青）の連勝
+  '2p_yellow': 0,  //  2P：プレイヤー2（黄）の連勝
+  'easy': 0,
+  'normal': 0,
+  'hard': 0
+}); // 連勝カウント
 
   const aiTimerRef = useRef(null);
   const delayTimerRef = useRef(null);
@@ -1462,18 +1638,47 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
     return false;
   }, [lastMove]);
 
-  function doNextTurn(newBoard, newHands, move = null) {
+function doNextTurn(newBoard, newHands, move = null) {
     const moveWithPlayer = move ? { ...move, player: currentPlayer } : null;
     setLastMove(moveWithPlayer); 
     const result = checkWinner(newBoard);
     if (result) {
       setWinResult(result); setPhase('winDelay'); setHasActiveGame(false);
+
+      // 💡【変更】勝者に応じたキーを決める！
+      let streakKey = '';
+      if (gameMode === '2p') {
+        // 2人対戦なら勝った色（blue または yellow）で分ける
+        streakKey = result.winner === 'blue' ? '2p_blue' : '2p_yellow';
+      } else {
+        // CPU対戦なら難易度
+        streakKey = difficulty;
+      }
+
+      const isHumanWin = (gameMode === 'ai' && result.winner === 'blue') || gameMode === '2p';
+
+      setStreaks(prev => {
+        const nextStreaks = { ...prev };
+        if (gameMode === '2p') {
+          // 💡 2P対戦：勝った方は +1、負けた方は 0 にリセット！
+          const winnerKey = result.winner === 'blue' ? '2p_blue' : '2p_yellow';
+          const loserKey = result.winner === 'blue' ? '2p_yellow' : '2p_blue';
+          nextStreaks[winnerKey] = (prev[winnerKey] || 0) + 1;
+          nextStreaks[loserKey] = 0;
+        } else {
+          // 💡 AI対戦：人間勝ちなら+1、負けたら0
+          nextStreaks[streakKey] = isHumanWin ? (prev[streakKey] || 0) + 1 : 0;
+        }
+        return nextStreaks;
+      });
+
       delayTimerRef.current = setTimeout(() => { setPhase('gameOver'); setShowOverlay(true); }, 2000); 
     } else {
       setCurrentPlayer(prev => prev === 'blue' ? 'yellow' : 'blue'); setPhase('selectAction');
     }
     setSelectedCell(null); setMoveCount(0);
   }
+
 
   useEffect(() => {
     if (!isAITurn || phase !== 'selectAction' || screen !== 'game') return;
@@ -1495,12 +1700,76 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
     else if (phase === 'placeSelect') { setPhase('selectAction'); setSelectedCell(null); }
   }
 
-  function handleCellClick(row, col) {
+
+// 💡 1秒ごとにタイマーを減らす処理
+useEffect(() => {
+  // 勝敗が決まっているか、操作不能の時はタイマーを動かさない
+  if (winResult || interactionDisabled) return;
+
+// 1分（0秒）経過したらゲームオーバー処理
+  if (timeLeft <= 0) {
+    const winnerColor = currentPlayer === 'blue' ? 'yellow' : 'blue';
+    
+    setWinResult({ winner: winnerColor, line: [] });
+    setPhase('gameOver');
+    setShowOverlay(true);
+    setHasActiveGame(false);
+    setTimeLeft(60);
+
+    // 💡【変更】タイムアウト時も勝者・敗者の連勝を更新！
+    setStreaks(prev => {
+      const nextStreaks = { ...prev };
+      if (gameMode === '2p') {
+        const winnerKey = winnerColor === 'blue' ? '2p_blue' : '2p_yellow';
+        const loserKey = winnerColor === 'blue' ? '2p_yellow' : '2p_blue';
+        nextStreaks[winnerKey] = (prev[winnerKey] || 0) + 1;
+        nextStreaks[loserKey] = 0;
+      } else {
+        const isHumanWin = winnerColor === 'blue';
+        nextStreaks[difficulty] = isHumanWin ? (prev[difficulty] || 0) + 1 : 0;
+      }
+      return nextStreaks;
+    });
+
+    return;
+  }
+
+
+  // 1秒（1000ms）ごとに timeLeft を1減らす
+  const timer = setInterval(() => {
+    setTimeLeft((prev) => prev - 1);
+  }, 1000);
+
+  // クリーンアップ（ターンが変わったりした時にタイマーをリセットする準備）
+  return () => clearInterval(timer);
+}, [timeLeft, winResult, interactionDisabled]);
+
+// 💡 ターンが替わった（doNextTurnなどでプレイヤーが変わった）時に60秒にリセットする
+useEffect(() => {
+  setTimeLeft(60);
+}, [currentPlayer]);
+
+
+
+
+
+ 
+ function handleCellClick(row, col) {
     if (interactionDisabled || winResult) return;
     
-    if (phase === 'selectAction') {
-      if (board[row][col].length === 0) return;
-      setSelectedCell({ row, col }); setPhase('moveCountSelect');
+   if (phase === 'selectAction') {
+      const stackHeight = board[row][col].length;
+      if (stackHeight === 0) return;
+
+      setSelectedCell({ row, col });
+
+      if (stackHeight === 1) {
+        setMoveCount(1); // 👈 1枚に固定
+        setPhase('moveTargetSelect');
+      } else {
+        setMoveCount(0); // 👈 2枚以上の時は一旦0にリセットして選択画面へ
+        setPhase('moveCountSelect');
+      }
 
     } else if (phase === 'placeSelect') {
       if (!isValidTarget(row, col)) return;
@@ -1529,6 +1798,7 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
       doNextTurn(newBoard, hands, { type: 'move', fromRow: selectedCell.row, fromCol: selectedCell.col, toRow: row, toCol: col, count: moveCount });
     }
   }
+
 
   function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
   function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
@@ -1615,6 +1885,16 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
             </div>
           </div>
 
+
+
+
+<div className={`timer-display ${timeLeft <= 10 ? 'warning' : ''}`}>
+  {/* 💡 絵文字を <span> で囲んで timer-icon という名前をつける */}
+  <span className="timer-icon">⏱️</span>
+  残り時間: {timeLeft}秒
+</div>
+
+
        <div className="board-space-block">
             <div className="board-scaler">
               <div className="board-iso-grid">
@@ -1647,18 +1927,9 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
             {!winResult && <button onClick={openInstructionsFromGame} className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform">📄 試合を中断して説明を読む</button>}
              
             <div className="flex gap-4 mt-4">
-
-
-
-            <button 
-  onClick={() => {
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // 👈 ココ！100ミリ秒震えて、50ミリ秒休んで、100ミリ秒震える
-    resetGame();
-  }}
-
-
-
-  className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
+              <button 
+                onClick={resetGame} 
+                className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
               >
                 Reset
               </button>
@@ -1672,7 +1943,21 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu }) {
             </div>
           </div>
 
-          {showOverlay && <WinOverlay winner={winResult.winner} onReset={resetGame} gameMode={gameMode} backToMenu={backToMenu} />}
+       {showOverlay && (
+<WinOverlay 
+    winner={winResult.winner} 
+    onReset={resetGame} 
+    gameMode={gameMode} 
+    backToMenu={backToMenu}
+    difficulty={difficulty}
+    /* 💡 2P対戦なら「勝者（blueまたはyellow）の連勝数」をピンポイントで渡す！ */
+    winStreak={
+      gameMode === '2p' 
+        ? streaks[winResult.winner === 'blue' ? '2p_blue' : '2p_yellow']
+        : streaks[difficulty]
+    } 
+  />
+)}
         </>
       )}
     </div>
