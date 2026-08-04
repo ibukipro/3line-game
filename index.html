@@ -523,15 +523,95 @@ filter: brightness(1.2); }
   display: inline-block;
   animation: trophyPop 0.3s ease-out;
 }
-/* 🥇 金トロフィー（オリジナルの黄金色 ＋ 金色のオーラ） */
+
+
+/* 🥇 ゴールドトロフィー本体 */
 .trophy-icon.gold {
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  position: relative;
+  display: inline-block;
+  filter: 
+    sepia(100%) hue-rotate(5deg) saturate(180%) brightness(0.95) contrast(1.1)
+    drop-shadow(0 0 10px #ffe600)
+    drop-shadow(0 0 25px rgba(255, 170, 0, 0.8));
 }
 
-/* 🥈 銀トロフィー（モノクロ化 ＋ 明るさアップで白銀に！） */
-.trophy-icon.silver {
-  filter: grayscale(100%) brightness(1.4) drop-shadow(0 0 10px rgba(220, 225, 255, 0.8));
+/* ✨ パーティクル（光の粒子が下から上へきらきら〜っと舞い上がる！） */
+.trophy-icon.gold::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  
+  /* 💡 点（box-shadow）を何個も散りばめて光の粒子を作る！ */
+  box-shadow: 
+    -12px  15px 2px #fff,
+     15px  20px 2px #ffe600,
+     -8px -10px 1px #fff,
+     20px -15px 3px #ffd700,
+    -20px  0px  2px #ffe600,
+     10px  10px 1px #fff,
+     -5px  25px 2px #ffd700;
+     
+  /* 💡 粒子がふわふわ舞い上がりながら消えるループ（2.5秒） */
+  animation: goldParticles 2.5s infinite linear;
 }
+
+/* ✨ もう1つのパーティクル（少しズラして密度を倍にする！） */
+.trophy-icon.gold::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  
+  box-shadow: 
+      8px  12px 2px #ffd700,
+    -18px  18px 1px #fff,
+     12px -20px 2px #ffe600,
+    -15px -12px 2px #ffd700,
+      0px  22px 1px #fff;
+     
+  /* 💡 1.25秒遅らせてループさせることで、途切れない「きらきら〜」を実現！ */
+  animation: goldParticles 2.5s infinite linear 1.25s;
+}
+
+/* 🏆 パーティクルが下から上に舞い上がりながらキラキラ消えるアニメーション */
+@keyframes goldParticles {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(15px) scale(0.6);
+  }
+  30% {
+    opacity: 1; /* 途中でくっきり光る */
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    /* 上にふわ〜っと昇っていって消える */
+    transform: translate(-50%, -50%) translateY(-25px) scale(1.4);
+  }
+}
+
+
+
+/* 🥈 銀トロフィー（元の黄色を消去して鮮やかなプラチナシルバーに！） */
+.trophy-icon.silver {
+  filter: 
+    grayscale(100%) /* 💡 1. 元の黄色を完全に消す */
+    brightness(0.95)  /* 💡 2. 白飛びしないよう少しトーンを落として陰影を出す */
+    contrast(1.6)  /* 💡 3. メリハリを強めて金属的なギラつきを演出 */
+    hue-rotate(200deg)    /* 💡 4. ほんの少しだけ冷たい銀色のニュアンスをプラス */
+    sepia(10%)   /* 💡 5. 重厚な金属感を少し足す */
+    drop-shadow(0 0 6px rgba(180, 200, 220, 0.8)); /* 💡 6. しっとりした銀のオーラ */
+}
+
 
 
 /* 🥉 銅トロフィー（一旦モノクロ化して渋い赤銅色を乗せる！） */
@@ -1438,28 +1518,37 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
                 </div>
               </div>
               
+            {/* 🏆 トロフィーと連勝ルール */}
               <div className="flex items-start gap-2.5">
-                <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+                <span className="text-yellow-400 mt-0.5 text-lg">🏆</span>
                 <div className="flex-1">
-                  <h4 className="text-white font-black text-base mb-1">指先の器用さ</h4>
+                  <h4 className="text-white font-black text-base mb-1">連勝でトロフィーを獲得！</h4>
                   <p className="text-gray-300 leading-relaxed">
-                    駒を重ねたり、重ねた駒を周りの駒を倒さずに取ったりと、指先の器用さが身に付きます。脳力を高めるには、指先の神経が重要だと言われています。
+                    勝利するとトロフィーが授与され、連勝する度にトロフィーが増えていきます。<br />
+                    難易度によって貰えるトロフィーの色が変わります。<br />
+                    <span className="text-amber-600 font-bold">・「よわい」</span>：ブロンズ<br />
+                    <span className="text-gray-300 font-bold">・「ふつう」</span>：シルバー<br />
+                    <span className="text-yellow-400 font-bold">・「つよい」 / 2人対戦</span>：ゴールド
                   </p>
                 </div>
               </div>
 
+              {/* ⚠️ リロードの注意点 */}
               <div className="flex items-start gap-2.5">
-                <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+                <span className="text-amber-400 mt-0.5 text-lg">⚠️</span>
                 <div className="flex-1">
-                  <h4 className="text-white font-black text-base mb-1">1人プレイでも効果大</h4>
-                  <p className="text-gray-300 leading-relaxed">
-                    どちらも負けないようにと、1人で対戦シミュレーション（1人2役）をしても抜群の脳力活性になります。
+                  <h4 className="text-white font-black text-base mb-1">連勝記録の注意点</h4>
+                  <p className="text-gray-300 leading-relaxed text-sm">
+                    ※ページをリロード（再読み込み）したり、ブラウザを閉じると連勝記録とトロフィーはリセットされます。
                   </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+
+
 
         {/* 🌟 ここから追加：洞察力セクション（ここもサイズ修正版） */}
         <div className="instruction-section mt-5 bg-amber-950/20 p-4 rounded-xl border border-amber-900/40">
