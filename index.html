@@ -629,8 +629,8 @@ filter: brightness(1.2); }
 
 /* 🔥 連勝テキスト（ほんのりキラリと光る上品仕様） */
 .streak-count-text {
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 400;
   color: #fbbf24;             /* パッと目を引く温かいゴールド */
   
   /* 💡 文字の周りに少ししっかりめの「光のオーラ」を入れる */
@@ -1347,7 +1347,7 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
         </div>
         
         {/* 1. 誰の勝ち */}
-        <p className={`text-xl font-black ${color} mb-3 tracking-wide whitespace-nowrap`}>
+        <p className={`text-base font-black ${color} mb-3 tracking-wide whitespace-nowrap`}>
           {name} の勝利！
         </p>
 
