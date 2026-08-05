@@ -1655,7 +1655,9 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
 
 
 
-    function App() {
+
+
+function App() {
   const [screen, setScreen] = useState('menu');
   const [gameMode, setGameMode] = useState('2p');
   const [difficulty, setDifficulty] = useState(null);
@@ -1670,15 +1672,30 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
   const [aiThinking, setAiThinking] = useState(false);
   const [lastMove, setLastMove] = useState(null);
   const [hasActiveGame, setHasActiveGame] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60); // 60秒タイマー
+  const [timeLeft, setTimeLeft] = useState(60);
 
-　const [streaks, setStreaks] = useState({
-  '2p_blue': 0,    //  2P：プレイヤー1（青）の連勝
-  '2p_yellow': 0,  //  2P：プレイヤー2（黄）の連勝
-  'easy': 0,
-  'normal': 0,
-  'hard': 0
-}); // 連勝カウント
+ 
+
+const [firstPlayer, setFirstPlayer] = useState('blue');
+
+
+
+
+
+// 🏆 1. 初期値を localStorage から取得（保存がなければ初期オブジェクト）
+  const [streaks, setStreaks] = useState(() => {
+    const saved = localStorage.getItem('shirorin_game_streaks');
+    return saved ? JSON.parse(saved) : { '2p_blue': 0, '2p_yellow': 0, easy: 0, normal: 0, hard: 0 };
+  });
+
+  // 💾 2. streaks の値が変わるたびに localStorage へ自動保存！
+  useEffect(() => {
+    localStorage.setItem('shirorin_game_streaks', JSON.stringify(streaks));
+  }, [streaks]);
+
+
+
+
 
   const aiTimerRef = useRef(null);
   const delayTimerRef = useRef(null);
@@ -1686,16 +1703,27 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
   const aiColor = 'yellow';
   const isAITurn = gameMode === 'ai' && currentPlayer === aiColor && !winResult;
 
+
+
   // 🌟 修正ポイント：手番選択ボタンから引数（startColor）を受け取れるように拡張！
   function startGame(mode, diff, startColor = 'blue') {
     if (mode === 'resume') { setScreen('game'); return; }
     setGameMode(mode); setDifficulty(diff); setBoard(EMPTY_BOARD()); setHands({ blue: 5, yellow: 5 });
+
     
-    // 🌟 AIモードのときは、選んだ手番（先攻なら'blue'、後攻なら'yellow'）をセット！
-    setCurrentPlayer(mode === 'ai' ? startColor : 'blue'); 
+// 💡 スタート時の色を決めて、firstPlayer に保存！
+    const initialColor = mode === 'ai' ? startColor : 'blue';
+    setCurrentPlayer(initialColor); 
+    setFirstPlayer(initialColor); // ← ここを追加！
+
+
 
     setPhase('selectAction'); setSelectedCell(null); setMoveCount(0);
-    setWinResult(null); setShowOverlay(false); setAiThinking(false); setLastMove(null); setScreen('game');
+    setWinResult(null); setShowOverlay(false); setAiThinking(false); setLastMove(null);
+
+   setTimeLeft(60); // 💡 ここに60秒リセットを追加！
+
+ setScreen('game');
     setHasActiveGame(true);
   }
 
@@ -1792,8 +1820,10 @@ function doNextTurn(newBoard, newHands, move = null) {
 
 // 💡 1秒ごとにタイマーを減らす処理
 useEffect(() => {
-  // 勝敗が決まっているか、操作不能の時はタイマーを動かさない
-  if (winResult || interactionDisabled) return;
+ // 📍 画面が「game」じゃないとき、勝敗が決まっているとき、操作不能のときはタイマーを動かさない！
+  if (screen !== 'game' || winResult || interactionDisabled) return;
+
+
 
 // 1分（0秒）経過したらゲームオーバー処理
   if (timeLeft <= 0) {
@@ -1829,9 +1859,10 @@ useEffect(() => {
     setTimeLeft((prev) => prev - 1);
   }, 1000);
 
-  // クリーンアップ（ターンが変わったりした時にタイマーをリセットする準備）
+ // クリーンアップ
   return () => clearInterval(timer);
-}, [timeLeft, winResult, interactionDisabled]);
+// 📍 依存配列に screen も忘れずに追加！
+}, [screen, timeLeft, winResult, interactionDisabled]);
 
 // 💡 ターンが替わった（doNextTurnなどでプレイヤーが変わった）時に60秒にリセットする
 useEffect(() => {
@@ -1892,13 +1923,27 @@ useEffect(() => {
   function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
   function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
 
-  function resetGame() {
+function resetGame() {
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
-    setBoard(EMPTY_BOARD()); setHands({ blue: 5, yellow: 5 }); setCurrentPlayer('blue');
-    setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); setWinResult(null); setShowOverlay(false); setAiThinking(false); setLastMove(null);
+    
+    setBoard(EMPTY_BOARD()); 
+    setHands({ blue: 5, yellow: 5 }); 
+    
+    // 💡 リロードや対戦途中で変わった手番ではなく、「最初のスタート手番」に戻す！
+    setCurrentPlayer(firstPlayer); 
+    
+    setPhase('selectAction'); 
+    setSelectedCell(null); 
+    setMoveCount(0); 
+    setWinResult(null); 
+    setShowOverlay(false); 
+    setAiThinking(false); 
+    setLastMove(null);
     setHasActiveGame(true);
+    setTimeLeft(60); // タイマーリセット
   }
+
 
   const maxMovable = selectedCell ? board[selectedCell.row][selectedCell.col].length : 0;
   const turnLabel = currentPlayer === 'blue' ? 'プレイヤー1（青）' : (gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）');
