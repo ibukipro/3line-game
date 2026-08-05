@@ -505,24 +505,30 @@ filter: brightness(1.2); }
 /* ==========================================
    🏆 トロフィー・連勝表示のスタイル
    ========================================== */
+
+
 /* 🏆 トロフィーを並べる箱（5個並ぶように最適化！） */
 .trophy-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4px;                /* 💡 隙間を 10px → 4px にキュッと詰める */
-  flex-wrap: wrap;         /* 6個以上になったら綺麗に2段目に折り返す */
-  max-width: 90%;          /* カードからはみ出ないように制御 */
-  margin: 10px auto;
+  gap: 6px;                /* 💡 隙間を6pxに設定 */
+  flex-wrap: wrap;          /* 万が一溢れたら折り返し */
+  width: 100%;             /* 横幅いっぱいに使う */
+  max-width: 100%;         /* はみ出しを防止 */
+  margin: 16px auto;       /* 💡 上下に16pxの余白を作ってスッキリさせる */
+  padding: 0 8px;          /* 左右にちょっとだけ内側の余白を作る */
 }
 
 /* 🏆 トロフィーのサイズ調整 */
 .trophy-icon {
-  font-size: 2rem;       
+  font-size: 1.35rem;      /* 💡 2rem → 1.35rem（約21.6px）に小さくして5個並べる！ */
   line-height: 1;
   display: inline-block;
   animation: trophyPop 0.3s ease-out;
 }
+
+
 
 
 /* 🥇 ゴールドトロフィー本体 */
