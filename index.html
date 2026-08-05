@@ -507,32 +507,35 @@ filter: brightness(1.2); }
    ========================================== */
 
 
-//* 🏆 トロフィーを並べる箱（5個ピッタリ一列に最適化！） */
+/* 🏆 トロフィーを並べる箱（極限まで横幅フル活用！） */
 .trophy-container {
   display: flex;
   justify-content: center;
   align-items: center;
   
-  /* 💡 縦の隙間は12px、横の隙間は3pxに微調整 */
-  gap: 12px 3px;
+  /* 💡【超重要】横の隙間を完全にゼロに！縦だけ広げる */
+  gap: 14px 0px;            /* 縦は14pxで息苦しさ解消、横は0pxで極限攻め */
   
   flex-wrap: wrap;
-  width: 100%;
+  width: 100%;              /* 横幅全開 */
   max-width: 100%;
-  margin: 16px auto;
-  padding: 0;
+  margin: 18px auto;        /* 上下の外側余白を少し広げてド迫力を受け止める */
+  padding: 0;               /* 左右のパディングは当然ゼロ */
 }
 
-/* 🏆 トロフィーのサイズ調整 */
+/* 🏆 トロフィーのサイズ調整（5個並ぶ極限限界！） */
 .trophy-icon {
-  font-size: 1.28rem;       /* 💡 1.2rem → 1.28rem（絶妙な5個ぴったりサイズ！） */
+  font-size: 1.45rem;       /* 💡 1.28rem → 1.45rem（約23.2px）までドーンとアップ！ */
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  /* 💡 アイコン自身の高さを固定して、縦の整列を綺麗にする */
+  height: 1.45rem;          
+  
   animation: trophyPop 0.3s ease-out;
 }
-
 
 
 /* 🥇 ゴールドトロフィー本体 */
