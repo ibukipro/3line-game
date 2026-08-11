@@ -53,40 +53,44 @@ body {
  /* 100vh ではなく 100dvh に変えると、スマホのバーに影響されません */
 
 
+
+/* ゲーム盤のスペース */
  .board-space-block { 
-   width: 100%;
-   height: 280px; 
-   display: flex; 
-   justify-content: center; 
-   align-items: center; 
-   margin: 0 0 15px 0; 
-   position: relative; }
- /* ゲーム盤のスペース */
+  width: 100%;
+  height: 280px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  margin: 0 0 15px 0; 
+  position: relative; 
+}
+
+/* ゲーム盤の位置？パースペクティブ（遠近感。px分離れた位置のカメラ） */
+.board-scaler { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  perspective: 1000px; 
+  width: 100%; 
+ transform: translateY(-15px); /* 👈 マイナスを増やすとさらに上に上がる */
+}
 
 
 
- .board-scaler { 
-   display: flex; 
-   justify-content: center; 
-   align-items: center; 
-   perspective: 1000px; 
-   width: 100%; }
- /* パースペクティブ（遠近感。px分離れた位置のカメラ） */
-
-  
 .board-iso-grid { 
-   display: grid; 
-   grid-template-columns: repeat(3, 80px); 
-   gap: 8px; 
-   padding: 12px; 
-   justify-items: center;
-   background: linear-gradient(135deg, #161633, #0b0b1f); 
-   border-radius: 16px; 
-   border: 3px solid #8a8ab5; 
-   box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
-   transform: rotateX(34deg) rotateZ(-6deg); 
-   transform-style: preserve-3d; 
-   transform-origin: center center; }
+  display: grid; 
+  grid-template-columns: repeat(3, 80px); 
+  gap: 8px; 
+  padding: 12px; 
+  justify-items: center;
+  background: linear-gradient(135deg, #161633, #0b0b1f); 
+  border-radius: 16px; 
+  border: 3px solid #8a8ab5; 
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
+  transform: rotateX(34deg) rotateZ(-6deg); 
+  transform-style: preserve-3d; 
+  transform-origin: center center; 
+}
 /* アイソメトリック（斜め上から見る感じ） */
 
 
@@ -250,6 +254,9 @@ body {
   }
 }
 
+
+
+
 /* 🌟 本番環境用に修正：
   puck-svg-container の中に直接 `puck-glowing-container` クラスがつく形に合わせたよ！
 */
@@ -279,83 +286,235 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
     @keyframes fade-in { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
 
- .hand-piece-3d { 
-transition: transform 0.15s, filter 0.15s; 
-cursor: pointer; 
-display: inline-flex; align-items: center; j
-ustify-content: center; }
-
-
- .hand-piece-3d:hover { 
-transform: translateY(-2px) scale(1.1); 
-filter: brightness(1.2); }
-
-
-  .hand-selected {
- filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)) brightness(1.3); }
 
 
 
+/* ==============================================
+   🪙 1. 手札（コイン・ストック）エリア
+   ============================================== */
+
+/* 外枠の基本構造（高さ移動は中でやるのでここはシンプルに） */
+.hand-area-section {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* コインを選んだ時にポッと光らせるエフェクト（残しておいてOK） */
+.hand-selected {
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)) brightness(1.3); 
+}
+
+/* 手札行の全体枠 */
+.hand-area-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: nowrap;
+  margin-top: -22px;
+}
+
+.hand-area-inner,
+.hand-piece-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+/* 駒1個あたりの枠 */
+.hand-piece-slot {
+  cursor: pointer;
+  width: 38px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 
+/* 🪙 手持ちの駒の枠 */
+.hand-puck-wrapper {
+  width: 60px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center bottom;
+  transition: transform 0.2s ease-out;
+  transform: scale(0.7) translateY(-7px);  /* 💡★ 通常時のコインの高さ（マイナスを大きくすると上に上がります） */
+}
+
+/* 💡★ 選択時にピョンと跳ね上がる高さ */
+.hand-puck-wrapper.is-selected {
+  transform: scale(0.7) translateY(-20px); 
+}
+
+/* 個数テキスト（x3 など） */
+.hand-count-text {
+  color: #9ca3af;
+  font-weight: 900;
+  font-size: 12px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+/* 個数ゼロ（なし）テキスト */
+.hand-empty-text {
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+
+
+/* ==============================================
+   🎯 2. 盤面（マス目・セル）の操作感
+   ============================================== */
+
+/* 押せるマスのカーソル（指マーク） */
 .cell-interactive {
   cursor: pointer;
 }
 
-
+/* 押せないマスのカーソル（通常矢印） */
 .cell-disabled {
   cursor: default;
 }
 
 
+/* ==============================================
+   💬 3. 盤面下のメッセージ＆キャンセルボタン
+   ============================================== */
 
-
-.selector-container {
+/* メッセージエリア全体の配置（中央揃えなど） */
+.game-message-container {
+  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  background: rgba(17, 24, 39, 0.95);
-  backdrop-filter: blur(4px);
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid #4b5563;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  justify-content: center;
+  margin-top: 0;
+  min-height: 40px;
 }
 
-.selector-btn {
-  width: 36px;
-  height: 36px;
+/* 「〜の番です」などの案内文字の大きさ・太さ */
+.game-message-text {
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 900;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  text-align: center;
+  width: 95%;
+　margin-top:2px;
+  margin-bottom: 4px;
+  white-space: pre-line;
+  transition: all 0.3s ease;
+}
+
+/* ボタンが並ぶ行の高さと中央配置 */
+.game-action-row {
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 900;
-  transition: transform 0.1s;
+  width: 100%;
 }
 
+/* 「キャンセル」ボタンの形・色・影 */
+.btn-cancel {
+  padding: 6px 24px;
+  background-color: #1f2937;
+  color: #d1d5db;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid #4b5563;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease;
+}
+
+/* キャンセルボタンを押した瞬間にちょっと縮む動き */
+.btn-cancel:active {
+  transform: scale(0.95);
+}
+
+
+/* ==============================================
+   🔢 4. 移動個数の選択UI（1個移動・2個移動など）
+   ============================================== */
+
+/* 移動個数選択エリア全体 */
+.move-count-selector {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+}
+
+/* 「取る数:」ラベルテキスト */
+.move-count-label {
+  color: #e5e7eb;
+  font-size: 12px;
+  font-weight: 900;
+  margin-right: 4px;
+}
+
+/* 数字ボタン・戻るボタン共通の基本スタイル */
+.selector-btn {
+  height: 28px;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+/* ボタンを押した瞬間にちょっと凹む動き */
 .selector-btn:active {
   transform: scale(0.95);
 }
 
+/* 数字決定ボタン（青/インディゴ背景） */
 .btn-primary {
-  background: #4f46e5;
-  color: #fff;
+  background-color: #4f46e5;
+  color: #ffffff;
+  border: none;
 }
 
 .btn-primary:hover {
-  background: #6366f1;
+  background-color: #6366f1;
 }
 
+/* 戻るボタン（ダークグレー背景） */
 .btn-secondary {
-  padding: 0 16px;
-  height: 36px;
-  background: #1f2937;
+  background-color: #1f2937;
   color: #d1d5db;
   border: 1px solid #4b5563;
+  margin-left: 4px;
 }
 
+.btn-secondary:hover {
+  background-color: #374151;
+}
 
+/* ==============================================
+   🔲 5. ポップアップ（ダイアログ・モーダル）共通
+   ============================================== */
+
+/* 画面全体を暗くすりガラス状にする背景幕 */
 .overlay-backdrop {
   position: fixed;
   inset: 0;
@@ -368,6 +527,7 @@ filter: brightness(1.2); }
   padding: 16px;
 }
 
+/* ポップアップ中央の白い/黒いカード枠 */
 .overlay-card {
   background: #111827; /* gray-900 */
   border: 1px solid #374151; /* gray-700 */
@@ -379,6 +539,7 @@ filter: brightness(1.2); }
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
+/* ポップアップ内の決定・OKボタン */
 .overlay-btn {
   width: 100%;
   padding: 10px;
@@ -391,6 +552,11 @@ filter: brightness(1.2); }
 }
 
 
+/* ==============================================
+   📖 6. 「遊び方を見る」モーダル画面
+   ============================================== */
+
+/* 遊び方画面全体のスクロール領域とテキスト */
 .instruction-container {
   display: flex;
   flex-direction: column;
@@ -402,12 +568,12 @@ filter: brightness(1.2); }
   overflow-y: auto;
 }
 
-
+/* 各段落（セクション）の余白 */
 .instruction-section {
   margin-bottom: 24px;
 }
 
-
+/* 「1. 勝利条件」などの見出しの文字 */
 .instruction-title {
   color: #818cf8; /* indigo-400 */
   font-weight: 900;
@@ -415,7 +581,7 @@ filter: brightness(1.2); }
   font-size: 16px;
 }
 
-
+/* 説明文の箇条書き用リスト枠（左側に青い線） */
 .instruction-list {
   padding-left: 12px;
   border-left: 2px solid #6366f1; /* indigo-500 */
@@ -423,7 +589,6 @@ filter: brightness(1.2); }
   flex-direction: column;
   gap: 14px;
 }
-
 
 /* ===================================================
    🏠 メインメニュー画面（レイアウト＆ボタン全般）
@@ -497,7 +662,7 @@ filter: brightness(1.2); }
 .achievement-panel {
   width: 100%;
   max-width: 360px;
-  margin-top: -50px;
+  margin-top: -35px;
   margin-bottom: 32px;
 }
 
@@ -509,7 +674,7 @@ filter: brightness(1.2); }
   justify-content: center; /* 💡 横方向を真ん中に寄せる */
   align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
   
-  font-size: 1rem;        /* 通常の文字サイズ */
+  font-size: 0.9rem;        /* 通常の文字サイズ */
   font-weight: bold;       
   color: #e0e0ff;          
   padding-top:3px;
@@ -519,13 +684,16 @@ filter: brightness(1.2); }
 
 /* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
 .timer-display .timer-icon {
-  font-size: 1.5rem;       /* 絵文字を大きくする */
+  font-size: 2rem;       /* 絵文字を大きくする */
   margin-right: 4px;       /* 文字との間の隙間 */
   
-  /* Flexboxで縦中央に揃えるので、vertical-alignは不要になるよ */
-  vertical-align: unset;   /* 👈 もし前の設定が残っていたらリセット */
-  line-height: 1;          /* 👈 絵文字自身の高さをスッキリさせる */
+  line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
+
+  /* 💡 ここを追加！絵文字だけを少し上に持ち上げる設定 */
+  display: inline-block;       /* 👈 位置調整（transform）を確実に利かせるため */
+  transform: translateY(-5px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
 }
+
 
 /* 🌟 ラスト10秒の赤点滅（点滅処理はそのまま） */
 .timer-display.warning {
@@ -693,6 +861,14 @@ filter: brightness(1.2); }
 }
 
 
+
+/* 🧪 究極のレイアウトデバッグ用：全要素を赤枠で囲う */
+*, *::before, *::after {
+  outline: 1px solid red !important;
+  
+  /* ↓ 背景をほんのり赤くして、透明な重なりを見つけたい場合はこれのコメントを外す */
+  /* background: rgba(255, 0, 0, 0.05) !important; */
+}
 
 
 
@@ -1220,7 +1396,9 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
         `}</style>
       )}
 
-      {/* 上段：プレイヤー名 */}
+    
+
+  {/* 上段：プレイヤー名 */}
       <div className="flex justify-center items-center w-full">
         <div className="flex items-center gap-2">
           {/* 🌟 プレイヤー名（PN）を手番のときは枠と同期してライトアップ */}
@@ -1236,49 +1414,41 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
         </div>
       </div>
 
-      {/* 下段：3D駒の並び */}
-      <div className="flex items-center justify-center w-full flex-nowrap -mt-[22px]">
-        <div className="flex items-center justify-center flex-nowrap w-full">
+   
+
+ {/* 下段：3D駒の並び */}
+      <div className="hand-area-row">
+        <div className="hand-area-inner">
           
           {count > 0 ? (
             <>
               {/* コインの並び */}
-              <div className="flex items-center flex-nowrap justify-center">
-                {Array.from({ length: count }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    onClick={handleSelect}
-                    /* 🌟 競合を避けるため、className から浮き上がり用の指定を外しました */
-                    className="cursor-pointer w-[38px] h-[48px] flex-shrink-0 flex items-center justify-center"
-                  >
-                    {/* 🌟 style属性の中で 0.7倍の縮小 と 選択時のスライド移動（-12px）を綺麗にドッキング */}
-                    <div style={{ 
-                      transform: `scale(0.7) translateY(${isSelected && i === count - 1 ? '-12px' : '0px'})`, 
-                      transformOrigin: 'center bottom', /* 地面を基準に綺麗に浮き上がらせる */
-                      transition: 'transform 0.2s ease-out', /* 動きを滑らかにする設定 */
-                      width: '60px', 
-                      height: '76px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center' 
-                    }}>
-                      {/* 🌟 クラッシュ防止：Puckにもしっかりと onClick を引き渡し、余計なプロパティを整理 */}
-                      <Puck 
-                        color={color} 
-                        index={0} 
-                        isGlowing={false} 
-                        onClick={handleSelect}
-                      />
+              <div className="hand-piece-list">
+                {Array.from({ length: count }).map((_, i) => {
+                  /* 一番上のコインが選択中かどうか */
+                  const isSelectedTarget = isSelected && i === count - 1;
+
+                  return (
+                    <div key={i} onClick={handleSelect} className="hand-piece-slot">
+                      {/* 💡 選択中なら 'is-selected' クラスを付けるだけ */}
+                      <div className={`hand-puck-wrapper ${isSelectedTarget ? 'is-selected' : ''}`}>
+                        <Puck 
+                          color={color} 
+                          index={0} 
+                          isGlowing={false} 
+                          onClick={handleSelect}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               
               {/* コインのすぐ右横に個数 */}
-              <div className="text-gray-400 font-black text-xs ml-2 flex items-center">x{count}</div>
+              <div className="hand-count-text">x{count}</div>
             </>
           ) : (
-            <span className="text-gray-500 text-xs italic font-bold">なし</span>
+            <span className="hand-empty-text">なし</span>
           )}
 
         </div>
@@ -1291,17 +1461,16 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
 
 
 
- function MoveCountSelector({ maxCount, onSelect, onCancel }) {
+function MoveCountSelector({ maxCount, onSelect, onCancel }) {
   return (
-    <div className="flex flex-row items-center justify-center gap-1.5 w-full py-0 animate-fade-in">
-      <span className="text-gray-200 text-xs font-black mr-1">取る数:</span>
+    <div className="move-count-selector">
+      <span className="move-count-label">取る数:</span>
       
       {Array.from({ length: maxCount }, (_, i) => i + 1).map(n => (
         <button 
           key={n} 
           onClick={() => onSelect(n)}
-          /* 🌟 !w-auto !inline-flex を追加して、ボタンが横幅いっぱいに広がるのを強制阻止 */
-          className="selector-btn btn-primary !h-7 !w-auto !inline-flex px-3 text-xs"
+          className="selector-btn btn-primary"
         >
           {n}
         </button>
@@ -1309,15 +1478,13 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
       
       <button 
         onClick={onCancel} 
-        /* 🌟 戻るボタンも同様に、無理やり横幅を文字サイズまで縮めさせます */
-        className="selector-btn btn-secondary !h-7 !w-auto !inline-flex px-3 text-xs ml-1"
+        className="selector-btn btn-secondary"
       >
         戻る
       </button>
     </div>
   );
 }
-
 
 
 
@@ -1376,7 +1543,7 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
 
         {/* 💡 人間勝利時に現在の勝利数を表示（1勝目から表示） */}
         {winStreak > 0 && !isCpuWin && (
-          <p className="streak-count-text">TOTAL WINS: {winStreak} </p>
+          <p className="streak-count-text">TOTAL: {winStreak}勝達成！ </p>
         )}
         
         {/* 2. ゲーム終了 */}
@@ -1451,7 +1618,8 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
    </div>
 
 
-<p>「持ち駒を置く」か、「自分の駒を移動させる」か、あるいは<strong>「相手の駒を移動させる」</strong>ことができます。</p>
+<p>「持ち駒を置く」か、「自分の駒を移動させる」か、あるいはマス上にある<strong>「相手の駒を移動させる」</strong>ことができます。</p>
+<p>※ マス上に置いた駒を、自分の手元に引き取る事は出来ません。また、相手の手元にある持ち駒を動かせるのは、相手のみです。</p>
 
 
  <p className="text-[20px] font-black text-amber-500 mt-2 mb-0 tracking-wide">
@@ -1498,12 +1666,13 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
           </div>
         </div>
 
-       {/* 🌟 禁止事項セクション（ここまでは既存のまま） */}
+      {/* 🌟 禁止事項セクション */}
         <div className="instruction-section">
           <h3 className="text-amber-500 font-black mb-1.5 text-[16px]">🚫 禁止事項・ルール</h3>
           <div className="space-y-2.5">
             <p><strong>・同手戻しの禁止:</strong><br />相手が移動させた駒をそのまま逆に戻す行為は禁止です。</p>
             <p><strong>・下からの並び出しに注意:</strong><br />駒を移動させて退かした際に、<strong>下にあった相手の駒が3つ並んでしまう</strong>と、動かした側の負けとなります。</p>
+            <p><strong>・ドロー（引き分け）判定:</strong><br />お互いに同じ手の繰り返しでゲームが先に進まないループ状態になった時は、違う別の手で先に進むか、ドロー判定としてリセットボタンを押してゲームを最初からやり直してください。</p>
           </div>
         </div>
   </div>
@@ -1524,45 +1693,74 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
             
             <div className="bg-indigo-950/40 p-4 rounded-xl border border-indigo-900/60 text-xs">
               <span className="text-indigo-300 font-black text-sm">👨‍⚕️ 考案者プロフィール</span>
-              <p className="mt-1 text-gray-300">
-                健康療法の専門家<strong>＜息吹友也・東洋医学名誉博士＞</strong>が考案。誰もが面白く、簡単に脳力を鍛えられるゲームです。
-              </p>
+             <p className="mt-1 text-gray-300">
+  健康療法の専門家<strong>＜息吹友也・東洋医学名誉博士＞</strong>が考案。誰もが面白く、簡単に脳力を鍛えられるゲームです。<span className="text-amber-400 font-bold ml-1">＜特許出願中＞</span>
+</p>
             </div>
 
-            {/* 🌟 箇条書き：各項目を1つずつ独立した見出し＆説明のセットにして読みやすくしました */}
-            <div className="space-y-5 pt-2">
-              <div className="flex items-start gap-2.5">
-                <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
-                <div className="flex-1">
-                  <h4 className="text-white font-black text-base mb-1">空間認知能力の発動</h4>
-                  <p className="text-gray-300 leading-relaxed">
-                    駒を立体に積む事で、立体的に物事を考える、注目の空間認知能力を発動できます。（空間認知能力は多方面からの思考を必要とするため脳力をフル活動しやすく、IQや運動能力にも大きな関係があると話題に。）
-                  </p>
-                </div>
-              </div>
-              
-            {/* 🏆 トロフィーと連勝ルール */}
+           {/* 🌟 箇条書き：各項目を1つずつ独立した見出し＆説明のセットにして読みやすくしました */}
+<div className="space-y-5 pt-2">
+  
+  {/* 🔹 既存の項目 */}
+  <div className="flex items-start gap-2.5">
+    <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+    <div className="flex-1">
+      <h4 className="text-white font-black text-base mb-1">空間認知能力の発動</h4>
+      <p className="text-gray-300 leading-relaxed">
+        駒を立体に積む事で、立体的に物事を考える、注目の空間認知能力を発動できます。（空間認知能力は多方面からの思考を必要とするため脳力をフル活動しやすく、IQや運動能力にも大きな関係があると話題に。）
+      </p>
+    </div>
+  </div>
+
+  {/* 💡★ 様々な能力アップに */}
+  <div className="flex items-start gap-2.5">
+    <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+    <div className="flex-1">
+      <h4 className="text-white font-black text-base mb-1">様々な能力アップに</h4>
+      <p className="text-gray-300 leading-relaxed">
+        空間認知能力、集中力、観察力、判断力、など総合的な洞察が身に付きます。
+      </p>
+    </div>
+  </div>
+
+       
+  {/* 🏆 勝利報酬と昇級システム */}
               <div className="flex items-start gap-2.5">
                 <span className="text-yellow-400 mt-0.5 text-lg">🏆</span>
+                
                 <div className="flex-1">
-                  <h4 className="text-white font-black text-base mb-1">連勝でトロフィーを獲得！</h4>
-                  <p className="text-gray-300 leading-relaxed">
-                    勝利するとトロフィーが授与され、連勝する度にトロフィーが増えていきます。<br />
-                    難易度によって貰えるトロフィーの色が変わります。<br />
-                    <span className="text-amber-600 font-bold">・「よわい」</span>：ブロンズ<br />
-                    <span className="text-gray-300 font-bold">・「ふつう」</span>：シルバー<br />
-                    <span className="text-yellow-400 font-bold">・「つよい」 / 2人対戦</span>：ゴールド
+                  <h4 className="text-white font-black text-base mb-1">勝利を重ねて昇級＆マスター称号を獲得！</h4>
+                 <p className="text-gray-300 leading-relaxed">
+                    勝利を重ねる毎に、昇級やマスターの称号が授与されます。<br />
+                    <br />
+                    <span className="text-amber-600 font-bold">・「よわい」</span><br />
+                      5勝：ブロンズメダル <span className="text-sky-300 font-bold">9級</span><br />
+                     10勝：ブロンズトロフィー <span className="text-sky-300 font-bold">8級</span><br />
+                     20勝：ブロンズクラウン <span className="text-sky-300 font-bold">7級</span> ＋<br />
+                       <span className="text-amber-300 font-bold">　👑 ブロンズマスターの称号授与</span><br />
+                    <br />
+                    <span className="text-gray-200 font-bold">・「ふつう」</span><br />
+                      5勝：シルバーメダル <span className="text-sky-300 font-bold">6級</span><br />
+                     10勝：シルバートロフィー <span className="text-sky-300 font-bold">5級</span><br />
+                     20勝：シルバークラウン <span className="text-sky-300 font-bold">4級</span> ＋<br />
+                      <span className="text-amber-300 font-bold">　👑 シルバーマスターの称号授与</span><br />
+                    <br />
+                    <span className="text-yellow-400 font-bold">・「つよい」</span><br />
+                      5勝：ゴールドメダル <span className="text-sky-300 font-bold">3級</span><br />
+                     10勝：ゴールドトロフィー <span className="text-sky-300 font-bold">2級</span><br />
+                     20勝：ゴールドクラウン <span className="text-sky-300 font-bold">1級</span> ＋<br />
+                      <span className="text-amber-300 font-bold">　👑 ゴールドマスターの称号授与</span>
                   </p>
                 </div>
               </div>
 
-              {/* ⚠️ リロードの注意点 */}
+              {/* ⚠️ 通算記録とリセットの注意点 */}
               <div className="flex items-start gap-2.5">
                 <span className="text-amber-400 mt-0.5 text-lg">⚠️</span>
                 <div className="flex-1">
-                  <h4 className="text-white font-black text-base mb-1">連勝記録の注意点</h4>
+                  <h4 className="text-white font-black text-base mb-1">通算記録の保存とリセット</h4>
                   <p className="text-gray-300 leading-relaxed text-sm">
-                    ※ページをリロード（再読み込み）したり、ブラウザを閉じると連勝記録とトロフィーはリセットされます。
+                    通算勝利記録は自動保存されます。説明欄の一番下にある「通算勝利記録をリセットする」を実行すると、元に戻せませんのでご注意ください。
                   </p>
                 </div>
               </div>
@@ -1579,13 +1777,13 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
           {/* 🌟 洞察力の説明も、標準サイズの text-sm に拡大 */}
           <div className="text-sm text-gray-300 leading-relaxed font-bold space-y-3">
             <p>
-              このゲームは、<strong>洞察力</strong>を養うゲームでもあります。
+              このゲームは、誰もが簡単に遊べるゲームでありながら、<strong>洞察力</strong>を養う事ができます。
             </p>
             <p className="text-gray-400">
               自分の駒ばかり見ていると、自分の駒を動かした時に、<span className="text-amber-400 font-black">その下にあった対戦者の駒が3つ並んでしまう事</span>に気付きません。
             </p>
             <p className="text-rose-400">
-              🚨 うっかり駒を動かした時点で、即座に対戦者に勝ちをあげる（自爆負け）ことになります！
+              🚨 うっかり駒を動かした時点で、即座に対戦者に勝ちをあげる（自爆負けする）ことになります！
             </p>
           </div>
   　　　 </div>
@@ -1746,13 +1944,22 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
               3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
             </h1>
 
-            <p className="text-gray-400 text-[15px] mb-8 tracking-widest">脳力活性ゲーム！</p>
+            <p className="text-gray-400 text-[15px] mb-2 tracking-widest">脳力活性ゲーム！</p>
+
+ <p className="text-gray-400 text-[15px] mb-7 tracking-widest">洞察力が身に付く立体３目並べ</p>
+
+
+
+
+
+
 
             <div className="flex flex-col gap-5 w-64">
               {hasHistory && (
                 <button onClick={() => onStart('resume', null)} className="menu-btn btn-resume animate-pulse">
                   途中から再開
                 </button>
+
               )}
               <button onClick={() => onStart('2p', null)} className="menu-btn btn-2p">2人対戦</button>
               <button onClick={() => setMode('ai')} className="menu-btn btn-ai">CPU対戦</button>
@@ -2184,17 +2391,6 @@ window.resetWins = () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
  
  function handleCellClick(row, col) {
     if (interactionDisabled || winResult) return;
@@ -2286,69 +2482,114 @@ function resetGame() {
   };
 
   return (
-    <div className="app-screen">
+   
+ <div className="app-screen">
 
+  {/* ==========================================
+      1. 画面の切り替え処理（メニュー / 説明）
+     ========================================== */}
 
-     {screen === 'menu' && <MenuScreen streaks={streaks} onStart={startGame} onOpenInstructions={() => setScreen('instructions')} hasHistory={hasActiveGame} />}
+  {/* 【メニュー画面】いまの状態が 'menu' のときに表示 */}
+  {screen === 'menu' && (
+    <MenuScreen 
+      streaks={streaks} 
+      onStart={startGame} 
+      onOpenInstructions={() => setScreen('instructions')} 
+      hasHistory={hasActiveGame} 
+    />
+  )}
 
+  {/* 【説明画面】いまの状態が 'instructions' のときに表示 */}
+  {screen === 'instructions' && (
+    <InstructionScreen 
+      onBack={backToMenu} 
+      hasActiveGame={hasActiveGame} 
+      onResumeGame={() => setScreen('game')} 
+    />
+  )}
+ 
 
-      {screen === 'instructions' && <InstructionScreen onBack={backToMenu} hasActiveGame={hasActiveGame} onResumeGame={() => setScreen('game')} />}
-      
-      {screen === 'game' && (
-        <>
-   {/* 🌟 上部の手番テキストと、中央のナビメッセージの完全同期版CSS */}
-          {!winResult && (
-            <style>{`
-              @keyframes syncTextGlowBlue {
-                0%, 100% { opacity: 0.65; text-shadow: 0 0 6px rgba(59,130,246,0.4); }
-                50% { opacity: 1.0; text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
-              }
-              @keyframes syncTextGlowAmber {
-                0%, 100% { opacity: 0.65; text-shadow: 0 0 6px rgba(217,119,6,0.4); }
-                50% { opacity: 1.0; text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
-              }
-              .animate-syncTextBlue { animation: syncTextGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
-              .animate-syncTextAmber { animation: syncTextGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
-            `}</style>
-          )}
+  {/* ==========================================
+      2. ゲーム本番画面（ここからゲーム中の中身）
+     ========================================== */}
+
+  {/* 【ゲーム本番画面】いまの状態が 'game' のときに表示 */}    
+  {screen === 'game' && (
+    <>
+  {/* 🌟 【光る演出の準備】試合中（勝者が決まる前）だけ、文字がボワボワ光るCSSアニメーションを読み込む */}
+      {!winResult && (
+        <style>{`
+          /* 青プレイヤーの手番のときに、文字を青くホタルのように光らせる設定 */
+          @keyframes syncTextGlowBlue {
+            0%, 100% { opacity: 0.65; text-shadow: 0 0 6px rgba(59,130,246,0.4); }
+            50% { opacity: 1.0; text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
+          }
+     /* オレンジ(琥珀)プレイヤーの手番のときに、文字をオレンジに光らせる設定 */
+          @keyframes syncTextGlowAmber {
+            0%, 100% { opacity: 0.65; text-shadow: 0 0 6px rgba(217,119,6,0.4); }
+            50% { opacity: 1.0; text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
+          }
+          /* 上記のアニメーションを「2秒周期」で「ずーっとループ」させるためのクラス名 */
+          .animate-syncTextBlue { animation: syncTextGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
+          .animate-syncTextAmber { animation: syncTextGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
+        `}</style>
+      )}
         
-          <div className="text-center w-full">
-            <h1 className="text-base font-black text-white mb-2 tracking-tight">3<span className="text-indigo-400">ライン</span>！</h1>
+      {/* 🌟 【画面上部のヘッダーエリア】 */}
+      <div className="text-center w-full">
+
+        {/* ゲームのタイトル（3ライン！） */}
+        <h1 className="text-base font-black text-white mb-2 tracking-tight">
+          3<span className="text-indigo-400">ライン</span>！
+        </h1>
            
-            <div className={`text-[16px] h-5 mt-0.5 transition-all duration-300 ${
-              !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
-            }`}>
-              {!winResult ? (
-                <>
-                  <span className={`font-black ${turnColor}`}>{turnLabel}</span>
-                  <span className="text-gray-400 ml-1 font-bold">の番</span>
-                </>
-              ) : (
-                <span className="text-amber-500 font-black animate-pulse">★ WINNER ★</span>
-              )}
-            </div>
-          </div>
+        {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
+        {/* ※ 試合中なら、現在のプレイヤー（blue か amber）に合わせて光るクラス名（animate-~）をカチカチと自動で切り替える仕組み */}
+        <div className={`text-[16px] h-5 mt-0.5 transition-all duration-300 ${
+          !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
+        }`}>
+          
+          {/* 【手番 or 決着の表示切り替え】 */}
+          {!winResult ? (
+            /* まだ勝敗が決まっていない（試合中）なら「〇〇の番」と出す */
+            <>
+              <span className={`font-black ${turnColor}`}>{turnLabel}</span>
+              <span className="text-gray-400 ml-2 font-bold">の番</span>
 
-          <div className="w-full mt-1">
-            <HandArea key={`blue-${currentPlayer}-${phase}-${hands.blue}`}
-              color="blue" count={hands.blue} isCurrentPlayer={currentPlayer === 'blue' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} onSelect={handleHandClick} playerLabel="P1 青" disabled={interactionDisabled} />
-          </div>
+            </>
 
-          <div className="w-full flex flex-col items-center mt-0 min-h-[40px] justify-center">
-            <div className={`text-[14px] leading-tight font-black px-2 text-center w-[95%] mb-1 whitespace-pre-line transition-all duration-300 ${
-              !winResult 
-                ? (currentPlayer === 'blue' ? 'text-blue-200 animate-syncTextBlue' : 'text-amber-200 animate-syncTextAmber') 
-                : 'text-gray-200'
-            }`}>
-              {phaseMessages[phase]}
-            </div>
+          ) : (
+ /* どちらかが勝ったら「★ WINNER ★」を点滅（animate-pulse）させて出す */
+   <span className="text-amber-500 font-black animate-pulse">★ WINNER ★</span>
+          )}
+        </div>
+      </div>
 
-            <div className="h-10 flex items-center justify-center w-full">
-              {phase === 'moveCountSelect' && selectedCell && !interactionDisabled && <MoveCountSelector maxCount={maxMovable} onSelect={handleMoveCountSelect} onCancel={cancelAction} />}
-              {(phase === 'placeSelect' || phase === 'moveTargetSelect') && !interactionDisabled && <button onClick={cancelAction} className="px-6 py-1.5 bg-gray-800 text-gray-300 rounded-lg text-xs font-black border border-gray-600 shadow-md active:scale-95 transition-transform">キャンセル</button>}
-            </div>
-          </div>
 
+         
+
+{/* 🔵 P1 (青) の手札エリア */}
+<div className="hand-area-section">
+  <HandArea key={`blue-${currentPlayer}-${phase}-${hands.blue}`}
+    color="blue" count={hands.blue} isCurrentPlayer={currentPlayer === 'blue' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} onSelect={handleHandClick} playerLabel="P1 青" disabled={interactionDisabled} />
+</div>
+
+
+{/* 🟡 メッセージ＆操作エリア */}
+<div className="game-message-container">
+  <div className={`game-message-text ${
+    !winResult 
+      ? (currentPlayer === 'blue' ? 'text-blue-200 animate-syncTextBlue' : 'text-amber-200 animate-syncTextAmber') 
+      : 'text-gray-200'
+  }`}>
+    {phaseMessages[phase]}
+  </div>
+
+  <div className="game-action-row">
+    {phase === 'moveCountSelect' && selectedCell && !interactionDisabled && <MoveCountSelector maxCount={maxMovable} onSelect={handleMoveCountSelect} onCancel={cancelAction} />}
+    {(phase === 'placeSelect' || phase === 'moveTargetSelect') && !interactionDisabled && <button onClick={cancelAction} className="btn-cancel">キャンセル</button>}
+  </div>
+</div>
 
 
 
