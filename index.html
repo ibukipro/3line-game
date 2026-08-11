@@ -44,13 +44,20 @@ body {
    margin: 0 auto; 
    display: flex; 
    flex-direction: column; 
-   justify-content: flex-start; 
    align-items: center;
    padding: 16px 12px 28px 12px; 
    position: relative; 
    box-sizing: border-box; 
-   gap: 4px;  }
- /* 100vh ではなく 100dvh に変えると、スマホのバーに影響されません */
+   gap: 4px;  
+}
+
+/* 👑 【追加】上下に自動クッションを入れて中身を真ん中に押し込む */
+.app-screen::before,
+.app-screen::after {
+  content: "";
+  margin: auto;
+}
+
 
 
 
@@ -268,7 +275,6 @@ body {
 
 
 
-
  .cell-win .cell-top { 
    border-color: #eab308; 
    animation: win-glow 1.0s ease-in-out infinite; }
@@ -401,9 +407,9 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
   min-height: 40px;
 }
 
-/* 「〜の番です」などの案内文字の大きさ・太さ */
+/* 駒をタップなどの案内文字の大きさ・太さ */
 .game-message-text {
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.25;
   font-weight: 900;
   padding-left: 0.5rem;
@@ -674,7 +680,7 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
   justify-content: center; /* 💡 横方向を真ん中に寄せる */
   align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
   
-  font-size: 0.9rem;        /* 通常の文字サイズ */
+  font-size: 0.8rem;        /* 通常の文字サイズ */
   font-weight: bold;       
   color: #e0e0ff;          
   padding-top:3px;
@@ -684,14 +690,14 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 /* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
 .timer-display .timer-icon {
-  font-size: 2rem;       /* 絵文字を大きくする */
+  font-size: 1.5rem;       /* 絵文字を大きくする */
   margin-right: 4px;       /* 文字との間の隙間 */
   
   line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
 
   /* 💡 ここを追加！絵文字だけを少し上に持ち上げる設定 */
   display: inline-block;       /* 👈 位置調整（transform）を確実に利かせるため */
-  transform: translateY(-5px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
+  transform: translateY(-4px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
 }
 
 
@@ -862,7 +868,7 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 
 
-/* 🧪 究極のレイアウトデバッグ用：全要素を赤枠で囲う */
+/* 🧪 究極のレイアウトデバッグ用：全要素を赤枠で囲う 
 *, *::before, *::after {
   outline: 1px solid red !important;
   
@@ -870,8 +876,7 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
   /* background: rgba(255, 0, 0, 0.05) !important; */
 }
 
-
-
+*/
 
 
  </style>
@@ -1944,9 +1949,9 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
               3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
             </h1>
 
-            <p className="text-gray-400 text-[15px] mb-2 tracking-widest">脳力活性ゲーム！</p>
+          <p className="text-gray-400 text-[15px] mb-2 tracking-widest">脳力活性ゲーム！</p>
 
- <p className="text-gray-400 text-[15px] mb-7 tracking-widest">洞察力が身に付く立体３目並べ</p>
+<p className="text-gray-200 text-[15px] mb-7 tracking-widest font-bold">洞察力が身に付く立体３目並べ</p>
 
 
 
@@ -2539,13 +2544,13 @@ function resetGame() {
       <div className="text-center w-full">
 
         {/* ゲームのタイトル（3ライン！） */}
-        <h1 className="text-base font-black text-white mb-2 tracking-tight">
+        <h1 className="text-base font-black text-white mt-2 mb-2 tracking-tight">
           3<span className="text-indigo-400">ライン</span>！
         </h1>
            
         {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
         {/* ※ 試合中なら、現在のプレイヤー（blue か amber）に合わせて光るクラス名（animate-~）をカチカチと自動で切り替える仕組み */}
-        <div className={`text-[16px] h-5 mt-0.5 transition-all duration-300 ${
+        <div className={`text-[16px] h-5 mt-0.5 mb-1 transition-all duration-300 ${
           !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
         }`}>
           
@@ -2554,7 +2559,7 @@ function resetGame() {
             /* まだ勝敗が決まっていない（試合中）なら「〇〇の番」と出す */
             <>
               <span className={`font-black ${turnColor}`}>{turnLabel}</span>
-              <span className="text-gray-400 ml-2 font-bold">の番</span>
+              <span className="text-gray-400 ml-1  font-bold">の番</span>
 
             </>
 
@@ -2562,6 +2567,8 @@ function resetGame() {
  /* どちらかが勝ったら「★ WINNER ★」を点滅（animate-pulse）させて出す */
    <span className="text-amber-500 font-black animate-pulse">★ WINNER ★</span>
           )}
+
+
         </div>
       </div>
 
