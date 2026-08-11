@@ -28,7 +28,7 @@ achievementStyle.textContent = `
   border-radius: 16px;
   padding: 20px; /* 24px ➔ 16px にして内側の余白をスッキリ */
   text-align: center;
-  width: 85%;   /* 85% ➔ 78% にして画面左右に適度なゆとりを確保 */
+  width: 90%;   /* 85% ➔ 78% にして画面左右に適度なゆとりを確保 */
   max-width: 320px; /* 320px ➔ 270px に縮小 */
   box-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
   animation: rewardPopUp 0.4s ease-out;
@@ -143,26 +143,16 @@ achievementStyle.textContent = `
 }
 
 
+
+
 /* ===================================================
-   ✨ エフェクト＆光演出系（星を最前面に出す修正版）
+   🌟 ポップアップ用の星設定（小ぶり化・発光調整済み）
    =================================================== */
-
-/* 1. 本体（メダル・王冠・トロフィー共通）のコンテナ
-   💡 z-index: 20 を追加して、外にあるリボンより手前に箱ごと持ち上げる！ */
-.sparkle-frame {
-  position: relative;
-  display: inline-block;
-  filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9)) brightness(1.25);
-  z-index: 20; /* 👈 これが超重要！ */
-}
-
-/* 2. 手前に浮かぶキラキラ星の共通設定
-   💡 z-index を 100 に引き上げて、丸バッジ(z-index:10)よりも手前に出す！ */
-.sparkle-frame .sparkle-star {
+.sparkle-popup .sparkle-star {
   position: absolute;
   font-style: normal;
   color: #ffffff;
-  z-index: 100; /* 👈 10 から 100 に変更！ */
+  z-index: 10;
   pointer-events: none;
   opacity: 0;
   display: block;
@@ -170,52 +160,58 @@ achievementStyle.textContent = `
   width: 1em;
   height: 1em;
   text-align: center;
-  transform-origin: center center;
-
-  /* 発光の広がりを抑えた金色のシャドウ */
+  
+  /* 💡 発光の広がりを抑えて、光が太く膨らまないように調整 */
   text-shadow: 
     0 0 6px #ffffff,
     0 0 12px #fef08a,
     0 0 18px #eab308;
+
+  transform-origin: center center;
 }
 
-/* 📍 星の配置 1：左上 */
-.sparkle-frame .star-1 {
+/* 📍 1. 左上（小ぶりに調整） */
+.sparkle-popup .star-1 {
   top: 4px;
   left: 8px;
   font-size: 22px;
   animation: popInPlace 2.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
 }
 
-/* 📍 星の配置 2：右上 */
-.sparkle-frame .star-2 {
+/* 📍 2. 右上（小ぶりに調整） */
+.sparkle-popup .star-2 {
   top: 14px;
   right: 8px;
   font-size: 14px;
   animation: popInPlace 3.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.9s infinite;
 }
 
-/* 📍 星の配置 3：左下 */
-.sparkle-frame .star-3 {
+/* 📍 3. 左下（小ぶりに調整） */
+.sparkle-popup .star-3 {
   bottom: 10px;
   left: 12px;
   font-size: 18px;
   animation: popInPlace 4.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.8s infinite;
 }
 
-/* 📍 星の配置 4：右下 */
-.sparkle-frame .star-4 {
+/* 📍 4. 右下（小ぶりに調整） */
+.sparkle-popup .star-4 {
   bottom: 6px;
   right: 10px;
   font-size: 24px;
   animation: popInPlace 3.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s infinite;
 }
+/* ✨ 王冠本体の輝き */
+@keyframes gentleGlow {
+  0% {
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5)) brightness(1);
+  }
+  100% {
+    filter: drop-shadow(0 4px 15px rgba(234, 179, 8, 0.5)) brightness(1.08);
+  }
+}
 
-/* ---------------------------------------------------
-   🎬 アニメーション定義（星のポンポン用）
-   --------------------------------------------------- */
-
-/* 🌟 星がポンッと現れて点滅する動き */
+/* 🌟 その場で小ぶりにポンッと点滅するアニメーション */
 @keyframes popInPlace {
   0% {
     opacity: 0;
@@ -223,7 +219,7 @@ achievementStyle.textContent = `
   }
   20% {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(1.1); /* 1.4倍 ➔ 1.1倍に抑えて膨らみを抑制 */
   }
   55% {
     opacity: 0;
@@ -365,11 +361,37 @@ achievementStyle.textContent = `
   position: relative;
 }
 
+
+/* ===================================================
+   🎉 ポップアップ内限定：級バッジをアイコンの右上に配置
+   =================================================== */
+
+/* 1. 全体枠をアイコンのサイズにピッタリ合わせる */
+.reward-modal-overlay .reward-medal-container {
+  position: relative !important;
+  display: inline-block !important; /* 余計な横幅を無くしてアイコンサイズにする */
+}
+
+/* 2. 級バッジをアイコンの右上へ配置 */
+.reward-modal-overlay .badge-grade {
+  position: absolute !important;
+  
+  /* 🎯 位置をアイコンの右上（上と右）へ指定 */
+  top: 80px !important;     /* 💡 マイナスを大きくすると「もっと上」へ */
+  right: -20px !important;   /* 💡 マイナスを大きくすると「もっと右」へ */
+  bottom: auto !important;
+  left: auto !important;
+}
+
+
+
+
+
 /* 2. 【マスター称号】上寄せ調整＆きらーん追加 */
 .badge-title-container {
-  margin-top: -50px; /* 💡 アイコンの下にスッキリ重ねる */
+  margin-top: -25px; /* 💡 -50px ➔ -25px にして位置を下に下げました */
   position: relative;
-  z-index: 10;
+  z-index: 1;        /* 💡 10 ➔ 1 にして、星のキラキラ（z-index: 10）より下に配置 */
   text-align: center;
 }
 
@@ -406,6 +428,7 @@ achievementStyle.textContent = `
   pointer-events: none;
   z-index: 2;
 }
+
 /* ==============================================
    ✨ なめらかツヤツヤグラデーション（金属感アップ版）
    ============================================== */
@@ -449,8 +472,6 @@ achievementStyle.textContent = `
     left: 120%; 
   }
 }
-
-
 
 
 /* ===================================================
@@ -751,7 +772,9 @@ achievementStyle.textContent = `
 
 
 
-/* 🚫 本体アプリの共通スタイルによる影・後光を強制カット */
+/* ---------------------------------------------------
+   🚫 実績パネル側はスッキリ（影・後光をカット）
+   --------------------------------------------------- */
 .achievement-panel .achievement-icon-wrapper,
 .achievement-panel .reward-icon,
 .achievement-panel .sparkle-frame {
@@ -760,12 +783,27 @@ achievementStyle.textContent = `
   background-color: transparent !important;
 }
 
-/* ※ 星の✦自体はそのまま弾けさせつつ、テキスト影によるぼんやり光だけをカット
 .achievement-panel .sparkle-star {
   text-shadow: none !important;
 }
- */
 
+
+/* ---------------------------------------------------
+   🌟 ポップアップ（✨後光・発光を強力に復活！）
+   --------------------------------------------------- */
+/* 1. アイコン自体の輝く後光（ドロップシャドウ） */
+.reward-modal-overlay .sparkle-popup {
+  filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.8)) 
+          drop-shadow(0 0 24px rgba(234, 179, 8, 0.5)) !important;
+}
+
+/* 2. 星（✦）のぼんやり黄金発光（テキシャドウ） */
+.reward-modal-overlay .sparkle-popup .sparkle-star {
+  text-shadow: 
+    0 0 6px #ffffff,
+    0 0 12px #fef08a,
+    0 0 18px #eab308 !important;
+}
 
 /* 🔒 ロック時の鍵バッジ（少し大きく＆リアルに） */
 .lock-badge {
@@ -920,29 +958,27 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
 
 
  // ② ポップアップ（HTML）を組み立てて表示
-  const modalHtml = `
-    <div id="rewardModalOverlay" class="reward-modal-overlay">
-      <div class="reward-modal-box">
-        <div style="color: #facc15; font-size: 12px; font-weight: bold;">
-          ★ ACHIEVEMENTS UNLOCKED ★
-        </div>
+const modalHtml = `
+  <div id="rewardModalOverlay" class="reward-modal-overlay">
+    <div class="reward-modal-box">
+      <div style="color: #facc15; font-size: 12px; font-weight: bold;">
+        ★ ACHIEVEMENTS UNLOCKED ★
+      </div>
 
-        <!-- 🏅 アイコン ＋ 級バッジ -->
-       <div class="reward-medal-container">
+      <!-- 🏅 アイコン ＋ 級バッジ -->
+      <div class="reward-medal-container">
 
-          <!-- ✨ メダル・王冠・トロフィー共通（CSS背景画像＋キラキラ表示） -->
-          <span class="${rewardGroup.baseClass} ${diffData.colorClass} sparkle-frame">
-            <i class="sparkle-star star-1">✦</i>
-            <i class="sparkle-star star-2">✦</i>
-            <i class="sparkle-star star-3">✦</i>
-            <i class="sparkle-star star-4">✦</i>
-          </span>
+        <!-- ✨ メダル・王冠・トロフィー共通（CSS背景画像＋キラキラ表示） -->
+        <span class="${rewardGroup.baseClass} ${diffData.colorClass} sparkle-popup">
+          <i class="sparkle-star star-1">✦</i>
+          <i class="sparkle-star star-2">✦</i>
+          <i class="sparkle-star star-3">✦</i>
+          <i class="sparkle-star star-4">✦</i>
+        </span>
 
+        ${diffData.grade ? `<span class="badge-grade ${rankClass}">${diffData.grade}</span>` : ''}
+      </div>
 
-
-         ${diffData.grade ? `<span class="badge-grade ${rankClass}">${diffData.grade}</span>` : ''}
-          </span>
-        </div>
 
        <!-- 💡 マスター称号バッジ（アイコンのすぐ下） -->
         ${diffData.title ? `<div class="badge-title-container"><span class="badge-title ${rankClass}">👑 ${diffData.title}</span></div>` : ''}
