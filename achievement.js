@@ -515,52 +515,69 @@ achievementStyle.textContent = `
   opacity: 1;
 }
 
-/* 非表示にする右上の星 */
-.star-sparkles-hidden {
-  display: none;
-}
 
 
 /* ===================================================
-   👑 王冠の頭の上に載るマスターリボン
+   👑 王冠の頭の上に載るマスターリボン（位置完全復元版）
    =================================================== */
 
 .master-top-ribbon {
   font-size: 8px;
   font-weight: 700;
   padding: 2px 6px;
-  border-radius: 3px;
   color: #fff;
   white-space: nowrap;
   line-height: 1;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 
   position: relative;
-  z-index: 2;           /* アイコンより前面に */
-  top: -10px;           /* 上に持ち上げる */
-  margin-bottom: -8px;  /* 王冠の頭に被せるマイナスマージン */
+  z-index: 10;                     /* 👈 10に上げて確実に前面へ出す */
+  
+  /* 💡★ ここです！リボンを上に持ち上げて王冠の頭に被せる */
+  top: -14px;                      /* 👈 以前よりさらに上に引っ張り上げる */
+  margin-bottom: -12px;            /* 👈 下の要素（王冠）を押し下げないように打ち消す */
+
+  /* 💡 ポップアップと同じV字リボン形状 */
+  clip-path: polygon(0% 0%, 100% 0%, 92% 50%, 100% 100%, 0% 100%, 8% 50%);
 }
 
-/* 色バリエーション */
-.master-top-ribbon.easy   { background: rgba(180, 83, 9, 0.9); }
-.master-top-ribbon.medium { background: rgba(100, 116, 139, 0.9); }
-.master-top-ribbon.hard   { background: rgba(217, 119, 6, 0.95); }
+/* ---------------------------------------------------
+   ✨ メタルグラデーション（変更なし）
+   --------------------------------------------------- */
 
+/* 🥉 ブロンズ（Easy） */
+.master-top-ribbon.easy { 
+  background: linear-gradient(135deg, #ffeddb 0%, #e09b53 45%, #8c420b 100%);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* 🥈 シルバー（Medium） */
+.master-top-ribbon.medium { 
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 45%, #64748b 100%);
+  color: #0f172a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* 🥇 ゴールド（Hard） */
+.master-top-ribbon.hard { 
+  background: linear-gradient(135deg, #fffbeb 0%, #facc15 45%, #b45309 100%);
+  color: #3f2200;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* 🔒 未解放（Locked） */
 .master-top-ribbon.locked {
   background: rgba(51, 65, 85, 0.5);
   color: #64748b;
   box-shadow: none;
-}
-
-/* メダル・トロフィー用：高さを揃えるための透明なスペーサー */
-.master-top-spacer {
-  height: 12px;
-  width: 100%;
-  margin-bottom: -8px;  /* リボンと同じマイナスマージン */
+  text-shadow: none;
 }
 
 
-/* ===================================================
+
+
+/*===================================================
    🎖️ アイコン領域 & サイズ調整
    =================================================== */
 
@@ -614,7 +631,7 @@ achievementStyle.textContent = `
   gap: 0;
 }
 
-/* 1行目：Easy 5勝 */
+/* 1行目：よわい 5勝 */
 .streak-label {
   font-size: 8px;
   font-weight: 700;
@@ -627,7 +644,7 @@ achievementStyle.textContent = `
 
 /* 2行目：級バッジ */
 .grade-badge {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   padding: 2px 6px;
   border-radius: 3px;
@@ -678,28 +695,28 @@ achievementStyle.textContent = `
 .sparkle-frame .star-1 {
   top: -2px;
   left: -2px;
-  font-size: 13px;       /* 👈 少し小さく (旧: 16px) */
+  font-size: 11px;       /* 👈 少し小さく (旧: 16px) */
   animation: popInPlace 4.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; /* 👈 ゆっくり (旧: 2.8s) */
 }
 
 .sparkle-frame .star-2 {
   top: 0px;
   right: -2px;
-  font-size: 10px;       /* 👈 少し小さく (旧: 12px) */
+  font-size: 8px;       /* 👈 少し小さく (旧: 12px) */
   animation: popInPlace 5.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s infinite; /* 👈 ゆっくり (旧: 3.6s) */
 }
 
 .sparkle-frame .star-3 {
   bottom: 0px;
   left: -2px;
-  font-size: 11px;       /* 👈 少し小さく (旧: 13px) */
+  font-size: 9px;       /* 👈 少し小さく (旧: 13px) */
   animation: popInPlace 6.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.5s infinite; /* 👈 ゆっくり (旧: 4.2s) */
 }
 
 .sparkle-frame .star-4 {
   bottom: -2px;
   right: -2px;
-  font-size: 12px;       /* 👈 少し小さく (旧: 15px) */
+  font-size: 10px;       /* 👈 少し小さく (旧: 15px) */
   animation: popInPlace 5.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s infinite; /* 👈 ゆっくり (旧: 3.2s) */
 }
 
@@ -990,19 +1007,19 @@ window.AchievementCollection = function(props) {
 const COLLECTION_ITEMS = [
 
   // 🥉 1段目：銅（Easy）グループ
-  { id: 'm_easy',   streak: 5,  diff: 'easy',   diffLabel: 'Easy',   baseClass: 'reward-medal-icon',   colorClass: 'medal-bronze',  grade: '9級', title: null },
-  { id: 't_easy',   streak: 10, diff: 'easy',   diffLabel: 'Easy',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-bronze', grade: '8級', title: null },
-  { id: 'c_easy',   streak: 20, diff: 'easy',   diffLabel: 'Easy',   baseClass: 'reward-crown-icon',   colorClass: 'crown-bronze',  grade: '7級', title: 'ブロンズマスター' },
+  { id: 'm_easy',   streak: 5,  diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-medal-icon',   colorClass: 'medal-bronze',  grade: '9級', title: null },
+  { id: 't_easy',   streak: 10, diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-bronze', grade: '8級', title: null },
+  { id: 'c_easy',   streak: 20, diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-bronze',  grade: '7級', title: 'ブロンズマスター' },
 
   // 🥈 2段目：銀（Normal）グループ
-  { id: 'm_medium', streak: 5,  diff: 'medium', diffLabel: 'Normal', baseClass: 'reward-medal-icon',   colorClass: 'medal-silver',  grade: '6級', title: null },
-  { id: 't_medium', streak: 10, diff: 'medium', diffLabel: 'Normal', baseClass: 'reward-trophy-icon',  colorClass: 'trophy-silver', grade: '5級', title: null },
-  { id: 'c_medium', streak: 20, diff: 'medium', diffLabel: 'Normal', baseClass: 'reward-crown-icon',   colorClass: 'crown-silver',  grade: '4級', title: 'シルバーマスター' },
+  { id: 'm_medium', streak: 5,  diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-medal-icon',   colorClass: 'medal-silver',  grade: '6級', title: null },
+  { id: 't_medium', streak: 10, diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-trophy-icon',  colorClass: 'trophy-silver', grade: '5級', title: null },
+  { id: 'c_medium', streak: 20, diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-crown-icon',   colorClass: 'crown-silver',  grade: '4級', title: 'シルバーマスター' },
 
   // 🥇 3段目：金（Hard）グループ
-  { id: 'm_hard',   streak: 5,  diff: 'hard',   diffLabel: 'Hard',   baseClass: 'reward-medal-icon',   colorClass: 'medal-gold',    grade: '3級', title: null },
-  { id: 't_hard',   streak: 10, diff: 'hard',   diffLabel: 'Hard',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-gold',   grade: '2級', title: null },
-  { id: 'c_hard',   streak: 20, diff: 'hard',   diffLabel: 'Hard',   baseClass: 'reward-crown-icon',   colorClass: 'crown-gold',    grade: '1級', title: 'ゴールドマスター' },
+  { id: 'm_hard',   streak: 5,  diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-medal-icon',   colorClass: 'medal-gold',    grade: '3級', title: null },
+  { id: 't_hard',   streak: 10, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-gold',   grade: '2級', title: null },
+  { id: 'c_hard',   streak: 20, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-gold',    grade: '1級', title: 'ゴールドマスター' },
 
 ];
 
@@ -1012,9 +1029,7 @@ var cards = COLLECTION_ITEMS.map(function(item) {
   var count = Number(streaks[item.diff]) || 0;
   var isUnlocked = count >= item.streak;
 
-  // ① 右上の星（ダミーの空要素）
-  var starElement = e('div', { className: 'star-sparkles-hidden' }, '');
-
+ 
   // ★王冠アイコンの「頭の上」に載せるマスター称号
   // （メダル・トロフィーの時は null ではなく空要素にして Error #130 を完全に防ぐ！）
   var topTitleElem;
@@ -1067,17 +1082,17 @@ var cards = COLLECTION_ITEMS.map(function(item) {
 
 
   // ③ 下のテキスト情報（1行目: Easy 5勝 / 2行目: 9級）
-  var streakElem = e('div', { className: 'streak-label' }, item.diffLabel + ' ' + item.streak + '勝');
+  var streakElem = e('div', { className: 'streak-label' }, item.diffLabel + ' ' + item.streak + '勝‼');
   var gradeElem = e('span', { className: 'grade-badge grade-' + item.diff }, item.grade);
 
   var infoArea = e('div', { className: 'achievement-info' }, streakElem, gradeElem);
 
-  // ④ カードの組み立て（順番：トップ称号 ➔ アイコン ➔ 下テキスト）
+  // ④ カードの組み立て（順番：トップ称号 ➔ アイコン ➔ 下テキスト（ホバー時））
   return e('div', {
     key: item.id,
     className: 'achievement-card ' + (isUnlocked ? 'unlocked' : 'locked'),
     title: item.diffLabel + ' ' + item.streak + '勝達成 (' + item.grade + ')'
-  }, starElement, topTitleElem, iconWrapper, infoArea);
+  },  topTitleElem, iconWrapper, infoArea);
 });
 
   // ⑤ 全体パネルの組み立て
