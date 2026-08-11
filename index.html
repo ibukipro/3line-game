@@ -680,7 +680,7 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
   justify-content: center; /* 💡 横方向を真ん中に寄せる */
   align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
   
-  font-size: 0.8rem;        /* 通常の文字サイズ */
+  font-size: 0.9rem;        /* 通常の文字サイズ */
   font-weight: bold;       
   color: #e0e0ff;          
   padding-top:3px;
@@ -690,7 +690,7 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 /* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
 .timer-display .timer-icon {
-  font-size: 1.5rem;       /* 絵文字を大きくする */
+  font-size: 1.1rem;       /* 絵文字を大きくする */
   margin-right: 4px;       /* 文字との間の隙間 */
   
   line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
@@ -1951,7 +1951,7 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
 
           <p className="text-gray-400 text-[15px] mb-2 tracking-widest">脳力活性ゲーム！</p>
 
-<p className="text-gray-200 text-[15px] mb-7 tracking-widest font-bold">洞察力が身に付く立体３目並べ</p>
+<p className="text-gray-200 text-[14px] mb-7 tracking-widest font-bold">洞察力が身に付く立体３目並べ</p>
 
 
 
@@ -2544,13 +2544,13 @@ function resetGame() {
       <div className="text-center w-full">
 
         {/* ゲームのタイトル（3ライン！） */}
-        <h1 className="text-base font-black text-white mt-2 mb-2 tracking-tight">
+        <h1 className="text-base font-black text-white mb-2 tracking-tight">
           3<span className="text-indigo-400">ライン</span>！
         </h1>
            
         {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
         {/* ※ 試合中なら、現在のプレイヤー（blue か amber）に合わせて光るクラス名（animate-~）をカチカチと自動で切り替える仕組み */}
-        <div className={`text-[16px] h-5 mt-0.5 mb-1 transition-all duration-300 ${
+        <div className={`text-[16px] h-5 mt-0.5 mb-2 transition-all duration-300 ${
           !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
         }`}>
           
