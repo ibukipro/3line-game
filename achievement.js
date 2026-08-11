@@ -995,7 +995,7 @@ const modalHtml = `
         ${diffData.grade ? `<p style="font-size: 13px; color: #bae6fd; margin: 10px 0 0 0; font-weight: 500; line-height: 1.5; white-space: normal;">「${diffData.grade}」を取得しました！</p>` : ''}
         
         <!-- 3. マスター称号の獲得（title が存在する場合のみ表示） -->
-        ${diffData.title ? `<p style="font-size: 12px; color: #ffd700; margin: 8px 0 0 0; font-weight: bold; line-height: 1.5; white-space: normal;">称号「${diffData.title}」が授与されました！</p>` : ''}
+        ${diffData.title ? `<p style="font-size: 12px; color: #ffd700; margin: 8px 0 0 0; font-weight: bold; line-height: 1.5; white-space: normal;">称号「${diffData.title}」が<br />授与されました！</p>` : ''}
 
         <!-- 💡 ボタン（上下マージンを上20px・下10pxに拡張） -->
         <button class="reward-close-btn" onclick="closeRewardModal()" style="margin: 40px 0 20px 0;">受け取る！</button>
