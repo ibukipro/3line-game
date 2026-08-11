@@ -1951,7 +1951,7 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
 
           <p className="text-gray-400 text-[15px] mb-2 tracking-widest">脳力活性ゲーム！</p>
 
-<p className="text-gray-200 text-[14px] mb-7 tracking-widest font-bold">洞察力が身に付く立体３目並べ</p>
+<p className="text-gray-200 text-[13px] mb-7 tracking-widest font-bold">洞察力が身に付く立体３目並べ</p>
 
 
 
@@ -2550,7 +2550,7 @@ function resetGame() {
            
         {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
         {/* ※ 試合中なら、現在のプレイヤー（blue か amber）に合わせて光るクラス名（animate-~）をカチカチと自動で切り替える仕組み */}
-        <div className={`text-[16px] h-5 mt-0.5 mb-2 transition-all duration-300 ${
+        <div className={`text-[16px] h-5 mt-0.5 mb-3 transition-all duration-300 ${
           !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
         }`}>
           
