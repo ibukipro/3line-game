@@ -16,6 +16,15 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 
+<!-- クラッカー用ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- ★追加：別ファイルにした連勝演出パック -->
+  <script src="./achievement.js"></script>
+</body>
+
+
+
   <style>
 
 body {
@@ -416,31 +425,34 @@ filter: brightness(1.2); }
 }
 
 
-.btn-menu-back {
-  padding: 10px;
-  background: #1f2937;
-  border: 1px solid #4b5563;
-  color: #d1d5db;
-  border-radius: 12px;
-  font-weight: 900;
-  font-size: 12px;
-  text-align: center;
-  transition: transform 0.1s;
-}
+/* ===================================================
+   🏠 メインメニュー画面（レイアウト＆ボタン全般）
+   =================================================== */
 
-
+/* 1. メニュー全体コンテナ */
 .menu-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80vh;
   width: 100%;
   text-align: center;
   padding: 16px;
+  box-sizing: border-box;
 }
 
+/* 2. 📱 1画面目のメインコンテンツ（タイトル＋ボタン群） */
+.menu-main-content {
+  width: 100%;
+  /* 画面1枚分の高さを確保して上下中央に綺麗に配置 */
+  min-height: calc(100dvh - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
 
+/* 3. 🔘 メインボタン共通設定 */
 .menu-btn {
   padding: 12px;
   border-radius: 12px;
@@ -450,24 +462,44 @@ filter: brightness(1.2); }
   width: 100%;
 }
 
-
-.menu-btn:active {
+/* ボタン押下時のぽこっと凹むアニメーション */
+.menu-btn:active,
+.btn-menu-back:active {
   transform: scale(0.95);
 }
 
-
-.btn-resume { background: #16a34a; color: #fff; } /* green-600 */
-.btn-2p { background: #4f46e5; color: #fff; }     /* indigo-600 */
-.btn-ai { background: #d97706; color: #fff; }     /* amber-600 */
+/* 4. ボタンカラー各種 */
+.btn-resume { background: #16a34a; color: #fff; } /* 途中から再開（緑） */
+.btn-2p     { background: #4f46e5; color: #fff; } /* 2人対戦（インディゴ） */
+.btn-ai     { background: #d97706; color: #fff; } /* CPU対戦（アンバー） */
 
 .btn-sub { 
-  background: #94a3b8;     /* 🌟 明るさを抑えた、しっかり「グレー」と分かるミディアムグレー */
-  color: #0f172a;          /* 文字はクッキリ引き締まる濃いネイビー */
-  border: 1px solid #64748b; /* 枠線は一回り濃いグレーで立体感を出します */
+  background: #94a3b8;      /* 遊び方ボタン（グレー） */
+  color: #0f172a; 
+  border: 1px solid #64748b;
   font-weight: bold;
   font-size: 14px;
 }
 
+.btn-menu-back {
+  padding: 10px;
+  background: #1f2937;      /* メニューに戻る等（ダークグレー） */
+  border: 1px solid #4b5563;
+  color: #d1d5db;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 12px;
+  text-align: center;
+  transition: transform 0.1s;
+}
+
+/* 5. 🏆 実績コレクションパネル（1画面目の下に押し出す設定） */
+.achievement-panel {
+  width: 100%;
+  max-width: 360px;
+  margin-top: -50px;
+  margin-bottom: 32px;
+}
 
 /* ==========================================
    ⏱️ タイマー表示のスタイル（上下中央揃え版）
@@ -521,7 +553,7 @@ filter: brightness(1.2); }
 
 /* 🏆 トロフィーのサイズ調整 */
 .trophy-icon {
-  font-size: 1.8rem;       /* 💡 縦一列にならない、ほどよくドーンと大きなサイズ */
+  font-size: 3.5rem;       /* 💡 縦一列にならない、ほどよくドーンと大きなサイズ */
   line-height: 1;
   display: inline-block;
   animation: trophyPop 0.3s ease-out;
@@ -632,40 +664,18 @@ filter: brightness(1.2); }
 }
 
 
-/* 🔥 連勝テキスト（ほんのりキラリと光る上品仕様） */
+/* 勝利数テキスト（シンプル表示） */
 .streak-count-text {
-  font-size: 1,2rem;
+  font-size: 16px;
   font-weight: 500;
-  color: #fbbf24;             /* パッと目を引く温かいゴールド */
-  
-  /* 💡 文字の周りに少ししっかりめの「光のオーラ」を入れる */
-  text-shadow: 
-    0 0 8px rgba(251, 191, 36, 0.6),
-    0 0 16px rgba(245, 158, 11, 0.4);
-  
+  color: #fbbf24;       /* 読みやすいゴールド */
   margin-top: -2px;
   margin-bottom: 16px;
   letter-spacing: 1.5px;
   display: inline-block;
-  
-  /* 💡 ゆっくり呼吸するように優しく光が強弱するアニメーション */
-  animation: streakGlow 2s infinite ease-in-out;
 }
 
-/* 💡 優しくふわ〜っと光が巡るアニメーション */
-@keyframes streakGlow {
-  0%, 100% {
-    opacity: 0.9;
-    filter: brightness(1);
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    /* ほんの少しだけ明るくなってキュッと輝く */
-    filter: brightness(1.25);
-    transform: scale(1.03);
-  }
-}
+
 
 /* 💡 トロフィーが飛び出すアニメーション */
 @keyframes trophyPop {
@@ -1311,10 +1321,20 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
 
 
 
-
-
 // 💡 引数に difficulty と winStreak を追加！
 function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStreak }) {
+  
+  // ★ ここを追加！勝利画面が出た瞬間に5勝判定＆ポップアップ呼出 ★
+  React.useEffect(() => {
+    // プレイヤー（青）が勝った ＆ AI対戦の時だけ実行
+    if (winner === 'blue' && gameMode === 'ai') {
+      if (typeof window.checkAndShowReward === 'function') {
+        window.checkAndShowReward(winStreak, difficulty);
+      }
+    }
+  }, [winner, gameMode, winStreak, difficulty]);
+
+
   const nameMap = { 
     blue: 'プレイヤー1（青）', 
     yellow: gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）' 
@@ -1336,29 +1356,27 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
     <div className="overlay-backdrop">
       <div className="overlay-card overlay-enter flex flex-col items-center">
         
-        {/* 🏆 トロフィー／ロボット表示エリア */}
+       {/* 🏆 トロフィー／ロボット表示エリア */}
         <div className="trophy-container">
           {isCpuWin ? (
             // CPU勝利のときはロボット1個
             <span className="trophy-icon">🤖</span>
           ) : (
-            // 人間勝利のときは連勝数（最低1個）の分だけトロフィーを並べる！
-            Array.from({ length: Math.max(1, winStreak) }).map((_, index) => (
-              <span key={index} className={`trophy-icon ${trophyClass}`}>
-                🏆
-              </span>
-            ))
+            // 人間勝利のときはトロフィー1個だけ！
+            <span className={`trophy-icon ${trophyClass}`}>
+              🏆
+            </span>
           )}
         </div>
         
         {/* 1. 誰の勝ち */}
-        <p className={`text-base font-black ${color} mb-3 tracking-wide whitespace-nowrap`}>
+        <p className={`text-[19px] font-black ${color} mb-3 tracking-wide whitespace-nowrap`}>
           {name} の勝利！
         </p>
 
-        {/* 💡 2連勝以上なら連勝数を表示（テンション上がるオマケ！） */}
-        {winStreak > 1 && !isCpuWin && (
-          <p className="streak-count-text">🔥 {winStreak} 連勝中！</p>
+        {/* 💡 人間勝利時に現在の勝利数を表示（1勝目から表示） */}
+        {winStreak > 0 && !isCpuWin && (
+          <p className="streak-count-text">TOTAL WINS: {winStreak} </p>
         )}
         
         {/* 2. ゲーム終了 */}
@@ -1570,8 +1588,7 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
               🚨 うっかり駒を動かした時点で、即座に対戦者に勝ちをあげる（自爆負け）ことになります！
             </p>
           </div>
-        </div>
-
+  　　　 </div>
 
 
 
@@ -1585,6 +1602,34 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
         <button onClick={onBack} className="btn-menu-back active:scale-95">
           メインメニューに戻る
         </button>
+
+
+
+
+{/* ルール説明の末尾などに配置 */}
+<div className="mt-8 pt-4 border-t border-gray-200 text-center">
+  <button
+    type="button"
+    onClick={() => {
+      const ok = window.confirm('これまでの通算勝利記録をすべてリセットしますか？\n（この操作は取り消せません）');
+      if (ok) {
+        // 1. ストレージからデータを消去
+        localStorage.removeItem('game_streaks');
+        
+        alert('通算勝利記録をリセットしました。');
+        
+        // 2. 画面を自動リロード（保存データが消えた状態で初期化・再描画されます！）
+        window.location.reload();
+      }
+    }}
+    className="text-xs text-red-500 hover:text-red-700 underline cursor-pointer transition-colors"
+  >
+    通算勝利記録をリセットする
+  </button>
+</div>
+
+
+
       </div>
     </div>
   );
@@ -1593,72 +1638,291 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
 
 
 
-  function MenuScreen({ onStart, onOpenInstructions, hasHistory }) {
-  const [mode, setMode] = useState(null);
-  const [selectedDiff, setSelectedDiff] = useState(null);
+function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInstructions, hasHistory }) {
+  // 🛠️ 1行でデバッグの有効/無効を切り替え（本番時は false に変更）
+  const IS_DEBUG = true; 
 
+  // 1. 内部State（親のstreaksと同期させつつ、デバッグ操作時に即座に再描画させる）
+  const [streaks, setLocalStreaks] = useState(propStreaks);
+
+  // 親から渡されるstreaksが変更されたら同期
+  React.useEffect(() => {
+    if (propStreaks) {
+      setLocalStreaks(propStreaks);
+    }
+  }, [propStreaks]);
+
+  // 2. 状態（State）の設定
+  const [mode, setMode] = useState(null);               
+  const [selectedDiff, setSelectedDiff] = useState(null); 
+  const [debugTapCount, setDebugTapCount] = useState(0);  
+  const [showDebug, setShowDebug] = useState(false);      
+
+  // 3. メニュー画面が開いた瞬間にスクロール位置を最上部にリセット
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, []);
+
+  // 4. 難易度選択ハンドラー
   const handleDiffSelect = (diff) => {
     setSelectedDiff(diff);
-    setMode('turn'); 
-// CPU対戦のときだけ、難易度の後に手番選択へ！
+    setMode('turn');
+  };
+
+  // 5. タイトル5回クリック/タップでデバッグ表示切替
+  const handleTitleTap = () => {
+    if (!IS_DEBUG) return;
+
+    const next = debugTapCount + 1;
+    if (next >= 5) {
+      setShowDebug(prev => !prev);
+      setDebugTapCount(0);
+    } else {
+      setDebugTapCount(next);
+    }
+  };
+
+  // 6. 勝利数更新用の共通処理（画面・保存・親コンポーネントを確実更新）
+  const updateStreaksData = (newStreaks) => {
+    const fresh = { ...newStreaks };
+
+    // ① ローカルState更新（画面が100%即時書き換わります）
+    setLocalStreaks(fresh);
+
+    // ② localStorageに保存
+    localStorage.setItem('game_streaks', JSON.stringify(fresh));
+
+    // ③ 親コンポーネントのsetStreaksを実行
+    if (typeof setStreaks === 'function') {
+      setStreaks(fresh);
+    }
+  };
+
+  // 7. 特定の難易度の勝利数を切り替え（トグル機能 + ポップアップ起動）
+  const toggleStreak = (diff, count) => {
+    const current = streaks[diff] || 0;
+    // すでに同じ勝利数なら0リセット、違えばその勝利数にする
+    const nextCount = current === count ? 0 : count;
+
+    const updated = { ...streaks, [diff]: nextCount };
+    updateStreaksData(updated);
+
+    // 🏆 ポップアップイベントの発生（0勝へのリセット時以外）
+    if (nextCount > 0 && typeof window.checkAndShowReward === 'function') {
+      window.checkAndShowReward(nextCount, diff);
+    }
+  };
+
+  // 8. 全リセット
+  const resetAllStreaks = () => {
+    updateStreaksData({ easy: 0, medium: 0, hard: 0 });
+  };
+
+  // 9. 全9種（最高20勝）一括解放
+  const unlockAll = () => {
+    const allMax = { easy: 20, medium: 20, hard: 20 };
+    updateStreaksData(allMax);
+
+    // 全開放時にも金メダルのポップアップを発火
+    if (typeof window.checkAndShowReward === 'function') {
+      window.checkAndShowReward(20, 'hard');
+    }
   };
 
   return (
     <div className="menu-container">
 
- {/* メインタイトル*/}
- <h1 className="text-[42px] font-black text-white mb-[5px] tracking-tight">
- 3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
-　　　</h1>
-
- {/* サブタイトル */}
- <p className="text-gray-400 text-[15px] mb-10 tracking-widest">脳力活性ゲーム！</p>
-
-
-
-      {/* ① メインメニュー */}
+      {/* ① メインメニュー表示時 */}
       {mode === null && (
-        <div className="flex flex-col gap-5 w-64">
-          {hasHistory && (
-            <button onClick={() => onStart('resume', null)} className="menu-btn btn-resume animate-pulse">
-              途中から再開  </button>
+        <>
+          <div className="menu-main-content">
+            <h1 
+              onClick={handleTitleTap} 
+              className="text-[42px] font-black text-white mb-[5px] tracking-tight cursor-pointer select-none"
+              title={IS_DEBUG ? "5回クリックでデバッグ表示" : ""}
+            >
+              3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
+            </h1>
+
+            <p className="text-gray-400 text-[15px] mb-8 tracking-widest">脳力活性ゲーム！</p>
+
+            <div className="flex flex-col gap-5 w-64">
+              {hasHistory && (
+                <button onClick={() => onStart('resume', null)} className="menu-btn btn-resume animate-pulse">
+                  途中から再開
+                </button>
+              )}
+              <button onClick={() => onStart('2p', null)} className="menu-btn btn-2p">2人対戦</button>
+              <button onClick={() => setMode('ai')} className="menu-btn btn-ai">CPU対戦</button>
+              <button onClick={onOpenInstructions} className="menu-btn btn-sub mt-2">📄 遊び方を見る</button>
+            </div>
+          </div>
+
+          {/* 🏆 獲得実績コレクション */}
+          {window.AchievementCollection && (
+            <window.AchievementCollection streaks={streaks} />
           )}
-          {/* 🌟 2人対戦のときは、手番選択を挟まずにすぐスタート！ */}
-          <button onClick={() => onStart('2p', null)} className="menu-btn btn-2p">2人対戦</button>
-          <button onClick={() => setMode('ai')} className="menu-btn btn-ai">CPU対戦</button>
-          <button onClick={onOpenInstructions} className="menu-btn btn-sub mt-2">📄 遊び方を見る</button>
-       
- 
- </div>
+        </>
       )}
 
-      {/* ② 難易度選択 */}
+      {/* ② 難易度選択画面 */}
       {mode === 'ai' && (
-        <div className="flex flex-col gap-4 w-64">
-          <p className="text-gray-400 text-[14px] mb-1 font-bold ">難易度を選択</p>
-          <button onClick={() => handleDiffSelect('easy')} className="menu-btn bg-green-600 text-white">よわい</button>
-          <button onClick={() => handleDiffSelect('medium')} className="menu-btn bg-orange-600 text-white">ふつう</button>
-          <button onClick={() => handleDiffSelect('hard')} className="menu-btn bg-red-600 text-white">つよい</button>
-          <button onClick={() => setMode(null)} className="menu-btn btn-sub mt-1">戻る</button>
+        <div className="menu-main-content">
+          <h1 
+            onClick={handleTitleTap} 
+            className="text-[42px] font-black text-white mb-[5px] tracking-tight cursor-pointer select-none"
+          >
+            3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
+          </h1>
+          <p className="text-gray-400 text-[15px] mb-6 tracking-widest">脳力活性ゲーム！</p>
+
+          <div className="flex flex-col gap-4 w-64">
+            <p className="text-gray-400 text-[14px] mb-1 font-bold">難易度を選択</p>
+            
+            <button id="btn-easy" onClick={() => handleDiffSelect('easy')} className="menu-btn bg-green-600 text-white">よわい</button>
+            <button id="btn-medium" onClick={() => handleDiffSelect('medium')} className="menu-btn bg-orange-600 text-white">ふつう</button>
+            <button id="btn-hard" onClick={() => handleDiffSelect('hard')} className="menu-btn bg-red-600 text-white">つよい</button>
+            
+            <button onClick={() => setMode(null)} className="menu-btn btn-sub mt-1">戻る</button>
+          </div>
         </div>
       )}
 
-      {/* ③ 先攻・後攻の選択（CPU対戦時のみ） */}
+      {/* ③ 先攻・後攻の選択画面 */}
       {mode === 'turn' && (
-        <div className="flex flex-col gap-4 w-64">
-          <p className="text-gray-400 text-[14px] mb-1 font-bold ">順番を選択</p>
-          {/* 先攻を選んだら、3つ目の引数に 'blue'（青からスタート）を渡す */}
-          <button onClick={() => onStart('ai', selectedDiff, 'blue')} className="menu-btn bg-indigo-600 text-white">先攻</button>
-          {/* 後攻を選んだら、3つ目の引数に 'yellow'（黄からスタート）を渡す */}
-          <button onClick={() => onStart('ai', selectedDiff, 'yellow')} className="menu-btn bg-amber-600 text-white">後攻</button>
-          <button onClick={() => setMode('ai')} className="menu-btn btn-sub mt-1">戻る</button>
+        <div className="menu-main-content">
+          <h1 
+            onClick={handleTitleTap} 
+            className="text-[42px] font-black text-white mb-[5px] tracking-tight cursor-pointer select-none"
+          >
+            3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
+          </h1>
+          <p className="text-gray-400 text-[15px] mb-6 tracking-widest">脳力活性ゲーム！</p>
+
+          <div className="flex flex-col gap-4 w-64">
+            <p className="text-gray-400 text-[14px] mb-1 font-bold">順番を選択</p>
+            
+            <button onClick={() => onStart('ai', selectedDiff, 'blue')} className="menu-btn bg-indigo-600 text-white">先攻</button>
+            <button onClick={() => onStart('ai', selectedDiff, 'yellow')} className="menu-btn bg-amber-600 text-white">後攻</button>
+            
+            <button onClick={() => setMode('ai')} className="menu-btn btn-sub mt-1">戻る</button>
+          </div>
         </div>
       )}
+
+      {/* 🛠️ デバッグパネル（銅・銀・金：5勝/10勝/20勝・ポップアップ連動対応） */}
+      {IS_DEBUG && showDebug && (
+        <div className="mt-6 p-4 bg-gray-900/95 border border-amber-500/50 rounded-xl w-full max-w-sm text-center z-50 shadow-2xl">
+          <p className="text-amber-400 text-xs font-bold mb-3">🛠️ 実績・ポップアップテストパネル</p>
+
+          {/* 9種類の実績切り替えボタン群（5勝/10勝/20勝） */}
+          <div className="space-y-2 text-xs mb-3">
+            {/* Easy */}
+            <div className="bg-gray-800/60 p-2 rounded-lg">
+              <p className="text-green-400 font-bold mb-1 text-left text-[11px]">🟢 よわい（Easy）</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button 
+                  onClick={() => toggleStreak('easy', 5)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.easy >= 5 && streaks.easy < 10 ? 'bg-amber-700 text-white ring-2 ring-amber-400' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥉 5勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('easy', 10)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.easy >= 10 && streaks.easy < 20 ? 'bg-slate-400 text-gray-900 ring-2 ring-slate-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥈 10勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('easy', 20)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.easy >= 20 ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥇 20勝
+                </button>
+              </div>
+            </div>
+
+            {/* Normal */}
+            <div className="bg-gray-800/60 p-2 rounded-lg">
+              <p className="text-orange-400 font-bold mb-1 text-left text-[11px]">🟠 ふつう（Medium）</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button 
+                  onClick={() => toggleStreak('medium', 5)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.medium >= 5 && streaks.medium < 10 ? 'bg-amber-700 text-white ring-2 ring-amber-400' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥉 5勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('medium', 10)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.medium >= 10 && streaks.medium < 20 ? 'bg-slate-400 text-gray-900 ring-2 ring-slate-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥈 10勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('medium', 20)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.medium >= 20 ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥇 20勝
+                </button>
+              </div>
+            </div>
+
+            {/* Hard */}
+            <div className="bg-gray-800/60 p-2 rounded-lg">
+              <p className="text-red-400 font-bold mb-1 text-left text-[11px]">🔴 つよい（Hard）</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button 
+                  onClick={() => toggleStreak('hard', 5)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.hard >= 5 && streaks.hard < 10 ? 'bg-amber-700 text-white ring-2 ring-amber-400' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥉 5勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('hard', 10)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.hard >= 10 && streaks.hard < 20 ? 'bg-slate-400 text-gray-900 ring-2 ring-slate-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥈 10勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('hard', 20)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.hard >= 20 ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥇 20勝
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 一括操作・リセットエリア */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <button 
+              onClick={unlockAll}
+              className="p-2 bg-amber-500 hover:bg-amber-400 text-gray-900 font-extrabold rounded text-xs transition-transform active:scale-95"
+            >
+              🏆 全9種を一括解禁
+            </button>
+            <button 
+              onClick={resetAllStreaks}
+              className="p-2 bg-gray-700 hover:bg-gray-600 text-red-300 font-bold rounded text-xs transition-transform active:scale-95"
+            >
+              🔄 全リセット
+            </button>
+          </div>
+
+          <button 
+            onClick={() => setShowDebug(false)}
+            className="text-[11px] text-gray-400 underline hover:text-white"
+          >
+            パネルをたたむ
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }
-
-
 
 
 
@@ -1689,13 +1953,13 @@ const [firstPlayer, setFirstPlayer] = useState('blue');
 
 // 🏆 1. 初期値を localStorage から取得（保存がなければ初期オブジェクト）
   const [streaks, setStreaks] = useState(() => {
-    const saved = localStorage.getItem('shirorin_game_streaks');
+    const saved = localStorage.getItem('game_streaks');
     return saved ? JSON.parse(saved) : { '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 };
   });
 
   // 💾 2. streaks の値が変わるたびに localStorage へ自動保存！
   useEffect(() => {
-    localStorage.setItem('shirorin_game_streaks', JSON.stringify(streaks));
+    localStorage.setItem('game_streaks', JSON.stringify(streaks));
   }, [streaks]);
 
 
@@ -1760,48 +2024,45 @@ const [firstPlayer, setFirstPlayer] = useState('blue');
     return false;
   }, [lastMove]);
 
+
+
 function doNextTurn(newBoard, newHands, move = null) {
     const moveWithPlayer = move ? { ...move, player: currentPlayer } : null;
     setLastMove(moveWithPlayer); 
     const result = checkWinner(newBoard);
-    if (result) {
-      setWinResult(result); setPhase('winDelay'); setHasActiveGame(false);
 
-      // 💡【変更】勝者に応じたキーを決める！
-      let streakKey = '';
-      if (gameMode === '2p') {
-        // 2人対戦なら勝った色（blue または yellow）で分ける
-        streakKey = result.winner === 'blue' ? '2p_blue' : '2p_yellow';
-      } else {
-        // CPU対戦なら難易度
-        streakKey = difficulty;
+    if (result) {
+      setWinResult(result); 
+      setPhase('winDelay'); 
+      setHasActiveGame(false);
+
+      // 💡 AI対戦でプレイヤー（青）が勝った時だけ、難易度ごとに+1（加算・負けても維持）
+      if (gameMode === 'ai' && result.winner === 'blue') {
+        setStreaks(prev => ({
+          ...prev,
+          [difficulty]: (prev[difficulty] || 0) + 1
+        }));
       }
 
-      const isHumanWin = (gameMode === 'ai' && result.winner === 'blue') || gameMode === '2p';
+      delayTimerRef.current = setTimeout(() => { 
+        setPhase('gameOver'); 
+        setShowOverlay(true); 
+      }, 2000); 
 
-      setStreaks(prev => {
-        const nextStreaks = { ...prev };
-        if (gameMode === '2p') {
-          // 💡 2P対戦：勝った方は +1、負けた方は 0 にリセット！
-          const winnerKey = result.winner === 'blue' ? '2p_blue' : '2p_yellow';
-          const loserKey = result.winner === 'blue' ? '2p_yellow' : '2p_blue';
-          nextStreaks[winnerKey] = (prev[winnerKey] || 0) + 1;
-          nextStreaks[loserKey] = 0;
-        } else {
-          // 💡 AI対戦：人間勝ちなら+1、負けたら0
-          nextStreaks[streakKey] = isHumanWin ? (prev[streakKey] || 0) + 1 : 0;
-        }
-        return nextStreaks;
-      });
-
-      delayTimerRef.current = setTimeout(() => { setPhase('gameOver'); setShowOverlay(true); }, 2000); 
     } else {
-      setCurrentPlayer(prev => prev === 'blue' ? 'yellow' : 'blue'); setPhase('selectAction');
+      setCurrentPlayer(prev => prev === 'blue' ? 'yellow' : 'blue'); 
+      setPhase('selectAction');
     }
-    setSelectedCell(null); setMoveCount(0);
+
+    setSelectedCell(null); 
+    setMoveCount(0);
   }
 
 
+
+
+
+ // この下は誤作動やAIの挙動などのコード
   useEffect(() => {
     if (!isAITurn || phase !== 'selectAction' || screen !== 'game') return;
     setAiThinking(true);
@@ -1823,6 +2084,7 @@ function doNextTurn(newBoard, newHands, move = null) {
   }
 
 
+
 // 💡 1秒ごとにタイマーを減らす処理
 useEffect(() => {
  // 📍 画面が「game」じゃないとき、勝敗が決まっているとき、操作不能のときはタイマーを動かさない！
@@ -1840,20 +2102,15 @@ useEffect(() => {
     setHasActiveGame(false);
     setTimeLeft(60);
 
-    // 💡【変更】タイムアウト時も勝者・敗者の連勝を更新！
-    setStreaks(prev => {
-      const nextStreaks = { ...prev };
-      if (gameMode === '2p') {
-        const winnerKey = winnerColor === 'blue' ? '2p_blue' : '2p_yellow';
-        const loserKey = winnerColor === 'blue' ? '2p_yellow' : '2p_blue';
-        nextStreaks[winnerKey] = (prev[winnerKey] || 0) + 1;
-        nextStreaks[loserKey] = 0;
-      } else {
-        const isHumanWin = winnerColor === 'blue';
-        nextStreaks[difficulty] = isHumanWin ? (prev[difficulty] || 0) + 1 : 0;
-      }
-      return nextStreaks;
-    });
+
+
+// 💡 タイムアウト時：AI対戦でプレイヤー（青）が勝った時だけ加算（負けても維持）
+    if (gameMode === 'ai' && winnerColor === 'blue') {
+      setStreaks(prev => ({
+        ...prev,
+        [difficulty]: (prev[difficulty] || 0) + 1
+      }));
+    }
 
     return;
   }
@@ -1873,6 +2130,66 @@ useEffect(() => {
 useEffect(() => {
   setTimeLeft(60);
 }, [currentPlayer]);
+
+
+
+
+// 💡 デバッグ用：コンソールから勝利画面やクラッカー演出を即座にテストする
+useEffect(() => {
+  // ① 数字を変えるだけの関数
+  window.setWins = (count = 10, targetDiff = null) => {
+    const activeDiff = targetDiff || difficulty || 'easy';
+    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
+    console.log(`✅ [デバッグ] 難易度 "${activeDiff}" の勝利数を ${count} に変更しました`);
+  };
+
+  // ② 【✨完全版】画面も切り替えて勝利画面＆演出を表示させる関数
+  window.testWin = (count = 10, targetDiff = null) => {
+    const activeDiff = targetDiff || difficulty || 'easy';
+
+    // 1. 難易度・モード・画面をゲーム画面に設定
+    if (typeof setDifficulty === 'function') setDifficulty(activeDiff);
+    if (typeof setGameMode === 'function') setGameMode('ai');
+    if (typeof setScreen === 'function') setScreen('game'); // 💡 ゲーム画面に強制移動
+
+    // 2. 勝利数をセット
+    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
+
+    // 3. プレイヤー（青）の勝利状態をセット
+    setWinResult({ 
+      winner: 'blue',
+      line: [],
+      winningLine: [],
+      winningCells: []
+    });
+
+    // 4. 勝利画面とオーバーレイを表示フェーズに切り替え！
+    setPhase('gameOver');
+    setShowOverlay(true);
+
+    console.log(`🎉 [テスト実行] 難易度 "${activeDiff}" を ${count} 勝にして勝利画面を表示しました！`);
+  };
+
+ // ③ リセット関数（デバッグ用）
+window.resetWins = () => {
+  localStorage.removeItem('game_streaks');
+  setStreaks({ '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 });
+  console.log('🧹 [デバッグ] 通算勝利数をすべてリセットしました');
+  
+  // 👈 コンソールから実行した時も自動で画面を更新！
+  window.location.reload(); 
+};
+
+}, [difficulty]);
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1925,6 +2242,8 @@ useEffect(() => {
   }
 
 
+
+// マスの動かし、キャンセルなど
   function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
   function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
 
@@ -1934,8 +2253,10 @@ function resetGame() {
     
     setBoard(EMPTY_BOARD()); 
     setHands({ blue: 5, yellow: 5 }); 
-    
-    // 💡 リロードや対戦途中で変わった手番ではなく、「最初のスタート手番」に戻す！
+  
+
+  
+// 💡 リロードや対戦途中で変わった手番ではなく、「最初のスタート手番」に戻す！
     setCurrentPlayer(firstPlayer); 
     
     setPhase('selectAction'); 
@@ -1966,12 +2287,16 @@ function resetGame() {
 
   return (
     <div className="app-screen">
-      {screen === 'menu' && <MenuScreen onStart={startGame} onOpenInstructions={() => setScreen('instructions')} hasHistory={hasActiveGame} />}
+
+
+     {screen === 'menu' && <MenuScreen streaks={streaks} onStart={startGame} onOpenInstructions={() => setScreen('instructions')} hasHistory={hasActiveGame} />}
+
+
       {screen === 'instructions' && <InstructionScreen onBack={backToMenu} hasActiveGame={hasActiveGame} onResumeGame={() => setScreen('game')} />}
       
       {screen === 'game' && (
         <>
-          {/* 🌟 上部の手番テキストと、中央のナビメッセージの完全同期版CSS */}
+   {/* 🌟 上部の手番テキストと、中央のナビメッセージの完全同期版CSS */}
           {!winResult && (
             <style>{`
               @keyframes syncTextGlowBlue {
