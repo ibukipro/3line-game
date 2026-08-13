@@ -60,7 +60,6 @@ body {
 
 
 
-
 /* ゲーム盤のスペース */
  .board-space-block { 
   width: 100%;
@@ -213,7 +212,7 @@ body {
   overflow: visible;
 }
 
-
+/*何枚重なっているかを示す数字バッジ */
 .stack-count-badge {
   position: absolute;
   bottom: -6px;   
@@ -227,7 +226,7 @@ body {
   text-shadow: 0 2px 4px #000;
   transform: translateZ(24px); 
 }
-/*何枚重なっているかを示す数字バッジ */
+
   /* コインの厚みに埋もれないように、3D空間で一番手前に浮かせる！ */
  /* 位置の微調整 */
   bottom: -2px;  /* 数字を小さく（マイナス）下へ */
@@ -296,75 +295,93 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 
 /* ==============================================
-   🪙 1. 手札（コイン・ストック）エリア
+   🪙 1. 手札（コイン・ストック）エリア ハンドエリア
    ============================================== */
 
-/* 外枠の基本構造（高さ移動は中でやるのでここはシンプルに） */
-.hand-area-section {
-  width: 100%;
-  margin-top: 4px;
+/* 🌟 手札メインカード（上下のパディングを 0.9rem ➔ 0.2rem に縮小！） */
+.hand-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;            /* 💡 ヘッダーと駒の間の隙間もほんの少しキュッと詰めました */
+  width: 90%;
+  margin: 4px auto 0;
+  padding: 0.2rem 0.6rem 0rem;  /* 🌟 上下 0.2rem / 左右 0.6rem で上下の無駄な余白をカット */
+  border-radius: 0.75rem;
+  border: 1px solid;
+  transition: all 300ms ease;
 }
 
-/* コインを選んだ時にポッと光らせるエフェクト（残しておいてOK） */
-.hand-selected {
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)) brightness(1.3); 
-}
-
-/* 手札行の全体枠 */
-.hand-area-row {
+/* 🌟 プレイヤー名 ＆ 矢印のアッパーヘッダー */
+.hand-player-header {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  flex-wrap: nowrap;
-  margin-top: -22px;
+  gap: 0.5rem;
 }
 
+/* 🌟 プレイヤー名テキスト */
+.hand-player-name {
+  font-weight: 900;
+  font-size: 14px;
+  color: #ffffff; 
+}
+
+/* 非手番時の文字色 */
+.hand-player-name.is-inactive {
+  color: #9ca3af;
+}
+
+/* 🌟 手番を示す緑の三角矢印 */
+.hand-player-arrow {
+  color: #4ade80;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* 🌟 中央揃えグループ */
+.hand-area-row,
 .hand-area-inner,
 .hand-piece-list {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: nowrap;
+  margin-bottom:0;
 }
 
-/* 駒1個あたりの枠 */
+
+.hand-area-row {
+  width: 100%;
+}
+
+/* 🪙 駒1個あたりの枠（高さを 52px ➔ 42px にスリム化！） */
 .hand-piece-slot {
   cursor: pointer;
   width: 38px;
-  height: 48px;
+  height: 38px;              /* 💡 縮小表示(scale 0.7)に合わせた高さに調整 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-
-/* 🪙 手持ちの駒の枠 */
-.hand-puck-wrapper {
-  width: 60px;
-  height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: center bottom;
+  transform-origin: center center;
   transition: transform 0.2s ease-out;
-  transform: scale(0.7) translateY(-7px);  /* 💡★ 通常時のコインの高さ（マイナスを大きくすると上に上がります） */
+transform: scale(0.7) translateY(4px);
 }
 
 /* 💡★ 選択時にピョンと跳ね上がる高さ */
-.hand-puck-wrapper.is-selected {
-  transform: scale(0.7) translateY(-20px); 
+.hand-piece-slot.is-selected {
+  transform: scale(0.75) translateY(-10px); /* 跳ね上がりも高さに合わせて微調整 */
 }
 
-/* 個数テキスト（x3 など） */
+/* 💡 個数テキスト（x5 など） */
 .hand-count-text {
   color: #9ca3af;
   font-weight: 900;
   font-size: 12px;
   margin-left: 8px;
-  display: flex;
-  align-items: center;
+transform: translateY(-3px);
 }
 
 /* 個数ゼロ（なし）テキスト */
@@ -695,146 +712,110 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
   
   line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
 
-  /* 💡 ここを追加！絵文字だけを少し上に持ち上げる設定 */
+  /* 💡絵文字だけを少し上に持ち上げる設定 */
   display: inline-block;       /* 👈 位置調整（transform）を確実に利かせるため */
   transform: translateY(-4px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
 }
 
 
-/* 🌟 ラスト10秒の赤点滅（点滅処理はそのまま） */
+/* 🌟 ラスト10秒の赤点滅 */
 .timer-display.warning {
   color: #ff4d4d;
   animation: timerBlink 0.8s infinite alternate;
 }
 
 
-/* ==========================================
-   🏆 トロフィー・連勝表示のスタイル
-   ========================================== */
+
+/* ===================================================
+   🌟 手番完全同期アニメーション (枠と文字を分離版)
+   =================================================== */
+
+/* 1. 手札エリア（枠線と枠外のぼんやりした影）用 */
+@keyframes syncGlowBlue {
+  0%, 100% { border-color: rgba(96,165,250,0.5); box-shadow: 0 0 10px rgba(59,130,246,0.3); }
+  50% { border-color: rgba(147,197,253,1); box-shadow: 0 0 28px rgba(59,130,246,0.9); }
+}
+
+@keyframes syncGlowAmber {
+  0%, 100% { border-color: rgba(251,191,36,0.5); box-shadow: 0 0 10px rgba(217,119,6,0.3); }
+  50% { border-color: rgba(254,240,138,1); box-shadow: 0 0 28px rgba(217,119,6,0.9); }
+}
+
+/* 2. テキスト（文字自体と発光）専用 ※四角い影はつけない */
+@keyframes syncTextBlue {
+  0%, 100% { opacity: 0.65; color: rgba(147,197,253,0.8); text-shadow: 0 0 6px rgba(59,130,246,0.4); }
+  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
+}
+
+@keyframes syncTextAmber {
+  0%, 100% { opacity: 0.65; color: rgba(254,240,138,0.8); text-shadow: 0 0 6px rgba(217,119,6,0.4); }
+  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
+}
+
+/* 3. 緑の三角（◀）用 */
+@keyframes syncTriangle {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1.0; transform: scale(1.05); }
+}
+
+/* 🌟 クラスの割り当て (-20s遅延で点滅タイミングは完全同期) */
+.animate-syncGlowBlue { animation: syncGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
+.animate-syncGlowAmber { animation: syncGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
+
+.animate-syncTextBlue { animation: syncTextBlue 2s infinite ease-in-out; animation-delay: -20s; }
+.animate-syncTextAmber { animation: syncTextAmber 2s infinite ease-in-out; animation-delay: -20s; }
+
+.animate-syncTriangle { animation: syncTriangle 2s infinite ease-in-out; animation-delay: -20s; }
 
 
-/* 🏆 トロフィーを並べる箱 */
-.trophy-container {
+
+
+
+
+
+
+
+
+
+
+
+/* ===================================================
+   🤖 AI（CPU）勝利用ロボットアイコン
+   =================================================== */
+
+/* 勝利の時、★と🤖を並べる箱 */
+.victory-icon-container{
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 12px 4px;           /* 💡【縦の隙間 12px / 横の隙間 4px】 */
-  flex-wrap: wrap;         /* 溢れたら綺麗に2段目へ */
   width: 100%;             /* 横幅いっぱいに使う */
   max-width: 100%;        /* カードからはみ出ない制御 */
   margin: 16px auto;       /* 💡【上下の外側余白を16pxに広げてスッキリ！】 */
 }
 
-/* 🏆 トロフィーのサイズ調整 */
-.trophy-icon {
-  font-size: 3.5rem;       /* 💡 縦一列にならない、ほどよくドーンと大きなサイズ */
+
+.icon-robot {
+  font-size: 2.8rem; /* ロボットの大きさをここで調整 */
+   display: inline-block;
   line-height: 1;
-  display: inline-block;
-  animation: trophyPop 0.3s ease-out;
+  animation: victoryPop 0.3s ease-out;
 }
 
 
-
-
-/* 🥇 ゴールドトロフィー本体 */
-.trophy-icon.gold {
-  position: relative;
-  display: inline-block;
-  filter: 
-    sepia(100%) hue-rotate(5deg) saturate(180%) brightness(0.95) contrast(1.1)
-    drop-shadow(0 0 10px #ffe600)
-    drop-shadow(0 0 25px rgba(255, 170, 0, 0.8));
-}
-
-/* ✨ パーティクル（光の粒子が下から上へきらきら〜っと舞い上がる！） */
-.trophy-icon.gold::after {
-  content: '';
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  
-  /* 💡 点（box-shadow）を何個も散りばめて光の粒子を作る！ */
-  box-shadow: 
-    -12px  15px 2px #fff,
-     15px  20px 2px #ffe600,
-     -8px -10px 1px #fff,
-     20px -15px 3px #ffd700,
-    -20px  0px  2px #ffe600,
-     10px  10px 1px #fff,
-     -5px  25px 2px #ffd700;
-     
-  /* 💡 粒子がふわふわ舞い上がりながら消えるループ（2.5秒） */
-  animation: goldParticles 2.5s infinite linear;
-}
-
-/* ✨ もう1つのパーティクル（少しズラして密度を倍にする！） */
-.trophy-icon.gold::before {
-  content: '';
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  
-  box-shadow: 
-      8px  12px 2px #ffd700,
-    -18px  18px 1px #fff,
-     12px -20px 2px #ffe600,
-    -15px -12px 2px #ffd700,
-      0px  22px 1px #fff;
-     
-  /* 💡 1.25秒遅らせてループさせることで、途切れない「きらきら〜」を実現！ */
-  animation: goldParticles 2.5s infinite linear 1.25s;
-}
-
-/* 🏆 パーティクルが下から上に舞い上がりながらキラキラ消えるアニメーション */
-@keyframes goldParticles {
+/* 💡 アイコンが飛び出すアニメーション */
+@keyframes victoryPop {
   0% {
+    transform: scale(0);
     opacity: 0;
-    transform: translate(-50%, -50%) translateY(15px) scale(0.6);
-  }
-  30% {
-    opacity: 1; /* 途中でくっきり光る */
   }
   80% {
-    opacity: 0.8;
+    transform: scale(1.2);
   }
   100% {
-    opacity: 0;
-    /* 上にふわ〜っと昇っていって消える */
-    transform: translate(-50%, -50%) translateY(-25px) scale(1.4);
+    transform: scale(1);
+    opacity: 1;
   }
-}
-
-
-
-/* 🥈 銀トロフィー（元の黄色を消去して鮮やかなプラチナシルバーに！） */
-.trophy-icon.silver {
-  filter: 
-    grayscale(100%) /* 💡 1. 元の黄色を完全に消す */
-    brightness(0.95)  /* 💡 2. 白飛びしないよう少しトーンを落として陰影を出す */
-    contrast(1.6)  /* 💡 3. メリハリを強めて金属的なギラつきを演出 */
-    hue-rotate(200deg)    /* 💡 4. ほんの少しだけ冷たい銀色のニュアンスをプラス */
-    sepia(10%)   /* 💡 5. 重厚な金属感を少し足す */
-    drop-shadow(0 0 6px rgba(180, 200, 220, 0.8)); /* 💡 6. しっとりした銀のオーラ */
-}
-
-
-
-/* 🥉 銅トロフィー（一旦モノクロ化して渋い赤銅色を乗せる！） */
-.trophy-icon.bronze {
-  filter: 
-    grayscale(100%)     /* 💡 1. 元の黄色を完全に消して白黒にする */
-    sepia(100%)     /* 💡 2. レトロなセピア調（ブラウン）に染める */
-    hue-rotate(-50deg)   /* 💡 3. 色相を赤寄りにシフトして銅の色を作る */
-    saturate(500%)   /* 💡 4. 銅の赤み・深みを強調する */
-    contrast(1.2)    /* 💡 5. 陰影のメリハリをつける */
-    brightness(0.7)   /* 💡 6. 金より少しトーンを落として重厚感を出す */
-    drop-shadow(0 0 8px rgba(184, 115, 51, 0.7)); /* 💡 7. 銅色のオーラ */
 }
 
 
@@ -851,22 +832,57 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 
 
-/* 💡 トロフィーが飛び出すアニメーション */
-@keyframes trophyPop {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+
+
+/* ===================================================
+   ★ 人間勝利用 メタリック星SVG（共通ベース）
+   =================================================== */
+.star-medal {
+  width: 110px;  /* ★の大きさをここで調整 */
+  height: 110px;
+  display: block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: victoryPop 0.3s ease-out;
+}
+
+/* 🥇 金の星（右上キラン削除版） */
+.star-medal.gold {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="gold-base" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFE082"/><stop offset="18%" stop-color="%23FFF59D"/><stop offset="45%" stop-color="%23FFB300"/><stop offset="70%" stop-color="%23FF6F00"/><stop offset="85%" stop-color="%23FFE082"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="gold-dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFB300"/><stop offset="50%" stop-color="%23FF6F00"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="gold-light" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="30%" stop-color="%23FFF8E1"/><stop offset="70%" stop-color="%23FFE082"/><stop offset="100%" stop-color="%23FFB300"/></linearGradient><linearGradient id="gold-rim" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="%234E2600"/><stop offset="25%" stop-color="%23FF6F00"/><stop offset="55%" stop-color="%23FFB300"/><stop offset="80%" stop-color="%23FFF59D"/><stop offset="100%" stop-color="%233E1C00"/></linearGradient><filter id="shadow-gold" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1" dy="5" stdDeviation="3" flood-color="%233E1C00" flood-opacity="0.75"/></filter></defs><g filter="url(%23shadow-gold)" transform="translate(-2, 4) scale(0.92)"><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="none" stroke="url(%23gold-rim)" stroke-width="5" stroke-linejoin="miter"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23gold-base)" stroke="%233E1C00" stroke-width="1.5" stroke-linejoin="miter"/><path d="M 50 50 L 73.6 84.6 L 50 72.2 Z" fill="url(%23gold-dark)" opacity="0.75"/><path d="M 50 50 L 30.9 58.3 L 26.4 84.6 Z" fill="url(%23gold-dark)" opacity="0.45"/><path d="M 50 12 L 61.8 35.9 L 50 50 Z" fill="url(%23gold-light)" opacity="0.9"/><path d="M 50 50 L 88.2 39.7 L 69.1 58.3 Z" fill="url(%23gold-light)" opacity="0.8"/><path d="M 50 50 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23gold-light)" opacity="0.98"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7" fill="none" stroke="%23FFF8E1" stroke-width="1" opacity="0.9"/><path d="M 50 12 L 50 50" fill="none" stroke="%23FFFFFF" stroke-width="1.2" opacity="0.95"/><path d="M 38.2 35.9 L 50 50 L 88.2 39.7" fill="none" stroke="%23FFF8E1" stroke-width="0.8" opacity="0.8"/></g></svg>');
+}
+
+/* 🥈 銀の星 */
+.star-medal.silver {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="silver-base" x1="15%" y1="0%" x2="85%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="20%" stop-color="%23ECEFF1"/><stop offset="45%" stop-color="%2390A4AE"/><stop offset="70%" stop-color="%23455A64"/><stop offset="88%" stop-color="%23CFD8DC"/><stop offset="100%" stop-color="%2337474F"/></linearGradient><linearGradient id="silver-dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23CFD8DC"/><stop offset="50%" stop-color="%2390A4AE"/><stop offset="100%" stop-color="%23455A64"/></linearGradient><linearGradient id="silver-light" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%23FFFFFF" stop-opacity="0.8"/><stop offset="60%" stop-color="%23ECEFF1"/><stop offset="100%" stop-color="%23CFD8DC"/></linearGradient><linearGradient id="silver-rim" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="%2337474F"/><stop offset="25%" stop-color="%23455A64"/><stop offset="55%" stop-color="%2390A4AE"/><stop offset="80%" stop-color="%23ECEFF1"/><stop offset="100%" stop-color="%23102027"/></linearGradient><filter id="shadow-silver" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1" dy="5" stdDeviation="3" flood-color="%23102027" flood-opacity="0.6"/></filter></defs><g filter="url(%23shadow-silver)" transform="translate(-2, 4) scale(0.92)"><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="none" stroke="url(%23silver-rim)" stroke-width="5" stroke-linejoin="miter"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23silver-base)" stroke="%23263238" stroke-width="1.5" stroke-linejoin="miter"/><path d="M 50 50 L 73.6 84.6 L 50 72.2 Z" fill="url(%23silver-dark)" opacity="0.75"/><path d="M 50 50 L 30.9 58.3 L 26.4 84.6 Z" fill="url(%23silver-dark)" opacity="0.45"/><path d="M 50 12 L 61.8 35.9 L 50 50 Z" fill="url(%23silver-light)" opacity="0.9"/><path d="M 50 50 L 88.2 39.7 L 69.1 58.3 Z" fill="url(%23silver-light)" opacity="0.8"/><path d="M 50 50 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23silver-light)" opacity="0.98"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="1" opacity="0.85"/><path d="M 50 12 L 50 50" fill="none" stroke="%23FFFFFF" stroke-width="1.2" opacity="0.9"/><path d="M 38.2 35.9 L 50 50 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="0.8" opacity="0.75"/></g></svg>');
+}
+
+/* 🥉 銅の星 */
+.star-medal.bronze {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="bronze-base" x1="15%" y1="0%" x2="85%" y2="100%"><stop offset="0%" stop-color="%23FFF0DD"/><stop offset="20%" stop-color="%23E8956A"/><stop offset="45%" stop-color="%238C3B1A"/><stop offset="70%" stop-color="%23B85830"/><stop offset="88%" stop-color="%23F2C09F"/><stop offset="100%" stop-color="%234A1D0B"/></linearGradient><linearGradient id="bronze-dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%239E411B"/><stop offset="50%" stop-color="%236E250A"/><stop offset="100%" stop-color="%233D1102"/></linearGradient><linearGradient id="bronze-light" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%23FFF3E0"/><stop offset="60%" stop-color="%23E8956A"/><stop offset="100%" stop-color="%23B85830"/></linearGradient><linearGradient id="bronze-rim" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="%233D1102"/><stop offset="25%" stop-color="%238C3B1A"/><stop offset="55%" stop-color="%23E8956A"/><stop offset="80%" stop-color="%23FFF0DD"/><stop offset="100%" stop-color="%235C2108"/></linearGradient><filter id="shadow-bronze" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1" dy="5" stdDeviation="3" flood-color="%23210800" flood-opacity="0.7"/></filter></defs><g filter="url(%23shadow-bronze)" transform="translate(-2, 4) scale(0.92)"><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="none" stroke="url(%23bronze-rim)" stroke-width="5" stroke-linejoin="miter"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23bronze-base)" stroke="%234A1D0B" stroke-width="1.5" stroke-linejoin="miter"/><path d="M 50 50 L 73.6 84.6 L 50 72.2 Z" fill="url(%23bronze-dark)" opacity="0.75"/><path d="M 50 50 L 30.9 58.3 L 26.4 84.6 Z" fill="url(%23bronze-dark)" opacity="0.45"/><path d="M 50 12 L 61.8 35.9 L 50 50 Z" fill="url(%23bronze-light)" opacity="0.9"/><path d="M 50 50 L 88.2 39.7 L 69.1 58.3 Z" fill="url(%23bronze-light)" opacity="0.8"/><path d="M 50 50 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23bronze-light)" opacity="0.98"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="1" opacity="0.85"/><path d="M 50 12 L 50 50" fill="none" stroke="%23FFFFFF" stroke-width="1.2" opacity="0.9"/><path d="M 38.2 35.9 L 50 50 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="0.8" opacity="0.75"/></g></svg>');
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================
+    デバッグ用
+   ========================================== */
 
 /* 🧪 究極のレイアウトデバッグ用：全要素を赤枠で囲う 
 *, *::before, *::after {
@@ -1072,14 +1088,11 @@ function getAIMove(board, hands, aiColor, difficulty, lastMove) {
   // -------------------------------------------------------------
 
   for (const move of moves) {
-
-   const { board: nb } = applyMove(board, hands, aiColor, move);
-
+  const { board: nb } = applyMove(board, hands, aiColor, move);
    if (checkWinnerSimple(nb) === aiColor) return move; 
-
  }
 
-  
+ 
 
   // -------------------------------------------------------------
 
@@ -1088,43 +1101,29 @@ function getAIMove(board, hands, aiColor, difficulty, lastMove) {
   // -------------------------------------------------------------
 
   if (difficulty !== 'easy') {
-
     const enemyMoves = getAllMoves(board, hands, opColor, null);
-
     let lethalEnemyMove = null;
-
     for (const em of enemyMoves) {
-
       const { board: eb } = applyMove(board, hands, opColor, em);
-
       if (checkWinnerSimple(eb) === opColor) { lethalEnemyMove = em; break; }
 
     }
 
     if (lethalEnemyMove) {
-
       for (const move of moves) {
-
         const { board: nb } = applyMove(board, hands, aiColor, move);
-
         const nextEnemyMoves = getAllMoves(nb, hands, opColor, null);
-
         const stillLethal = nextEnemyMoves.some(nem => checkWinnerSimple(applyMove(nb, hands, opColor, nem).board) === opColor);
 
         if (!stillLethal) return move;
-
       }
-
     }
-
   }
 
 
 
   // 深さの設定はそのまま（easy:1, medium:2, hard:4）
-
   const depthMap = { easy: 1, medium: 2, hard: 4 };
-
   const depth = depthMap[difficulty] || 2;
 
   
@@ -1136,24 +1135,17 @@ function getAIMove(board, hands, aiColor, difficulty, lastMove) {
   // -------------------------------------------------------------
 
   if (difficulty === 'easy' && Math.random() < 0.60) {
-
     // イージー：60%の確率で適当な手を打つ
-
     return moves[Math.floor(Math.random() * moves.length)];
 
   }
 
   
-
   if (difficulty === 'medium' && Math.random() < 0.75) {
-
     // ミディアム：75%の確率で適当な手を打つ（★ここを変更しました！）
-
     return moves[Math.floor(Math.random() * moves.length)];
-
   }
-
-  
+ 
 
   // -------------------------------------------------------------
 
@@ -1162,37 +1154,26 @@ function getAIMove(board, hands, aiColor, difficulty, lastMove) {
   // -------------------------------------------------------------
 
   let bestScore = -Infinity;
-
   let bestMoves = [];
-
   const nextPlayer = aiColor === 'blue' ? 'yellow' : 'blue';
 
   
-
   for (const move of moves) {
-
     const { board: nb, hands: nh } = applyMove(board, hands, aiColor, move);
-
     const score = minimax(nb, nh, nextPlayer, depth - 1, -Infinity, Infinity, aiColor, false, move);
 
     if (score > bestScore) {
-
       bestScore = score;
-
       bestMoves = [move];
-
     } else if (score === bestScore) {
 
-      bestMoves.push(move);
-
+     bestMoves.push(move);
     }
-
   }
 
   return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 
 } 
-
 
 
 
@@ -1355,113 +1336,6 @@ function Puck({ color, index, isGlowing = false, onClick }) {
 
 
 
-function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerLabel, disabled }) {
-  const isBlue = color === 'blue';
-
-  /* 🌟 手番のときだけ、同期点滅用のクラス（animate-syncGlowBlue / Amber）を適用 */
-  const bgClass = isCurrentPlayer
-    ? (isBlue 
-        ? 'bg-blue-950/70 border-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.6)] animate-syncGlowBlue' 
-        : 'bg-amber-950/70 border-amber-400 shadow-[0_0_20px_rgba(217,119,6,0.6)] animate-syncGlowAmber')
-    : 'bg-gray-900/90 border-gray-700';
-
-  /* 安全にクリックイベントを処理する関数 */
-  const handleSelect = () => {
-    if (!disabled && isCurrentPlayer && onSelect) {
-      onSelect();
-    }
-  };
-
-  return (
-    <div className={`flex flex-col gap-1 w-[95%] mx-auto py-2 px-3 rounded-xl border transition-all duration-300 ${bgClass}`}>
-      
-      {/* 🌟 枠・文字・三角の「点滅タイミング」を完全に1つにまとめる内蔵CSS */}
-     {/* 🌟 枠・文字・三角の「点滅タイミング」完全同期版CSS */}
-      {isCurrentPlayer && (
-        <style>{`
-          /* 青プレイヤーの手番アニメーション */
-          @keyframes syncAnimationBlue {
-            0%, 100% { border-color: rgba(96,165,250,0.5); box-shadow: 0 0 10px rgba(59,130,246,0.3); color: rgba(147,197,253,0.7); }
-            50% { border-color: rgba(147,197,253,1); box-shadow: 0 0 28px rgba(59,130,246,0.9); color: rgba(255,255,255,1); }
-          }
-          /* 黄プレイヤーの手番アニメーション */
-          @keyframes syncAnimationAmber {
-            0%, 100% { border-color: rgba(251,191,36,0.5); box-shadow: 0 0 10px rgba(217,119,6,0.3); color: rgba(254,240,138,0.7); }
-            50% { border-color: rgba(254,240,138,1); box-shadow: 0 0 28px rgba(217,119,6,0.9); color: rgba(255,255,255,1); }
-          }
-          /* 緑の三角も明るさを完全同期 */
-          @keyframes syncTriangle {
-            0%, 100% { opacity: 0.4; transform: scale(0.95); }
-            50% { opacity: 1.0; transform: scale(1.05); }
-          }
-          /* 🌟 animation-delay: -20s; を追加して、時間軸を完全に統一しました */
-          .animate-syncGlowBlue { animation: syncAnimationBlue 2s infinite ease-in-out; animation-delay: -20s; }
-          .animate-syncGlowAmber { animation: syncAnimationAmber 2s infinite ease-in-out; animation-delay: -20s; }
-          .animate-syncTriangle { animation: syncTriangle 2s infinite ease-in-out; animation-delay: -20s; }
-        `}</style>
-      )}
-
-    
-
-  {/* 上段：プレイヤー名 */}
-      <div className="flex justify-center items-center w-full">
-        <div className="flex items-center gap-2">
-          {/* 🌟 プレイヤー名（PN）を手番のときは枠と同期してライトアップ */}
-          <span className={`font-black text-[14px] ${isCurrentPlayer ? '' : 'text-gray-400'}`}>
-            {playerLabel}
-          </span>
-          {/* 🌟 緑の三角をサイズアップ（18px）し、同じ周期で同期点滅 */}
-          {isCurrentPlayer && (
-            <span className="text-green-400 text-[18px] leading-none select-none inline-block animate-syncTriangle">
-              ◀
-            </span>
-          )}
-        </div>
-      </div>
-
-   
-
- {/* 下段：3D駒の並び */}
-      <div className="hand-area-row">
-        <div className="hand-area-inner">
-          
-          {count > 0 ? (
-            <>
-              {/* コインの並び */}
-              <div className="hand-piece-list">
-                {Array.from({ length: count }).map((_, i) => {
-                  /* 一番上のコインが選択中かどうか */
-                  const isSelectedTarget = isSelected && i === count - 1;
-
-                  return (
-                    <div key={i} onClick={handleSelect} className="hand-piece-slot">
-                      {/* 💡 選択中なら 'is-selected' クラスを付けるだけ */}
-                      <div className={`hand-puck-wrapper ${isSelectedTarget ? 'is-selected' : ''}`}>
-                        <Puck 
-                          color={color} 
-                          index={0} 
-                          isGlowing={false} 
-                          onClick={handleSelect}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* コインのすぐ右横に個数 */}
-              <div className="hand-count-text">x{count}</div>
-            </>
-          ) : (
-            <span className="hand-empty-text">なし</span>
-          )}
-
-        </div>
-      </div>
-
-    </div>
-  );
-}
 
 
 
@@ -1517,28 +1391,33 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
   // 💡 CPU勝利かどうかの判定
   const isCpuWin = gameMode !== '2p' && winner === 'yellow';
 
-  // 💡 トロフィーの色クラスを決める（デフォルトは金）
-  let trophyClass = 'gold';
-  if (gameMode === 'ai') {
-    if (difficulty === 'easy') trophyClass = 'bronze';      // よわい：銅
-    if (difficulty === 'medium') trophyClass = 'silver';   // ふつう：銀
-  }
+ 
 
-  return (
-    <div className="overlay-backdrop">
-      <div className="overlay-card overlay-enter flex flex-col items-center">
+
+// 💡 星の色を決める（デフォルトは金）
+let starColor = 'gold';
+
+if (gameMode === 'ai') {
+  if (difficulty === 'easy') starColor = 'bronze';      // よわい：銅の星
+  if (difficulty === 'medium') starColor = 'silver';    // ふつう：銀の星
+}
+// ※ gameMode === 'friends'（人間同士）のときはデフォルトの 'gold' のまま
+
+return (
+  <div className="overlay-backdrop">
+    <div className="overlay-card overlay-enter flex flex-col items-center">
+
         
-       {/* 🏆 トロフィー／ロボット表示エリア */}
-        <div className="trophy-container">
-          {isCpuWin ? (
-            // CPU勝利のときはロボット1個
-            <span className="trophy-icon">🤖</span>
-          ) : (
-            // 人間勝利のときはトロフィー1個だけ！
-            <span className={`trophy-icon ${trophyClass}`}>
-              🏆
-            </span>
-          )}
+       {/* 勝利アイコン／ロボット／星 表示エリア */}
+      <div className="victory-icon-container">
+        {isCpuWin ? (
+          // ① CPU勝利のときはロボット（文字アイコン用クラス）
+          <span className="icon-robot">🤖</span>
+        ) : (
+          // ② 人間勝利のときは★（色に応じたクラスを付与）
+          <div className={`star-medal ${starColor}`}></div>
+        )}
+
         </div>
         
         {/* 1. 誰の勝ち */}
@@ -2299,6 +2178,10 @@ function doNextTurn(newBoard, newHands, move = null) {
 
 // 💡 1秒ごとにタイマーを減らす処理
 useEffect(() => {
+
+ return; // 👈 タイマー止め。あとで削除
+
+
  // 📍 画面が「game」じゃないとき、勝敗が決まっているとき、操作不能のときはタイマーを動かさない！
   if (screen !== 'game' || winResult || interactionDisabled) return;
 
@@ -2444,237 +2327,298 @@ window.resetWins = () => {
 
 
 
+
 // マスの動かし、キャンセルなど
   function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
   function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
 
-function resetGame() {
-    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
-    if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
-    
-    setBoard(EMPTY_BOARD()); 
-    setHands({ blue: 5, yellow: 5 }); 
-  
-
-  
-// 💡 リロードや対戦途中で変わった手番ではなく、「最初のスタート手番」に戻す！
-    setCurrentPlayer(firstPlayer); 
-    
-    setPhase('selectAction'); 
-    setSelectedCell(null); 
-    setMoveCount(0); 
-    setWinResult(null); 
-    setShowOverlay(false); 
-    setAiThinking(false); 
-    setLastMove(null);
-    setHasActiveGame(true);
-    setTimeLeft(60); // タイマーリセット
-  }
 
 
-  const maxMovable = selectedCell ? board[selectedCell.row][selectedCell.col].length : 0;
-  const turnLabel = currentPlayer === 'blue' ? 'プレイヤー1（青）' : (gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）');
-  const turnColor = currentPlayer === 'blue' ? 'text-blue-400' : 'text-amber-500';
-  const diffLabel = { easy: 'よわい', medium: 'ふつう', hard: 'つよい' };
 
-  const phaseMessages = {
-    selectAction: aiThinking ? 'CPU思考中...' : '駒をタップして配置、または移動',
-    placeSelect: '配置先を選んでください',
-    moveCountSelect: '取る駒の数を選んでください',
-    moveTargetSelect: '移動先を選んでください',
-    winDelay: '決着！盤面を確認中...', 
-    gameOver: ''
+
+
+
+// ===================================================
+// 1. 手札エリアコンポーネント (HandArea)ハンドエリア
+// ===================================================
+
+function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerLabel, disabled }) {
+  const isBlue = color === 'blue';
+
+  /* 💡【手番状態の判定】 */
+  const bgClass = isCurrentPlayer
+    ? (isBlue 
+        ? 'bg-blue-950/70 border-blue-400 animate-syncGlowBlue' 
+        : 'bg-amber-950/70 border-amber-400 animate-syncGlowAmber')
+    : 'bg-gray-900/90 border-gray-700';
+
+  /* 💡【安全なクリック処理】 */
+  const handleSelect = () => {
+    if (!disabled && isCurrentPlayer && onSelect) {
+      onSelect();
+    }
   };
 
   return (
-   
- <div className="app-screen">
-
-  {/* ==========================================
-      1. 画面の切り替え処理（メニュー / 説明）
-     ========================================== */}
-
-  {/* 【メニュー画面】いまの状態が 'menu' のときに表示 */}
-  {screen === 'menu' && (
-    <MenuScreen 
-      streaks={streaks} 
-      onStart={startGame} 
-      onOpenInstructions={() => setScreen('instructions')} 
-      hasHistory={hasActiveGame} 
-    />
-  )}
-
-  {/* 【説明画面】いまの状態が 'instructions' のときに表示 */}
-  {screen === 'instructions' && (
-    <InstructionScreen 
-      onBack={backToMenu} 
-      hasActiveGame={hasActiveGame} 
-      onResumeGame={() => setScreen('game')} 
-    />
-  )}
- 
-
-  {/* ==========================================
-      2. ゲーム本番画面（ここからゲーム中の中身）
-     ========================================== */}
-
-  {/* 【ゲーム本番画面】いまの状態が 'game' のときに表示 */}    
-  {screen === 'game' && (
-    <>
-  {/* 🌟 【光る演出の準備】試合中（勝者が決まる前）だけ、文字がボワボワ光るCSSアニメーションを読み込む */}
-      {!winResult && (
-        <style>{`
-          /* 青プレイヤーの手番のときに、文字を青くホタルのように光らせる設定 */
-          @keyframes syncTextGlowBlue {
-            0%, 100% { opacity: 0.65; text-shadow: 0 0 6px rgba(59,130,246,0.4); }
-            50% { opacity: 1.0; text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
-          }
-     /* オレンジ(琥珀)プレイヤーの手番のときに、文字をオレンジに光らせる設定 */
-          @keyframes syncTextGlowAmber {
-            0%, 100% { opacity: 0.65; text-shadow: 0 0 6px rgba(217,119,6,0.4); }
-            50% { opacity: 1.0; text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
-          }
-          /* 上記のアニメーションを「2秒周期」で「ずーっとループ」させるためのクラス名 */
-          .animate-syncTextBlue { animation: syncTextGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
-          .animate-syncTextAmber { animation: syncTextGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
-        `}</style>
-      )}
+    /* 💡【手札全体の外枠カード】 */
+    <div className={`hand-card ${bgClass}`}>
+      
+      {/* 💡【上段：プレイヤー名 ＆ 手番マーク】 */}
+      <div className="hand-player-header">
+        <span className={`hand-player-name ${isCurrentPlayer ? '' : 'is-inactive'}`}>
+          {playerLabel}
+        </span>
         
-      {/* 🌟 【画面上部のヘッダーエリア】 */}
-      <div className="text-center w-full">
+        {isCurrentPlayer && (
+          <span className="hand-player-arrow animate-syncTriangle">
+            ◀
+          </span>
+        )}
+      </div>
 
-        {/* ゲームのタイトル（3ライン！） */}
-        <h1 className="text-base font-black text-white mb-2 tracking-tight">
-          3<span className="text-indigo-400">ライン</span>！
-        </h1>
-           
-        {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
-        {/* ※ 試合中なら、現在のプレイヤー（blue か amber）に合わせて光るクラス名（animate-~）をカチカチと自動で切り替える仕組み */}
-        <div className={`text-[16px] h-5 mt-0.5 mb-3 transition-all duration-300 ${
-          !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
-        }`}>
+      {/* 💡【下段：所持している駒（コイン）の並び】 */}
+      <div className="hand-area-row">
+        <div className="hand-area-inner">
           
-          {/* 【手番 or 決着の表示切り替え】 */}
-          {!winResult ? (
-            /* まだ勝敗が決まっていない（試合中）なら「〇〇の番」と出す */
+          {/* コインが1個以上ある場合 */}
+          {count > 0 ? (
             <>
-              <span className={`font-black ${turnColor}`}>{turnLabel}</span>
-              <span className="text-gray-400 ml-1  font-bold">の番</span>
-
+              {/* 所持コインのリスト描画 */}
+              <div className="hand-piece-list">
+                {Array.from({ length: count }).map((_, i) => {
+                  const isSelectedTarget = isSelected && i === count - 1;
+                  
+                  return (
+                    <div 
+                      key={i} 
+                      onClick={handleSelect} 
+                      className={`hand-piece-slot ${isSelectedTarget ? 'is-selected' : ''}`}
+                    >
+                      <Puck 
+                        color={color} 
+                        index={0} 
+                        isGlowing={false} 
+                        onClick={handleSelect}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* コインの右側に枚数を表示（全角スペースを削除！） */}
+              <div className="hand-count-text">x{count}</div>
             </>
-
           ) : (
- /* どちらかが勝ったら「★ WINNER ★」を点滅（animate-pulse）させて出す */
-   <span className="text-amber-500 font-black animate-pulse">★ WINNER ★</span>
+            /* コインが0個の場合の表示 */
+            <span className="hand-empty-text">なし</span>
           )}
-
 
         </div>
       </div>
 
-
-         
-
-{/* 🔵 P1 (青) の手札エリア */}
-<div className="hand-area-section">
-  <HandArea key={`blue-${currentPlayer}-${phase}-${hands.blue}`}
-    color="blue" count={hands.blue} isCurrentPlayer={currentPlayer === 'blue' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} onSelect={handleHandClick} playerLabel="P1 青" disabled={interactionDisabled} />
-</div>
-
-
-{/* 🟡 メッセージ＆操作エリア */}
-<div className="game-message-container">
-  <div className={`game-message-text ${
-    !winResult 
-      ? (currentPlayer === 'blue' ? 'text-blue-200 animate-syncTextBlue' : 'text-amber-200 animate-syncTextAmber') 
-      : 'text-gray-200'
-  }`}>
-    {phaseMessages[phase]}
-  </div>
-
-  <div className="game-action-row">
-    {phase === 'moveCountSelect' && selectedCell && !interactionDisabled && <MoveCountSelector maxCount={maxMovable} onSelect={handleMoveCountSelect} onCancel={cancelAction} />}
-    {(phase === 'placeSelect' || phase === 'moveTargetSelect') && !interactionDisabled && <button onClick={cancelAction} className="btn-cancel">キャンセル</button>}
-  </div>
-</div>
-
-
-
-<div className={`timer-display ${timeLeft <= 10 ? 'warning' : ''}`}>
-  {/* 💡 絵文字を <span> で囲んで timer-icon という名前をつける */}
-  <span className="timer-icon">⏱️</span>
-  残り時間: {timeLeft}秒
-</div>
-
-
-       <div className="board-space-block">
-            <div className="board-scaler">
-              <div className="board-iso-grid">
-                {board.map((row, r) => row.map((cell, c) => (
-                  <CellStack 
-                    key={`${r}-${c}`} 
-                    stack={cell} 
-                    isSelected={selectedCell?.row === r && selectedCell?.col === c} 
-                    isValidTarget={isValidTarget(r, c)} 
-                    rowIdx={r} 
-                    colIdx={c} 
-                    lastMove={lastMove} 
-                    winHighlight={winLineSet.has(`${r},${c}`)} 
-                    onClick={() => handleCellClick(r, c)} 
-                    disabled={interactionDisabled} 
-                  />
-                )))}
-              </div>
-            </div>
-          </div>
-
-          <div className="w-full">
-            {/* 🌟 安全対策：diffLabel[difficulty] が null でクラッシュしないよう保護をキープ */}
-            <HandArea 
-              key={`yellow-${currentPlayer}-${phase}-${hands.yellow}`}
-              color="yellow" count={hands.yellow} isCurrentPlayer={currentPlayer === 'yellow' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'yellow'} onSelect={handleHandClick} playerLabel={gameMode === '2p' ? 'P2 黄' : `CPU (${diffLabel[difficulty] || 'ふつう'})`} disabled={interactionDisabled || gameMode === 'ai'} />
-          </div>
-
-          <div className="flex flex-col items-center gap-2 w-full mb-auto pt-2">
-            {!winResult && <button onClick={openInstructionsFromGame} className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform">📄 試合を中断して説明を読む</button>}
-             
-            <div className="flex gap-4 mt-4">
-              <button 
-                onClick={resetGame} 
-                className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
-              >
-                Reset
-              </button>
-
-              <button 
-                onClick={backToMenu} 
-                className="w-32 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all animate-none"
-              >
-                メニューへ
-              </button>
-            </div>
-          </div>
-
-       {showOverlay && (
-<WinOverlay 
-    winner={winResult.winner} 
-    onReset={resetGame} 
-    gameMode={gameMode} 
-    backToMenu={backToMenu}
-    difficulty={difficulty}
-    /* 💡 2P対戦なら「勝者（blueまたはyellow）の連勝数」をピンポイントで渡す！ */
-    winStreak={
-      gameMode === '2p' 
-        ? streaks[winResult.winner === 'blue' ? '2p_blue' : '2p_yellow']
-        : streaks[difficulty]
-    } 
-  />
-)}
-        </>
-      )}
     </div>
   );
 }
+
+
+// ===================================================
+// 2. メインコンポーネント (App 内部の関数 ＆ 描画ロジック)リセットゲーム
+// ===================================================
+
+/* 💡 ゲームリセット用関数 */
+function resetGame() {
+  if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+  if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
+  
+  setBoard(EMPTY_BOARD()); 
+  setHands({ blue: 5, yellow: 5 }); 
+
+  // 💡 リロードや対戦途中で変わった手番ではなく、「最初のスタート手番」に戻す！
+  setCurrentPlayer(firstPlayer); 
+  
+  setPhase('selectAction'); 
+  setSelectedCell(null); 
+  setMoveCount(0); 
+  setWinResult(null); 
+  setShowOverlay(false); 
+  setAiThinking(false); 
+  setLastMove(null);
+  setHasActiveGame(true);
+  setTimeLeft(60); // タイマーリセット
+}
+
+// --- メインコンポーネント(App)の描画 (return) 部分 ---
+
+const maxMovable = selectedCell ? board[selectedCell.row][selectedCell.col].length : 0;
+const turnLabel = currentPlayer === 'blue' ? 'プレイヤー1（青）' : (gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）');
+const turnColor = currentPlayer === 'blue' ? 'text-blue-400' : 'text-amber-500';
+const diffLabel = { easy: 'よわい', medium: 'ふつう', hard: 'つよい' };
+
+const phaseMessages = {
+  selectAction: aiThinking ? 'CPU思考中...' : '駒をタップして配置、または移動',
+  placeSelect: '配置先を選んでください',
+  moveCountSelect: '取る駒の数を選んでください',
+  moveTargetSelect: '移動先を選んでください',
+  winDelay: '決着！盤面を確認中...', 
+  gameOver: ''
+};
+
+return (
+  <div className="app-screen">
+
+    {/* ==========================================
+        1. 画面の切り替え処理（メニュー / 説明）
+       ========================================== */}
+
+    {/* 【メニュー画面】いまの状態が 'menu' のときに表示 */}
+    {screen === 'menu' && (
+      <MenuScreen 
+        streaks={streaks} 
+        onStart={startGame} 
+        onOpenInstructions={() => setScreen('instructions')} 
+        hasHistory={hasActiveGame} 
+      />
+    )}
+
+    {/* 【説明画面】いまの状態が 'instructions' のときに表示 */}
+    {screen === 'instructions' && (
+      <InstructionScreen 
+        onBack={backToMenu} 
+        hasActiveGame={hasActiveGame} 
+        onResumeGame={() => setScreen('game')} 
+      />
+    )}
+
+    {/* ==========================================
+        2. ゲーム本番画面（ここからゲーム中の中身）
+       ========================================== */}
+
+    {/* 【ゲーム本番画面】いまの状態が 'game' のときに表示 */}    
+    {screen === 'game' && (
+      <>
+        {/* 🌟 【画面上部のヘッダーエリア（３ライン、プレイヤー】 */}
+        <div className="text-center w-full">
+
+          {/* ゲームのタイトル（3ライン！） */}
+          <h1 className="text-base font-black text-white mb-2 tracking-tight">
+            3<span className="text-indigo-400">ライン</span>！
+          </h1>
+             
+          {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
+          <div className={`text-[16px] h-5 mt-0.5 mb-3 transition-all duration-300 ${
+            !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
+          }`}>
+            
+            {/* 【手番 or 決着の表示切り替え】 */}
+            {!winResult ? (
+              <>
+                <span className={`font-black ${turnColor}`}>{turnLabel}</span>
+                <span className="text-gray-400 ml-1 font-bold">の番</span>
+              </>
+            ) : (
+              <span className="text-amber-500 font-black animate-pulse">★ WINNER ★</span>
+            )}
+
+          </div>
+        </div>
+          
+        {/* 🔵 P1 (青) の手札エリア */}
+          <HandArea key={`blue-${currentPlayer}-${phase}-${hands.blue}`}
+            color="blue" count={hands.blue} isCurrentPlayer={currentPlayer === 'blue' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} onSelect={handleHandClick} playerLabel="P1 青" disabled={interactionDisabled} />
+       
+
+        {/* 🟡 メッセージ＆操作エリア */}
+        <div className="game-message-container">
+
+          <div className={`game-message-text ${
+            !winResult 
+              ? (currentPlayer === 'blue' ? 'text-blue-200 animate-syncTextBlue' : 'text-amber-200 animate-syncTextAmber') 
+              : 'text-gray-200'
+          }`}>
+            {phaseMessages[phase]}
+          </div>
+
+          <div className="game-action-row">
+
+            {phase === 'moveCountSelect' && selectedCell && !interactionDisabled && <MoveCountSelector maxCount={maxMovable} onSelect={handleMoveCountSelect} onCancel={cancelAction} />}
+            {(phase === 'placeSelect' || phase === 'moveTargetSelect') && !interactionDisabled && <button onClick={cancelAction} className="btn-cancel">キャンセル</button>}
+          </div>
+        </div>
+
+        <div className={`timer-display ${timeLeft <= 10 ? 'warning' : ''}`}>
+          <span className="timer-icon">⏱️</span>
+          残り時間: {timeLeft}秒
+        </div>
+
+        <div className="board-space-block">
+
+          <div className="board-scaler">
+
+            <div className="board-iso-grid">
+
+              {board.map((row, r) => row.map((cell, c) => (
+                <CellStack 
+                  key={`${r}-${c}`} 
+                  stack={cell} 
+                  isSelected={selectedCell?.row === r && selectedCell?.col === c} 
+                  isValidTarget={isValidTarget(r, c)} 
+                  rowIdx={r} 
+                  colIdx={c} 
+                  lastMove={lastMove} 
+                  winHighlight={winLineSet.has(`${r},${c}`)} 
+                  onClick={() => handleCellClick(r, c)} 
+                  disabled={interactionDisabled} 
+                />
+              )))}
+            </div>
+          </div>
+        </div>
+
+　　　　{/* 🟡 P2 / CPU (黄) の手札エリア */}
+     <HandArea key={`yellow-${currentPlayer}-${phase}-${hands.yellow}`}
+            color="yellow" count={hands.yellow} isCurrentPlayer={currentPlayer === 'yellow' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'yellow'} onSelect={handleHandClick} playerLabel={gameMode === '2p' ? 'P2 黄' : `CPU (${diffLabel[difficulty] || 'ふつう'})`} disabled={interactionDisabled || gameMode === 'ai'} />
+
+
+        <div className="flex flex-col items-center gap-2 w-full mb-auto pt-2">
+          {!winResult && <button onClick={openInstructionsFromGame} className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform">📄 試合を中断して説明を読む</button>}
+           
+          <div className="flex gap-4 mt-4">
+            <button 
+              onClick={resetGame} 
+              className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
+            >
+              Reset
+            </button>
+
+            <button 
+              onClick={backToMenu} 
+              className="w-32 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all animate-none"
+            >
+              メニューへ
+            </button>
+          </div>
+        </div>
+
+        {showOverlay && (
+          <WinOverlay 
+            winner={winResult.winner} 
+            onReset={resetGame} 
+            gameMode={gameMode} 
+            backToMenu={backToMenu}
+            difficulty={difficulty}
+            winStreak={
+              gameMode === '2p' 
+                ? streaks[winResult.winner === 'blue' ? '2p_blue' : '2p_yellow']
+                : streaks[difficulty]
+            } 
+          />
+        )}
+      </>
+    )}
+  </div>
+);
+}
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
