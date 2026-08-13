@@ -2574,7 +2574,7 @@ return (
           </div>
         </div>
 
-　　　　{/* 🟡 P2 / CPU (黄) の手札エリア */}
+{/* 🟡 P2 / CPU (黄) の手札エリア */}
      <HandArea key={`yellow-${currentPlayer}-${phase}-${hands.yellow}`}
             color="yellow" count={hands.yellow} isCurrentPlayer={currentPlayer === 'yellow' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'yellow'} onSelect={handleHandClick} playerLabel={gameMode === '2p' ? 'P2 黄' : `CPU (${diffLabel[difficulty] || 'ふつう'})`} disabled={interactionDisabled || gameMode === 'ai'} />
 
