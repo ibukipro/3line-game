@@ -1,1142 +1,2886 @@
-/* ===================================================
-   🏆 連勝＆実績システム（CSS + HTML + JS 一体型パック）
-=================================================== */
+<!DOCTYPE html>
+<html lang="ja">
 
-// ---------------------------------------------------
-// 1. 🎨 CSSを自動的に本体（<head>）へ読み込ませる
-// ---------------------------------------------------
-const achievementStyle = document.createElement('style');
-achievementStyle.textContent = `
-  /* 画面全体を覆う背景 */
-  .reward-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
 
- /* ポップアップの箱（コンパクト化版） */
-.reward-modal-box {
-  background: #111827;
-  border: 2px solid #facc15;
-  border-radius: 16px;
-  padding: 20px; /* 24px ➔ 16px にして内側の余白をスッキリ */
-  text-align: center;
-  width: 90%;   /* 85% ➔ 78% にして画面左右に適度なゆとりを確保 */
-  max-width: 320px; /* 320px ➔ 270px に縮小 */
-  box-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
-  animation: rewardPopUp 0.4s ease-out;
-  color: white;
-  font-family: sans-serif;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+
+  <title>3（スリー）ライン！</title>
+
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+
+<!-- クラッカー用ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- ★追加：別ファイルにした連勝演出パック -->
+  <script src="./achievement.js"></script>
+</body>
+
+
+
+  <style>
+
+body {
+   background: linear-gradient(160deg, #1a1a35, #2d2d4d, #3d3d66);
+   min-height: auto; 
+   margin: 0; 
+   padding: 0; 
+   font-family: sans-serif; 
+   overflow-x: hidden;  }
+    /* bodyからは高さを制限する設定を削除 */
+
+
+.app-screen {
+   width: 100%; 
+   max-width: 400px; 
+   min-height: 100dvh; 
+   margin: 0 auto; 
+   display: flex; 
+   flex-direction: column; 
+   align-items: center;
+   padding: 16px 12px 28px 12px; 
+   position: relative; 
+   box-sizing: border-box; 
+   gap: 4px;  
 }
 
-  /* メダル枠 */
-.reward-medal-container {
-  position: relative;
-  display: inline-block;
-  margin: 15px 0;
-  padding: 10px;
-}
-
-/* 🏅 SVGメダルの共通設定 */
-.reward-medal-icon {
-  display: inline-block;
-  width: 95px;
-  height: 95px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
-}
-
-/* ===================================================
-   🥉 銅メダル (星の位置を大幅ダウン・目視中央調整版)
-   =================================================== */
-.medal-bronze {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFCCBC"/><stop offset="18%" stop-color="%23FFE0B2"/><stop offset="45%" stop-color="%23D87A51"/><stop offset="70%" stop-color="%238D3C1B"/><stop offset="85%" stop-color="%23E0A98B"/><stop offset="95%" stop-color="%235D220A"/><stop offset="100%" stop-color="%232A0B00"/></linearGradient><linearGradient id="body" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23FFCCBC"/><stop offset="20%" stop-color="%23FFE0B2"/><stop offset="45%" stop-color="%23D87A51"/><stop offset="70%" stop-color="%238D3C1B"/><stop offset="85%" stop-color="%23E0A98B"/><stop offset="100%" stop-color="%235D220A"/></linearGradient><linearGradient id="star" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFF3E0"/><stop offset="30%" stop-color="%23FFCCBC"/><stop offset="75%" stop-color="%23D87A51"/><stop offset="100%" stop-color="%234A1D0D"/></linearGradient><linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0"/><stop offset="50%" stop-color="%23ffffff" stop-opacity="0.35"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient><filter id="emboss" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%231F0800" flood-opacity="0.85"/></filter></defs><circle cx="50" cy="50" r="47" fill="url(%23ring)" stroke="%23FFE0B2" stroke-width="0.8"/><circle cx="50" cy="50" r="37" fill="url(%23body)" stroke="%234A1D0D" stroke-width="1.2"/><path d="M 20 20 L 80 20 L 70 80 L 30 80 Z" fill="url(%23shine)" opacity="0.6"/><path d="M 50 37.5 L 53.6 45.6 L 62.1 46.4 L 55.7 52.2 L 57.6 60.5 L 50 55.8 L 42.4 60.5 L 44.3 52.2 L 37.9 46.4 L 46.4 45.6 Z" fill="none" stroke="%23FFE0B2" stroke-width="0.6" opacity="0.8"/><path d="M 50 38 L 53.2 45.8 L 61.5 46.6 L 55.3 52.2 L 57.1 60 L 50 55.5 L 42.9 60 L 44.7 52.2 L 38.5 46.6 L 46.8 45.8 Z" fill="url(%23star)" filter="url(%23emboss)"/></svg>');
-}
-
-/* ===================================================
-   🥈 銀メダル (星の位置を大幅ダウン・目視中央調整版)
-   =================================================== */
-.medal-silver {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23ECEFF1"/><stop offset="18%" stop-color="%23FFFFFF"/><stop offset="45%" stop-color="%2390A4AE"/><stop offset="70%" stop-color="%23455A64"/><stop offset="85%" stop-color="%23CFD8DC"/><stop offset="95%" stop-color="%2337474F"/><stop offset="100%" stop-color="%23102027"/></linearGradient><linearGradient id="body" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ECEFF1"/><stop offset="20%" stop-color="%23FFFFFF"/><stop offset="45%" stop-color="%2390A4AE"/><stop offset="70%" stop-color="%23455A64"/><stop offset="85%" stop-color="%23CFD8DC"/><stop offset="100%" stop-color="%2337474F"/></linearGradient><linearGradient id="star" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="30%" stop-color="%23ECEFF1"/><stop offset="75%" stop-color="%2390A4AE"/><stop offset="100%" stop-color="%23263238"/></linearGradient><linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0"/><stop offset="50%" stop-color="%23ffffff" stop-opacity="0.45"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient><filter id="emboss" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%23102027" flood-opacity="0.85"/></filter></defs><circle cx="50" cy="50" r="47" fill="url(%23ring)" stroke="%23FFFFFF" stroke-width="0.8"/><circle cx="50" cy="50" r="37" fill="url(%23body)" stroke="%23263238" stroke-width="1.2"/><path d="M 20 20 L 80 20 L 70 80 L 30 80 Z" fill="url(%23shine)" opacity="0.6"/><path d="M 50 37.5 L 53.6 45.6 L 62.1 46.4 L 55.7 52.2 L 57.6 60.5 L 50 55.8 L 42.4 60.5 L 44.3 52.2 L 37.9 46.4 L 46.4 45.6 Z" fill="none" stroke="%23FFFFFF" stroke-width="0.6" opacity="0.8"/><path d="M 50 38 L 53.2 45.8 L 61.5 46.6 L 55.3 52.2 L 57.1 60 L 50 55.5 L 42.9 60 L 44.7 52.2 L 38.5 46.6 L 46.8 45.8 Z" fill="url(%23star)" filter="url(%23emboss)"/></svg>');
-}
-
-/* ===================================================
-   🥇 金メダル (星の位置を大幅ダウン・目視中央調整版)
-   =================================================== */
-.medal-gold {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFE082"/><stop offset="18%" stop-color="%23FFF59D"/><stop offset="45%" stop-color="%23FFB300"/><stop offset="70%" stop-color="%23FF6F00"/><stop offset="85%" stop-color="%23FFE082"/><stop offset="95%" stop-color="%23FF8F00"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="body" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23FFE082"/><stop offset="20%" stop-color="%23FFF59D"/><stop offset="45%" stop-color="%23FFB300"/><stop offset="70%" stop-color="%23FF6F00"/><stop offset="85%" stop-color="%23FFE082"/><stop offset="100%" stop-color="%23FF8F00"/></linearGradient><linearGradient id="star" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="30%" stop-color="%23FFE082"/><stop offset="75%" stop-color="%23FFB300"/><stop offset="100%" stop-color="%23D84315"/></linearGradient><linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0"/><stop offset="50%" stop-color="%23ffffff" stop-opacity="0.45"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient><filter id="emboss" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%233E1C00" flood-opacity="0.85"/></filter></defs><circle cx="50" cy="50" r="47" fill="url(%23ring)" stroke="%23FFF8E1" stroke-width="0.8"/><circle cx="50" cy="50" r="37" fill="url(%23body)" stroke="%233E1C00" stroke-width="1.2"/><path d="M 20 20 L 80 20 L 70 80 L 30 80 Z" fill="url(%23shine)" opacity="0.6"/><path d="M 50 37.5 L 53.6 45.6 L 62.1 46.4 L 55.7 52.2 L 57.6 60.5 L 50 55.8 L 42.4 60.5 L 44.3 52.2 L 37.9 46.4 L 46.4 45.6 Z" fill="none" stroke="%23FFF8E1" stroke-width="0.6" opacity="0.8"/><path d="M 50 38 L 53.2 45.8 L 61.5 46.6 L 55.3 52.2 L 57.1 60 L 50 55.5 L 42.9 60 L 44.7 52.2 L 38.5 46.6 L 46.8 45.8 Z" fill="url(%23star)" filter="url(%23emboss)"/></svg>');
-}
-
- 
-
-/* 🏆 SVGトロフィーの共通設定 */
-.reward-trophy-icon {
-  display: inline-block;
-  width: 115px;  /* 👈 トロフィーのサイズはここで一括変更できます */
-  height: 115px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
-}
-
-/* 🥉 銅のトロフィー */
-.trophy-bronze {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="tm-b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23FFCCBC"/><stop offset="18%" stop-color="%23FFE0B2"/><stop offset="45%" stop-color="%23D87A51"/><stop offset="70%" stop-color="%238D3C1B"/><stop offset="85%" stop-color="%23E0A98B"/><stop offset="95%" stop-color="%235D220A"/><stop offset="100%" stop-color="%232A0B00"/></linearGradient><linearGradient id="tb-b" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23A14723"/><stop offset="50%" stop-color="%234A1D0D"/><stop offset="100%" stop-color="%231F0800"/></linearGradient><linearGradient id="ts-b" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFF3E0"/><stop offset="30%" stop-color="%23FFCCBC"/><stop offset="75%" stop-color="%23D87A51"/><stop offset="100%" stop-color="%234A1D0D"/></linearGradient><linearGradient id="t-sh" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0"/><stop offset="50%" stop-color="%23ffffff" stop-opacity="0.4"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient><filter id="f-tb" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%231F0800" flood-opacity="0.85"/></filter></defs><path d="M 32 26 C 10 26, 8 52, 32 54 L 32 46 C 18 45, 18 33, 32 33 Z" fill="url(%23tm-b)"/><path d="M 68 26 C 90 26, 92 52, 68 54 L 68 46 C 82 45, 82 33, 68 33 Z" fill="url(%23tm-b)"/><rect x="22" y="82" width="56" height="13" rx="3" fill="url(%23tb-b)" stroke="%233E1608" stroke-width="0.8"/><rect x="28" y="75" width="44" height="9" rx="2" fill="url(%23tm-b)"/><path d="M 42 56 L 58 56 L 55 76 L 45 76 Z" fill="url(%23tm-b)"/><ellipse cx="50" cy="57" rx="9" ry="2.5" fill="%23FFE0B2"/><path d="M 26 18 L 74 18 C 74 44, 62 60, 50 60 C 38 60, 26 44, 26 18 Z" fill="url(%23tm-b)"/><ellipse cx="50" cy="18" rx="24" ry="5" fill="url(%23tm-b)"/><ellipse cx="50" cy="19" rx="22" ry="4" fill="url(%23tm-b)"/><path d="M 43 18 L 51 18 L 49 60 L 46 60 Z" fill="url(%23t-sh)"/><path d="M 50 26.5 L 52.8 32.8 L 59.5 33.4 L 54.5 38.0 L 56.0 44.5 L 50 40.8 L 44 44.5 L 45.5 38.0 L 40.5 33.4 L 47.2 32.8 Z" fill="none" stroke="%23FFE0B2" stroke-width="0.6" opacity="0.8"/><path d="M 50 27 L 52.5 33 L 59 33.6 L 54.2 38.0 L 55.6 44 L 50 40.5 L 44.4 44 L 45.8 38.0 L 41 33.6 L 47.5 33 Z" fill="url(%23ts-b)" filter="url(%23f-tb)"/></svg>');
-}
-
-/* 🥈 銀のトロフィー */
-.trophy-silver {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="tm-s" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ECEFF1"/><stop offset="18%" stop-color="%23FFFFFF"/><stop offset="45%" stop-color="%2390A4AE"/><stop offset="70%" stop-color="%23455A64"/><stop offset="85%" stop-color="%23CFD8DC"/><stop offset="95%" stop-color="%2337474F"/><stop offset="100%" stop-color="%23102027"/></linearGradient><linearGradient id="tb-s" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%2378909C"/><stop offset="50%" stop-color="%23263238"/><stop offset="100%" stop-color="%230D171D"/></linearGradient><linearGradient id="ts-s" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="30%" stop-color="%23ECEFF1"/><stop offset="75%" stop-color="%2390A4AE"/><stop offset="100%" stop-color="%23263238"/></linearGradient><linearGradient id="t-sh" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0"/><stop offset="50%" stop-color="%23ffffff" stop-opacity="0.4"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient><filter id="f-ts" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%23102027" flood-opacity="0.85"/></filter></defs><path d="M 32 26 C 10 26, 8 52, 32 54 L 32 46 C 18 45, 18 33, 32 33 Z" fill="url(%23tm-s)"/><path d="M 68 26 C 90 26, 92 52, 68 54 L 68 46 C 82 45, 82 33, 68 33 Z" fill="url(%23tm-s)"/><rect x="22" y="82" width="56" height="13" rx="3" fill="url(%23tb-s)" stroke="%231C282E" stroke-width="0.8"/><rect x="28" y="75" width="44" height="9" rx="2" fill="url(%23tm-s)"/><path d="M 42 56 L 58 56 L 55 76 L 45 76 Z" fill="url(%23tm-s)"/><ellipse cx="50" cy="57" rx="9" ry="2.5" fill="%23FFFFFF"/><path d="M 26 18 L 74 18 C 74 44, 62 60, 50 60 C 38 60, 26 44, 26 18 Z" fill="url(%23tm-s)"/><ellipse cx="50" cy="18" rx="24" ry="5" fill="url(%23tm-s)"/><ellipse cx="50" cy="19" rx="22" ry="4" fill="url(%23tm-s)"/><path d="M 43 18 L 51 18 L 49 60 L 46 60 Z" fill="url(%23t-sh)"/><path d="M 50 26.5 L 52.8 32.8 L 59.5 33.4 L 54.5 38.0 L 56.0 44.5 L 50 40.8 L 44 44.5 L 45.5 38.0 L 40.5 33.4 L 47.2 32.8 Z" fill="none" stroke="%23FFFFFF" stroke-width="0.6" opacity="0.8"/><path d="M 50 27 L 52.5 33 L 59 33.6 L 54.2 38.0 L 55.6 44 L 50 40.5 L 44.4 44 L 45.8 38.0 L 41 33.6 L 47.5 33 Z" fill="url(%23ts-s)" filter="url(%23f-ts)"/></svg>');
-}
-
-/* 🥇 金のトロフィー */
-.trophy-gold {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="tm-g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23FFE082"/><stop offset="18%" stop-color="%23FFF59D"/><stop offset="45%" stop-color="%23FFB300"/><stop offset="70%" stop-color="%23FF6F00"/><stop offset="85%" stop-color="%23FFE082"/><stop offset="95%" stop-color="%23FF8F00"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="tb-g" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFB300"/><stop offset="50%" stop-color="%238D4000"/><stop offset="100%" stop-color="%233E1C00"/></linearGradient><linearGradient id="ts-g" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="30%" stop-color="%23FFE082"/><stop offset="75%" stop-color="%23FFB300"/><stop offset="100%" stop-color="%23D84315"/></linearGradient><linearGradient id="t-sh" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0"/><stop offset="50%" stop-color="%23ffffff" stop-opacity="0.4"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></linearGradient><filter id="f-tg" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%233E1C00" flood-opacity="0.85"/></filter></defs><path d="M 32 26 C 10 26, 8 52, 32 54 L 32 46 C 18 45, 18 33, 32 33 Z" fill="url(%23tm-g)"/><path d="M 68 26 C 90 26, 92 52, 68 54 L 68 46 C 82 45, 82 33, 68 33 Z" fill="url(%23tm-g)"/><rect x="22" y="82" width="56" height="13" rx="3" fill="url(%23tb-g)" stroke="%234E2600" stroke-width="0.8"/><rect x="28" y="75" width="44" height="9" rx="2" fill="url(%23tm-g)"/><path d="M 42 56 L 58 56 L 55 76 L 45 76 Z" fill="url(%23tm-g)"/><ellipse cx="50" cy="57" rx="9" ry="2.5" fill="%23FFF59D"/><path d="M 26 18 L 74 18 C 74 44, 62 60, 50 60 C 38 60, 26 44, 26 18 Z" fill="url(%23tm-g)"/><ellipse cx="50" cy="18" rx="24" ry="5" fill="url(%23tm-g)"/><ellipse cx="50" cy="19" rx="22" ry="4" fill="url(%23tm-g)"/><path d="M 43 18 L 51 18 L 49 60 L 46 60 Z" fill="url(%23t-sh)"/><path d="M 50 26.5 L 52.8 32.8 L 59.5 33.4 L 54.5 38.0 L 56.0 44.5 L 50 40.8 L 44 44.5 L 45.5 38.0 L 40.5 33.4 L 47.2 32.8 Z" fill="none" stroke="%23FFF8E1" stroke-width="0.6" opacity="0.8"/><path d="M 50 27 L 52.5 33 L 59 33.6 L 54.2 38.0 L 55.6 44 L 50 40.5 L 44.4 44 L 45.8 38.0 L 41 33.6 L 47.5 33 Z" fill="url(%23ts-g)" filter="url(%23f-tg)"/></svg>');
-}
-
-
-
-
-/* 👑 王冠の共通設定 */
-  .reward-crown-icon {
-    display: inline-block;
-    width: 120px;
-    height: 120px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    vertical-align: middle;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
-  }
-
-/* ===================================================
-   🥉 銅の王冠 (メダル完全同期カラー版)
-   =================================================== */
-.crown-bronze {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="bm" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%235D220A"/><stop offset="15%" stop-color="%23D87A51"/><stop offset="35%" stop-color="%23FFCCBC"/><stop offset="42%" stop-color="%23FFE0B2"/><stop offset="65%" stop-color="%238D3C1B"/><stop offset="85%" stop-color="%23E0A98B"/><stop offset="100%" stop-color="%232A0B00"/></linearGradient><linearGradient id="br" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%235D220A"/><stop offset="20%" stop-color="%23D87A51"/><stop offset="40%" stop-color="%23FFCCBC"/><stop offset="60%" stop-color="%238D3C1B"/><stop offset="100%" stop-color="%232A0B00"/></linearGradient><radialGradient id="gem-b" cx="35%" cy="25%" r="70%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%236EE7B7"/><stop offset="60%" stop-color="%23047857"/><stop offset="100%" stop-color="%23064E3B"/></radialGradient><filter id="f3d-b" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%231F0800" flood-opacity="0.85"/></filter></defs><g filter="url(%23f3d-b)"><path d="M 15 75 Q 50 77 85 75 C 88 60 86 46 84 36 C 79 46 71 46 66 26 C 61 40 55 40 50 18 C 45 40 39 40 34 26 C 29 46 21 46 16 36 C 14 46 12 60 15 75 Z" fill="url(%23bm)" stroke="%234A1D0D" stroke-width="1"/><path d="M 15 75 Q 50 77 85 75 L 85 60 Q 50 62 15 60 Z" fill="url(%23br)" stroke="%234A1D0D" stroke-width="1"/><circle cx="16" cy="36" r="3" fill="url(%23br)" stroke="%234A1D0D" stroke-width="0.8"/><circle cx="34" cy="26" r="3.5" fill="url(%23br)" stroke="%234A1D0D" stroke-width="0.8"/><circle cx="50" cy="18" r="4" fill="url(%23br)" stroke="%234A1D0D" stroke-width="0.8"/><circle cx="66" cy="26" r="3.5" fill="url(%23br)" stroke="%234A1D0D" stroke-width="0.8"/><circle cx="84" cy="36" r="3" fill="url(%23br)" stroke="%234A1D0D" stroke-width="0.8"/><circle cx="50" cy="48" r="7.5" fill="url(%23gem-b)" stroke="%234A1D0D" stroke-width="1"/><path d="M 45 52 A 5 5 0 0 0 55 52" fill="none" stroke="%23A7F3D0" stroke-width="1.2" opacity="0.8"/><circle cx="47.5" cy="45" r="2.5" fill="%23ffffff"/><circle cx="52" cy="49" r="1" fill="%23ffffff" opacity="0.8"/></g></svg>');
-}
-
-/* ===================================================
-   🥈 銀の王冠 (メダル完全同期カラー版)
-   =================================================== */
-.crown-silver {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="sm" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%2337474F"/><stop offset="15%" stop-color="%2390A4AE"/><stop offset="35%" stop-color="%23ECEFF1"/><stop offset="42%" stop-color="%23FFFFFF"/><stop offset="65%" stop-color="%23455A64"/><stop offset="85%" stop-color="%23CFD8DC"/><stop offset="100%" stop-color="%23102027"/></linearGradient><linearGradient id="sr" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%2337474F"/><stop offset="20%" stop-color="%2390A4AE"/><stop offset="40%" stop-color="%23ECEFF1"/><stop offset="60%" stop-color="%23455A64"/><stop offset="100%" stop-color="%23102027"/></linearGradient><radialGradient id="gem-s" cx="35%" cy="25%" r="70%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%2338BDF8"/><stop offset="60%" stop-color="%230369A1"/><stop offset="100%" stop-color="%23075985"/></radialGradient><filter id="f3d-s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="%23102027" flood-opacity="0.85"/></filter></defs><g filter="url(%23f3d-s)"><path d="M 15 75 Q 50 77 85 75 C 88 60 86 46 84 36 C 79 46 71 46 66 26 C 61 40 55 40 50 18 C 45 40 39 40 34 26 C 29 46 21 46 16 36 C 14 46 12 60 15 75 Z" fill="url(%23sm)" stroke="%23263238" stroke-width="1"/><path d="M 15 75 Q 50 77 85 75 L 85 60 Q 50 62 15 60 Z" fill="url(%23sr)" stroke="%23263238" stroke-width="1"/><circle cx="16" cy="36" r="3" fill="url(%23sr)" stroke="%23263238" stroke-width="0.8"/><circle cx="34" cy="26" r="3.5" fill="url(%23sr)" stroke="%23263238" stroke-width="0.8"/><circle cx="50" cy="18" r="4" fill="url(%23sr)" stroke="%23263238" stroke-width="0.8"/><circle cx="66" cy="26" r="3.5" fill="url(%23sr)" stroke="%23263238" stroke-width="0.8"/><circle cx="84" cy="36" r="3" fill="url(%23sr)" stroke="%23263238" stroke-width="0.8"/><circle cx="50" cy="48" r="7.5" fill="url(%23gem-s)" stroke="%23263238" stroke-width="1"/><path d="M 45 52 A 5 5 0 0 0 55 52" fill="none" stroke="%23BAE6FD" stroke-width="1.2" opacity="0.85"/><circle cx="47.5" cy="45" r="2.5" fill="%23ffffff"/><circle cx="52" cy="49" r="1" fill="%23ffffff" opacity="0.9"/></g></svg>');
-}
-
-/* ===================================================
-   🥇 金の王冠 (メダル完全同期カラー版)
-   =================================================== */
-.crown-gold {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="gm" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23FF8F00"/><stop offset="15%" stop-color="%23FFB300"/><stop offset="35%" stop-color="%23FFE082"/><stop offset="42%" stop-color="%23FFF59D"/><stop offset="65%" stop-color="%23FF6F00"/><stop offset="85%" stop-color="%23FFE082"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="gr" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%23FF8F00"/><stop offset="20%" stop-color="%23FFB300"/><stop offset="40%" stop-color="%23FFE082"/><stop offset="60%" stop-color="%23FF6F00"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><radialGradient id="gem-r" cx="35%" cy="25%" r="70%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%23FB7185"/><stop offset="60%" stop-color="%23BE123C"/><stop offset="100%" stop-color="%23881337"/></radialGradient></defs><g><path d="M 15 75 Q 50 77 85 75 C 88 60 86 46 84 36 C 79 46 71 46 66 26 C 61 40 55 40 50 18 C 45 40 39 40 34 26 C 29 46 21 46 16 36 C 14 46 12 60 15 75 Z" fill="url(%23gm)" stroke="%233E1C00" stroke-width="1"/><path d="M 15 75 Q 50 77 85 75 L 85 60 Q 50 62 15 60 Z" fill="url(%23gr)" stroke="%233E1C00" stroke-width="1"/><circle cx="16" cy="36" r="3" fill="url(%23gr)" stroke="%233E1C00" stroke-width="0.8"/><circle cx="34" cy="26" r="3.5" fill="url(%23gr)" stroke="%233E1C00" stroke-width="0.8"/><circle cx="50" cy="18" r="4" fill="url(%23gr)" stroke="%233E1C00" stroke-width="0.8"/><circle cx="66" cy="26" r="3.5" fill="url(%23gr)" stroke="%233E1C00" stroke-width="0.8"/><circle cx="84" cy="36" r="3" fill="url(%23gr)" stroke="%233E1C00" stroke-width="0.8"/><circle cx="50" cy="48" r="7.5" fill="url(%23gem-r)" stroke="%233E1C00" stroke-width="1"/><path d="M 45 52 A 5 5 0 0 0 55 52" fill="none" stroke="%23FECDD3" stroke-width="1.2" opacity="0.85"/><circle cx="47.5" cy="45" r="2.5" fill="%23ffffff"/><circle cx="52" cy="49" r="1" fill="%23ffffff" opacity="0.9"/></g></svg>');
-}
-
-
-
-
-/* ===================================================
-   🌟 ポップアップ用の星設定（小ぶり化・発光調整済み）
-   =================================================== */
-.sparkle-popup .sparkle-star {
-  position: absolute;
-  font-style: normal;
-  color: #ffffff;
-  z-index: 10;
-  pointer-events: none;
-  opacity: 0;
-  display: block;
-  line-height: 1;
-  width: 1em;
-  height: 1em;
-  text-align: center;
-  
-  /* 💡 発光の広がりを抑えて、光が太く膨らまないように調整 */
-  text-shadow: 
-    0 0 6px #ffffff,
-    0 0 12px #fef08a,
-    0 0 18px #eab308;
-
-  transform-origin: center center;
-}
-
-/* 📍 1. 左上（小ぶりに調整） */
-.sparkle-popup .star-1 {
-  top: 4px;
-  left: 8px;
-  font-size: 22px;
-  animation: popInPlace 2.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
-}
-
-/* 📍 2. 右上（小ぶりに調整） */
-.sparkle-popup .star-2 {
-  top: 14px;
-  right: 8px;
-  font-size: 14px;
-  animation: popInPlace 3.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.9s infinite;
-}
-
-/* 📍 3. 左下（小ぶりに調整） */
-.sparkle-popup .star-3 {
-  bottom: 10px;
-  left: 12px;
-  font-size: 18px;
-  animation: popInPlace 4.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.8s infinite;
-}
-
-/* 📍 4. 右下（小ぶりに調整） */
-.sparkle-popup .star-4 {
-  bottom: 6px;
-  right: 10px;
-  font-size: 24px;
-  animation: popInPlace 3.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s infinite;
-}
-/* ✨ 王冠本体の輝き */
-@keyframes gentleGlow {
-  0% {
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5)) brightness(1);
-  }
-  100% {
-    filter: drop-shadow(0 4px 15px rgba(234, 179, 8, 0.5)) brightness(1.08);
-  }
-}
-
-/* 🌟 その場で小ぶりにポンッと点滅するアニメーション */
-@keyframes popInPlace {
-  0% {
-    opacity: 0;
-    transform: scale(0.1);
-  }
-  20% {
-    opacity: 1;
-    transform: scale(1.1); /* 1.4倍 ➔ 1.1倍に抑えて膨らみを抑制 */
-  }
-  55% {
-    opacity: 0;
-    transform: scale(0.2);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.1);
-  }
-}
-
-
- 
- /* ボタン */
-  .reward-close-btn {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(to right, #facc15, #f59e0b);
-    color: #000;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-
-  /* アニメーション */
-  @keyframes rewardPopUp {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
- 
-
-  /* 難易度ボタンの横につくミニアイコン用 */
-  .diff-icon {
-    margin-left: 6px;
-    font-size: 1.1em;
-  }
-
-
-
-/* ==============================================
-   アイコン全体を中央寄せするコンテナ
-   ============================================== */
-.reward-medal-container {
-  position: relative;
-  display: block;
-  text-align: center; /* 💡 アイコンを中央に寄せる */
-  margin: 15px 0;
-  padding: 10px;
-}
-
-/* ==============================================
-   1. 級バッジ（丸型）＆ 右下配置（つやつや＆きらーん実装）
-   ============================================== */
-
-/* 💡 アイコン自体をバッジの基準点にする設定 */
-.sparkle-frame {
-  position: relative;
-  display: inline-block; /* アイコンの大きさにピッタリ合わせる */
-  z-index: 20;
-}
-
-.badge-grade {
-  position: absolute;
-  
-  /* 位置とサイズは完全維持 */
-  bottom: 40px;        
-  right: -180px;        
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
-  white-space: nowrap;
-  z-index: 30; /* バッジを前面に出す */
-
-  /* 💡 追加1：光線が飛び出さないように＆光のベース */
-  overflow: hidden;
-  
-  /* 💡 追加2：ぷっくり立体感を生む内部ハイライトと影 */
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.6),
-    inset 0 2px 3px rgba(255, 255, 255, 0.9),  /* 上部の白い光の反射 */
-    inset 0 -2px 3px rgba(0, 0, 0, 0.3);       /* 下部の影 */
-}
-
-/* 💡 追加3：上半分のレンズっぽい「つや」をつくる擬似要素 */
-.badge-grade::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 48%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.05));
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 💡 追加4：光がスッと走り抜ける「きらーん」アニメーション用 */
-.badge-grade::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -150%;
-  width: 60%;
-  height: 200%;
-  background: linear-gradient(
-    90deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.85) 50%, 
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: rotate(25deg);
-  animation: shineGleam 5s infinite ease-in-out;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* 文字自体をハイライトより手前に表示 */
-.badge-grade span, 
-.badge-grade {
-  position: relative;
-}
-
-
-/* ===================================================
-   🎉 ポップアップ内限定：級バッジをアイコンの右上に配置
-   =================================================== */
-
-/* 1. 全体枠をアイコンのサイズにピッタリ合わせる */
-.reward-modal-overlay .reward-medal-container {
-  position: relative !important;
-  display: inline-block !important; /* 余計な横幅を無くしてアイコンサイズにする */
-}
-
-/* 2. 級バッジをアイコンの右上へ配置 */
-.reward-modal-overlay .badge-grade {
-  position: absolute !important;
-  
-  /* 🎯 位置をアイコンの右上（上と右）へ指定 */
-  top: 80px !important;     /* 💡 マイナスを大きくすると「もっと上」へ */
-  right: -20px !important;   /* 💡 マイナスを大きくすると「もっと右」へ */
-  bottom: auto !important;
-  left: auto !important;
+/* 👑 【追加】上下に自動クッションを入れて中身を真ん中に押し込む */
+.app-screen::before,
+.app-screen::after {
+  content: "";
+  margin: auto;
 }
 
 
 
 
 
-/* 2. 【マスター称号】上寄せ調整＆きらーん追加 */
-.badge-title-container {
-  margin-top: -25px; /* 💡 -50px ➔ -25px にして位置を下に下げました */
-  position: relative;
-  z-index: 1;        /* 💡 10 ➔ 1 にして、星のキラキラ（z-index: 10）より下に配置 */
-  text-align: center;
-}
-
-.badge-title {
-  position: relative; /* 💡 光線アニメーションの基準点 */
-  overflow: hidden;   /* 💡 はみ出た光をカット */
-  display: inline-block;
-  padding: 2px 18px;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  clip-path: polygon(0% 0%, 100% 0%, 92% 50%, 100% 100%, 0% 100%, 8% 50%);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  white-space: nowrap;
-}
-
-/* 💡 追加：マスター称号リボンを走り抜ける「きらーん」光線 */
-.badge-title::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -150%;
-  width: 40%;
-  height: 200%;
-  background: linear-gradient(
-    90deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.85) 50%, 
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: rotate(25deg);
-  /* 💡 丸バッジから0.8秒遅れて光る設定（3.5s周期⇒変更した） */
-  animation: shineGleam 5s infinite ease-in-out 1s;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ==============================================
-   ✨ なめらかツヤツヤグラデーション（金属感アップ版）
-   ============================================== */
-
-/* 🥉 ブロンズ（自然な光沢のコッパー・銅） */
-.rank-bronze {
-  background: linear-gradient(135deg, #ffeddb 0%, #e09b53 45%, #8c420b 100%);
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-/* 🥈 シルバー（自然な光沢の上品な銀） */
-.rank-silver {
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 45%, #64748b 100%);
-  color: #0f172a;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-/* 🥇 ゴールド（ボタン風の鮮やかでつややかな金） */
-.rank-gold {
-  background: linear-gradient(135deg, #fffbeb 0%, #facc15 45%, #b45309 100%);
-  color: #3f2200;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* ---------------------------------------------------
-   🎬 「きらーん」アニメーション定義
-   --------------------------------------------------- */
-/* 3. ✨ 光の動き（無駄な助走を削って、ずーっと見えるように修正！） */
-@keyframes shineGleam {
-  0% {
-    /* 💡 見え始めるギリギリの位置からスタート */
-    left: -60%; 
-  }
-  40% { 
-    /* 💡 8秒のうち6秒（75%）もかけて、バッジの上をゆっくり「すぅーーーーっ」と移動 */
-    left: 120%; 
-  }
-  100% {
-    /* 残りの2秒はお休み */
-    left: 120%; 
-  }
-}
+/* ==========================================================================
+   ゲーム盤   ========================================================================== */
 
 
-/* ===================================================
-   🏆 メニュー画面用：獲得実績コレクション（完成・整理版）
-   =================================================== */
-
-/* 📦 全体コンテナ */
-.achievement-panel {
+/* 🌟 ゲーム盤のスペース */
+.board-space-block { 
   width: 100%;
-  max-width: 256px;
-  margin: 25px auto 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  box-sizing: border-box;
-}
+  height: 250px;             /* 💡 高さは250px前後でちょうど良いサイズ感に */
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  position: relative; 
 
-.achievement-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 20px;
-  margin-bottom: 40px;
-  text-align: center;
-}
-
-/* 📜 3x3 グリッドエリア */
-.achievement-scroll-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px 8px;
-  padding: 8px 4px;
-  overflow: visible !important;
+  /* 🌟 上下にマージンを指定！ (順序: 上 左右 下) */
+  margin: -2px 0 35px 0;    /* 💡 上に10px / 下に15px の隙間 */
 }
 
 
-/* ===================================================
-   🎴 カード本体 & アニメーション状態
-   =================================================== */
-
-.achievement-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  transition: transform 0.2s ease;
-}
-
-.achievement-card:hover {
-  transform: translateY(-2px);
-}
-
-/* 未解放（🔒）の状態 */
-.achievement-card.locked {
-  opacity: 0.25;
-  filter: grayscale(1);
-}
-
-/* 獲得済み（✨）の状態 */
-.achievement-card.unlocked {
-  opacity: 1;
-}
-
-
-
-/* ===================================================
-   👑 王冠の頭の上に載るマスターリボン（位置完全復元版）
-   =================================================== */
-
-.master-top-ribbon {
-  font-size: 8px;
-  font-weight: 700;
-  padding: 2px 6px;
-  color: #fff;
-  white-space: nowrap;
-  line-height: 1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-
-  position: relative;
-  z-index: 10;                     /* 👈 10に上げて確実に前面へ出す */
+/* 🌟 カメラの視点設定（中のズレをリセット） */
+.board-scaler { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  perspective: 1000px; 
+  width: 100%; 
   
-  /* 💡★ ここです！リボンを上に持ち上げて王冠の頭に被せる */
-  top: -14px;                      /* 👈 以前よりさらに上に引っ張り上げる */
-  margin-bottom: -12px;            /* 👈 下の要素（王冠）を押し下げないように打ち消す */
-
-  /* 💡 ポップアップと同じV字リボン形状 */
-  clip-path: polygon(0% 0%, 100% 0%, 92% 50%, 100% 100%, 0% 100%, 8% 50%);
-}
-
-/* ---------------------------------------------------
-   ✨ メタルグラデーション（変更なし）
-   --------------------------------------------------- */
-
-/* 🥉 ブロンズ（Easy） */
-.master-top-ribbon.easy { 
-  background: linear-gradient(135deg, #ffeddb 0%, #e09b53 45%, #8c420b 100%);
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-/* 🥈 シルバー（Medium） */
-.master-top-ribbon.medium { 
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 45%, #64748b 100%);
-  color: #0f172a;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-/* 🥇 ゴールド（Hard） */
-.master-top-ribbon.hard { 
-  background: linear-gradient(135deg, #fffbeb 0%, #facc15 45%, #b45309 100%);
-  color: #3f2200;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* 🔒 未解放（Locked） */
-.master-top-ribbon.locked {
-  background: rgba(51, 65, 85, 0.5);
-  color: #64748b;
-  box-shadow: none;
-  text-shadow: none;
+  /* 💡 translateY(-15px) は削除！ (外枠で上に上げているため) */
 }
 
 
-
-
-/*===================================================
-   🎖️ アイコン領域 & サイズ調整
-   =================================================== */
-
-.achievement-icon-wrapper {
-  width: 44px;
-  height: 44px;         /* 高さを固定して全カードの下端を一直線に揃える */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-  margin-bottom: 2px;   /* アイコンと「Easy 5勝」の間隔 */
-  overflow: visible !important;
+.board-iso-grid { 
+  display: grid; 
+  grid-template-columns: repeat(3, 80px); 
+  gap: 8px; 
+  padding: 12px; 
+  justify-items: center;
+  background: linear-gradient(135deg, #161633, #0b0b1f); 
+  border-radius: 16px; 
+  border: 3px solid #8a8ab5; 
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
+  transform: rotateX(34deg) rotateZ(-6deg); 
+  transform-style: preserve-3d; 
+  transform-origin: center center; 
 }
+/* アイソメトリック（斜め上から見る感じ） */
 
-.achievement-icon-wrapper svg {
+
+.cell-3d { 
+  width: 80px;  
+  height: 80px;  
+  position: relative; 
+  transform-style: preserve-3d; 
+  cursor: pointer; }
+ /*  grid-template-columns の 80px と完全に一致させます */
+/*  マウスを乗せたら手のマークにする親切設計 */
+
+  
+.cell-top { 
+  position: absolute; 
+  inset: 0; 
+  background: linear-gradient(135deg, #3d3d5d, #252540); 
+  border: 4px solid #8a8ab5; 
+  border-radius: 8px; 
+  transform: translateZ(0px); }
+/* マス目の表面（4px浮かせてリッチな立体感に） */
+/* フワッと浮き出る魔法 */
+
+
+.cell-front { 
+  position: absolute; 
+  left: 0; 
+  right: 0; 
+  bottom: -3px; 
+  height: 3px; 
+  background: linear-gradient(180deg, #141426, #06060c); 
+  border-radius: 0 0 4px 4px; 
+  border: 1px solid #4a4a6b; 
+  border-top: none; 
+  transform-origin: top; 
+  transform: rotateX(-90deg); }
+ /* マス目の厚み（手前の壁） */
+
+
+.cell-right { 
+   position: absolute; 
+   top: 0; 
+   bottom: 0; 
+   right: -3px; 
+   width: 3px; 
+   background: linear-gradient(90deg, #181830, #080814); 
+   border-radius: 0 4px 4px 0; 
+   border: 1px solid #4a4a6b; 
+   border-left: none; 
+   transform-origin: left; 
+   transform: rotateY(90deg); }
+
+
+.cell-stack-container {
+  position: absolute; 
+  inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible; 
+  transform-style: preserve-3d; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 盤面の各マス目のコンテナ */
+  /*  テスト版の「3Dで高く積み重ねる」ための呪文 */
+/* マス表面にピタッと重ねるために absolute にします */
+ /* 本体の「コインをマスのど真ん中に置く」ための呪文 */
+ /* insetインセット 親要素との距離*/
+
+
+/* ==========================================================================
+   パック（コイン）関連の最新ハイブリッドCSS
+   ========================================================================== */
+
+.puck-wrapper {
+  position: absolute;
+  inset: 0;     
+  width: 100%;    
+  height: 100%;
+  transform-style: preserve-3d; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 1. マス目の上で、コイン全体の基準位置を決める透明な枠 */
+  /* 🌟 12pxなどのズレを廃止！マスの四隅にピッタリ合わせます */
+/* マスのサイズ（80px）に100%連動 */
+/* 3D空間を維持 */
+
+
+.puck-svg-container {
+  position: absolute;
+  width: 66px;     
+  height: 66px; 
+  bottom: 8px;     
+  left: calc(50% - 33px); 
+  transform-origin: bottom center; 
+  overflow: visible;
+  pointer-events: none;
+  transition: transform 0.2s ease; 
+}
+/* 2. コインのSVG画像を包むコンテナ（テスト版のサイズを80px盤面に最適化） */
+/* 🌟 1マス80pxに対して、少しだけ余裕を持たせた絶妙なサイズ！ */
+/* 手前に少し飛び出すように見せるテスト版の調整 */
+/* 🌟 66pxのちょうど真ん中にくるように計算（50% - 半分） */
+ /* 🌟 変な逆回転は全削除！JavaScriptのインライン style="transform: translateZ(...)" だけを受け止める */
+
+
+.puck-svg-container svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-/* 👑 王冠（全色） */
-.achievement-panel [class*="crown-"] {
-  transform: scale(1.1);
-  transform-origin: center center;
+/*何枚重なっているかを示す数字バッジ */
+.stack-count-badge {
+  position: absolute;
+  bottom: -6px;   
+  right: 10px;  
+  left: auto;
+  top: auto;
+  margin: 0;
+  font-size: 20px;
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 2px 4px #000;
+  transform: translateZ(24px); 
 }
 
-/* 🏆 トロフィー（全色） */
-.achievement-panel [class*="trophy-"] {
-  transform: scale(1.1);
-  transform-origin: center center;
+  /* コインの厚みに埋もれないように、3D空間で一番手前に浮かせる！ */
+ /* 位置の微調整 */
+  bottom: -2px;  /* 数字を小さく（マイナス）下へ */
+  right: -2px;   /* 数字を小さく（マイナス）右へ */
+
+ 
+  
+ .cell-selected .cell-top { 
+   border-color: #fff; 
+   box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+
+
+ .cell-valid .cell-top { 
+   border-color: #22c55e; 
+   box-shadow: inset 0 0 15px rgba(34,197,94,0.3), 0 0 10px rgba(34,197,94,0.4); }
+  
+
+ .cell-last-move .cell-top {
+    animation: last-move-glow 1.5s ease-in-out infinite; }
+
+
+
+/* 🌟 影の広がりを最小限に絞り、究極に主張を抑えたゆらめき */
+@keyframes puck-glow-infinite-wave {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px transparent);
+  }
+  50% {
+    /* コインのフチのキワだけが、ひっそりと揺らめきます */
+    filter: drop-shadow(0 0 6px var(--glow-color));
+  }
 }
 
-/* 🏅 メダル（全色） */
-.achievement-panel [class*="medal-"] {
-  transform: scale(0.8) !important;
-  transform-origin: center center;
+
+
+/* ✨ 盤面のコマ（Puck）が直前に動いた時にフワフワ優しく光るエフェクト */
+@keyframes puckGlow {
+  0%, 100% { filter: brightness(1.0) drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 10px rgba(255,255,255,0.6)); }
 }
+
+
+
+/* 🌟 本番環境用に修正：
+  puck-svg-container の中に直接 `puck-glowing-container` クラスがつく形に合わせたよ！
+*/
+.puck-svg-container.puck-glowing-container {
+  animation: puck-glow-infinite-wave 2.5s ease-in-out infinite !important;
+}
+
+
+
+
+/* =============================================================
+   🏆 勝利時マスの光り分け（セルの枠と背景の発光エフェクト）
+   ============================================================= */
+
+/* 🔵 プレイヤー1（青）が勝ったときの光り方 */
+.cell-win-blue .cell-top { 
+   border-color: #60a5fa; /* blue-400 */
+   animation: win-glow-blue 1.0s ease-in-out infinite; 
+}
+
+@keyframes win-glow-blue {
+  0%, 100% { 
+    box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.3), 0 0 15px rgba(96, 165, 250, 0.5); 
+    background: linear-gradient(135deg, #0f172a, #030712); 
+  }
+  50% { 
+    box-shadow: inset 0 0 35px rgba(96, 165, 250, 0.6), 0 0 25px rgba(96, 165, 250, 0.7); 
+    background: linear-gradient(135deg, #1e3a8a, #0f172a); 
+  } 
+}
+
+/* 🟡 プレイヤー2またはCPU（アンバー）が勝ったときの光り方 */
+.cell-win-amber .cell-top { 
+   border-color: #eab308; /* amber-500 */
+   animation: win-glow-amber 1.0s ease-in-out infinite; 
+}
+
+@keyframes win-glow-amber {
+  0%, 100% { 
+    box-shadow: inset 0 0 20px rgba(234, 179, 8, 0.3), 0 0 15px rgba(234, 179, 8, 0.5); 
+    background: linear-gradient(135deg, #3d300c, #1f1702); 
+  }
+  50% { 
+    box-shadow: inset 0 0 35px rgba(234, 179, 8, 0.6), 0 0 25px rgba(234, 179, 8, 0.7); 
+    background: linear-gradient(135deg, #665011, #332704); 
+  } 
+}
+
 
 
 /* ===================================================
-   ℹ️ テキスト情報（アイコン下のラベル群）
+   🌟 手番完全同期アニメーション (枠と文字を分離版)
    =================================================== */
 
-.achievement-info {
+/* 1. 手札エリア（枠線と枠外のぼんやりした影）用 */
+@keyframes syncGlowBlue {
+  0%, 100% { border-color: rgba(96,165,250,0.5); box-shadow: 0 0 10px rgba(59,130,246,0.3); }
+  50% { border-color: rgba(147,197,253,1); box-shadow: 0 0 28px rgba(59,130,246,0.9); }
+}
+
+@keyframes syncGlowAmber {
+  0%, 100% { border-color: rgba(251,191,36,0.5); box-shadow: 0 0 10px rgba(217,119,6,0.3); }
+  50% { border-color: rgba(254,240,138,1); box-shadow: 0 0 28px rgba(217,119,6,0.9); }
+}
+
+/* 2. テキスト（文字自体と発光）専用 ※四角い影はつけない */
+@keyframes syncTextBlue {
+  0%, 100% { opacity: 0.65; color: rgba(147,197,253,0.8); text-shadow: 0 0 6px rgba(59,130,246,0.4); }
+  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
+}
+
+@keyframes syncTextAmber {
+  0%, 100% { opacity: 0.65; color: rgba(254,240,138,0.8); text-shadow: 0 0 6px rgba(217,119,6,0.4); }
+  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
+}
+
+/* 3. 緑の三角（◀）用 */
+@keyframes syncTriangle {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1.0; transform: scale(1.05); }
+}
+
+/* 🌟 クラスの割り当て (-20s遅延で点滅タイミングは完全同期) */
+.animate-syncGlowBlue { animation: syncGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
+.animate-syncGlowAmber { animation: syncGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
+
+.animate-syncTextBlue { animation: syncTextBlue 2s infinite ease-in-out; animation-delay: -20s; }
+.animate-syncTextAmber { animation: syncTextAmber 2s infinite ease-in-out; animation-delay: -20s; }
+
+.animate-syncTriangle { animation: syncTriangle 2s infinite ease-in-out; animation-delay: -20s; }
+
+
+
+
+/* ==============================================
+   🪙 1. 手札（コイン・ストック）エリア ハンドエリア
+   ============================================== */
+
+/* 🌟 手札メインカード（上下のパディングを 0.9rem ➔ 0.2rem に縮小！） */
+.hand-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0rem;            /* 💡 ヘッダーと駒の間の隙間もほんの少しキュッと詰めました */
+  width: 86%;
+  margin: 0px 0px 0;
+  padding: 0.2rem 0rem 0rem;  /* 🌟 上下 0.2rem / 左右 0.6rem で上下の無駄な余白をカット */
+  border-radius: 0.75rem;
+  border: 1px solid;
+  transition: all 300ms ease;
+}
+
+/* 🌟 プレイヤー名 ＆ 矢印のアッパーヘッダー */
+.hand-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  text-align: center;
+  gap: 0.5rem;
+}
+
+/* 🌟 プレイヤー名テキスト */
+.hand-player-name {
+  font-weight: 900;
+  font-size: 14px;
+  color: #ffffff; 
+}
+
+/* 非手番時の文字色 */
+.hand-player-name.is-inactive {
+  color: #9ca3af;
+}
+
+/* 🌟 手番を示す緑の三角矢印 */
+.hand-player-arrow {
+  color: #4ade80;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* 🌟 中央揃えグループ */
+.hand-area-row,
+.hand-area-inner,
+.hand-piece-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom:0;
+}
+
+
+.hand-area-row {
+  width: 100%;
+}
+
+/* 🪙 駒1個あたりの枠（高さを 52px ➔ 42px にスリム化！） */
+.hand-piece-slot {
+  cursor: pointer;
+  width: 38px;
+  height: 38px;              /* 💡 縮小表示(scale 0.7)に合わせた高さに調整 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  transform-origin: center center;
+  transition: transform 0.2s ease-out;
+transform: scale(0.7) translateY(8px);
+}
+
+/* 💡★ 選択時にピョンと跳ね上がる高さ */
+.hand-piece-slot.is-selected {
+  transform: scale(0.75) translateY(-10px); /* 跳ね上がりも高さに合わせて微調整 */
+}
+
+/* 💡 個数テキスト（x5 など） */
+.hand-count-text {
+  color: #9ca3af;
+  font-weight: 900;
+  font-size: 12px;
+  margin-left: 8px;
+transform: translateY(-3px);
+}
+
+/* 個数ゼロ（なし）テキスト */
+.hand-empty-text {
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+
+
+/* ==============================================
+   🎯 2. 盤面（マス目・セル）の操作感
+   ============================================== */
+
+/* 押せるマスのカーソル（指マーク） */
+.cell-interactive {
+  cursor: pointer;
+}
+
+/* 押せないマスのカーソル（通常矢印） */
+.cell-disabled {
+  cursor: default;
+}
+
+
+/* ==============================================
+   💬 3. 盤面下のメッセージ＆キャンセルボタン
+   ============================================== */
+
+/* メッセージエリア全体の配置（中央揃えなど） */
+.game-message-container {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0;
+  justify-content: center;
+  margin-top: 0;
+  min-height: 40px;
 }
 
-/* 1行目：よわい 5勝 */
-.streak-label {
-  font-size: 8px;
-  font-weight: 700;
-  color: #94a3b8;
-  line-height: 1;
-  white-space: nowrap;
-  margin-top: 0px;
-  margin-bottom: 6px;   /* 1行目と2行目（級バッジ）の間の余白 */
+/* 駒をタップなどの案内文字の大きさ・太さ */
+.game-message-text {
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 900;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  text-align: center;
+  width: 95%;
+  margin-top: 3px;     /* 👈 ここを半角スペースに修正！ */
+  margin-bottom: 4px;
+  white-space: pre-line;
+  transition: all 0.3s ease;
+}
+/* ボタンが並ぶ行の高さと中央配置 */
+.game-action-row {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
-/* 2行目：級バッジ */
-.grade-badge {
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 3px;
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  display: inline-block;
-  margin-bottom: 30px;  /* 👈 級の下側（カード底面）への余白 */
+/* 「キャンセル」ボタンの形・色・影 */
+.btn-cancel {
+  padding: 6px 24px;
+  background-color: #1f2937;
+  color: #d1d5db;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid #4b5563;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease;
 }
 
-/* 級バッジの色バリエーション */
-.grade-badge.grade-easy   { background: #d97706; color: #fef3c7; }
-.grade-badge.grade-medium { background: #d97706; color: #fef3c7; }
-.grade-badge.grade-hard   { background: #d97706; color: #fef3c7; }
+/* キャンセルボタンを押した瞬間にちょっと縮む動き */
+.btn-cancel:active {
+  transform: scale(0.95);
+}
+
+
+/* ==============================================
+   🔢 4. 移動個数の選択UI（1個移動・2個移動など）
+   ============================================== */
+
+/* 移動個数選択エリア全体 */
+.move-count-selector {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+}
+
+/* 「取る数:」ラベルテキスト */
+.move-count-label {
+  color: #e5e7eb;
+  font-size: 12px;
+  font-weight: 900;
+  margin-right: 4px;
+}
+
+/* 数字ボタン・戻るボタン共通の基本スタイル */
+.selector-btn {
+  height: 28px;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+/* ボタンを押した瞬間にちょっと凹む動き */
+.selector-btn:active {
+  transform: scale(0.95);
+}
+
+/* 数字決定ボタン（青/インディゴ背景） */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #6366f1;
+}
+
+/* 戻るボタン（ダークグレー背景） */
+.btn-secondary {
+  background-color: #1f2937;
+  color: #d1d5db;
+  border: 1px solid #4b5563;
+  margin-left: 4px;
+}
+
+.btn-secondary:hover {
+  background-color: #374151;
+}
+
+
+/* ==========================================
+   ⏱️ タイマー表示のスタイル（上下中央揃え版）
+   ========================================== */
+.timer-display {
+  display: flex;           /* 💡 Flexboxを使う！（これで中身を整列させる） */
+  justify-content: center; /* 💡 横方向を真ん中に寄せる */
+  align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
+  
+  font-size: 0.9rem;        /* 通常の文字サイズ */
+  font-weight: bold;       
+  color: #e0e0ff;          
+  padding-top:3px;
+　margin-bottom: 2px;     
+  text-align: center;      /* Flexboxが効かない環境への保険 */
+}
+
+/* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
+.timer-display .timer-icon {
+  font-size: 1.1rem;       /* 絵文字を大きくする */
+  margin-right: 4px;       /* 文字との間の隙間 */
+  
+  line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
+
+  /* 💡絵文字だけを少し上に持ち上げる設定 */
+  display: inline-block;       /* 👈 位置調整（transform）を確実に利かせるため */
+  transform: translateY(-2px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
+}
+
+
+/* 🌟 ラスト10秒の赤点滅 */
+.timer-display.warning {
+  color: #ff4d4d;
+  animation: timerBlink 0.8s infinite alternate;
+}
+
+
+
+
+/* ==============================================
+   📖 6. 「遊び方を見る」モーダル画面
+   ============================================== */
+
+/* 遊び方画面全体のスクロール領域とテキスト */
+.instruction-container {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  user-select: none;
+  padding: 16px 8px 32px 8px;
+  color: #f3f4f6;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* 各段落（セクション）の余白 */
+.instruction-section {
+  margin-bottom: 24px;
+}
+
+/* 「1. 勝利条件」などの見出しの文字 */
+.instruction-title {
+  color: #818cf8; /* indigo-400 */
+  font-weight: 900;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+/* 説明文の箇条書き用リスト枠（左側に青い線） */
+.instruction-list {
+  padding-left: 12px;
+  border-left: 2px solid #6366f1; /* indigo-500 */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ===================================================
+   🏠 メインメニュー画面（レイアウト＆ボタン全般）
+   =================================================== */
+
+/* 1. メニュー全体コンテナ */
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* 2. 📱 1画面目のメインコンテンツ（タイトル＋ボタン群） */
+.menu-main-content {
+  width: 100%;
+  /* 画面いっぱいに広げすぎず、適度な高さ（または自動伸縮）にする */
+  min-height: auto; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 20px 0 40px 0; /* 👈 上下に程よい余白を作って下の要素との被りを防ぐ */
+}
+
+
+
+/* スマホなど縦長画面のときだけ中央揃えのために高さを確保 */
+@media (min-height: 600px) and (max-width: 640px) {
+  .menu-main-content {
+    min-height: calc(100dvh - 80px);
+  }
+}/* 3. 🔘 メインボタン共通設定 */
+.menu-btn {
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 16px;
+  transition: transform 0.1s;
+  width: 100%;
+}
+
+/* ボタン押下時のぽこっと凹むアニメーション */
+.menu-btn:active,
+.btn-menu-back:active {
+  transform: scale(0.95);
+}
+
+/* 4. ボタンカラー各種 */
+.btn-resume { background: #16a34a; color: #fff; } /* 途中から再開（緑） */
+.btn-2p     { background: #4f46e5; color: #fff; } /* 2人対戦（インディゴ） */
+.btn-ai     { background: #d97706; color: #fff; } /* CPU対戦（アンバー） */
+
+.btn-sub { 
+  background: #94a3b8;      /* 遊び方ボタン（グレー） */
+  color: #0f172a; 
+  border: 1px solid #64748b;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn-menu-back {
+  padding: 10px;
+  background: #1f2937;      /* メニューに戻る等（ダークグレー） */
+  border: 1px solid #4b5563;
+  color: #d1d5db;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 12px;
+  text-align: center;
+  transition: transform 0.1s;
+}
+
+/* 5. 🏆 実績コレクションパネル（1画面目の下に押し出す設定） */
+.achievement-panel {
+  width: 100%;
+  max-width: 360px;
+  margin-top: -35px;
+  margin-bottom: 32px;
+}
+
+
+
+
+/* ==============================================
+   🔲  ポップアップ（ダイアログ・モーダル）共通
+   ============================================== */
+
+/* 画面全体を暗くすりガラス状にする背景幕 */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 16px;
+}
+
+/* ポップアップ中央の白い/黒いカード枠 */
+.overlay-card {
+  background: #111827; /* gray-900 */
+  border: 1px solid #374151; /* gray-700 */
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ポップアップ内の決定・OKボタン */
+.overlay-btn {
+  width: 100%;
+  padding: 10px;
+  background: #4f46e5; /* indigo-600 */
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+
+ .overlay-enter { 
+animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    @keyframes fade-in { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+
+
+
 
 
 /* ===================================================
-   ✨ キラキラ星（最前面ポップ演出：44px外枠基準）
+   🤖 AI（CPU）勝利用ロボットアイコン
    =================================================== */
 
-.sparkle-frame {
-  position: relative;
-  overflow: visible !important;
+/* 勝利の時、★と🤖を並べる箱 */
+.victory-icon-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px 4px;           /* 💡【縦の隙間 12px / 横の隙間 4px】 */
+  width: 100%;             /* 横幅いっぱいに使う */
+  max-width: 100%;        /* カードからはみ出ない制御 */
+  margin: 16px auto;       /* 💡【上下の外側余白を16pxに広げてスッキリ！】 */
 }
 
-.sparkle-frame .sparkle-star {
-  position: absolute;
-  font-style: normal;
-  color: #ffffff;
-  z-index: 999 !important;
-  pointer-events: none;
-  opacity: 0;
-  display: block;
+
+.icon-robot {
+  font-size: 2.8rem; /* ロボットの大きさをここで調整 */
+   display: inline-block;
   line-height: 1;
-  width: 1em;
-  height: 1em;
-  text-align: center;
-  transform-origin: center center;
-
-  /* ★光の広がり（シャドウ）を小さく控えめに調整 */
-  text-shadow: 
-    0 0 3px #ffffff,
-    0 0 6px #fef08a,
-    0 0 10px #eab308;
+  animation: victoryPop 0.3s ease-out;
 }
 
-/* 📍 星の位置・サイズ・ゆったりアニメーション（秒数を長めに変更） */
-.sparkle-frame .star-1 {
-  top: -2px;
-  left: -2px;
-  font-size: 11px;       /* 👈 少し小さく (旧: 16px) */
-  animation: popInPlace 4.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; /* 👈 ゆっくり (旧: 2.8s) */
+
+
+
+/* ==============================================
+   🌟 金・銀・銅 メダル（スター）本体 ＆ 基準点設定　ポップアップ
+   ============================================== */
+
+.star-medal {
+  /* 📐 メダルのサイズ ＆ 表示設定 */
+  width: 90px;               /* ★の大きさ */
+  height: 90px;
+  display: inline-block;      /* 幅・高さを効かせつつインライン配置 */
+  line-height: 1;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /* 💡 疑似要素（キラリ✦）を内側に配置するための基準点 */
+  position: relative;         
+
+  /* 🚀 飛び出しアニメーション */
+  animation: victoryPop 0.3s ease-out;
 }
 
-.sparkle-frame .star-2 {
-  top: 0px;
-  right: -2px;
-  font-size: 8px;       /* 👈 少し小さく (旧: 12px) */
-  animation: popInPlace 5.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s infinite; /* 👈 ゆっくり (旧: 3.6s) */
+
+
+/* 🌟 キラリマークの呼び出し部分（全体で4秒周期に変更） */
+.star-medal::before,
+.star-medal::after {
+  content: '✦';
+  position: absolute;
+  font-size: 0.35em;
+  color: #ffffff;
+  text-shadow: 0 0 5px #fef08a, 0 0 8px #eab308;
+  opacity: 0;
+  pointer-events: none;
+  /* 💡 全体を 4秒 に設定（約2秒光る ＋ 約2秒お休み） */
+  animation: medalSparkle 4s infinite ease-in-out; 
 }
 
-.sparkle-frame .star-3 {
-  bottom: 0px;
-  left: -2px;
-  font-size: 9px;       /* 👈 少し小さく (旧: 13px) */
-  animation: popInPlace 6.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.5s infinite; /* 👈 ゆっくり (旧: 4.2s) */
+/* 📍 1箇所目：左上（すぐスタート） */
+.star-medal::before {
+  top: 25%;
+  left: 25%;
+  animation-delay: 1s;
 }
 
-.sparkle-frame .star-4 {
-  bottom: -2px;
-  right: -2px;
-  font-size: 10px;       /* 👈 少し小さく (旧: 15px) */
-  animation: popInPlace 5.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s infinite; /* 👈 ゆっくり (旧: 3.2s) */
+/* 📍 2箇所目：右下（2秒ずらして交互に） */
+.star-medal::after {
+  bottom: 25%;
+  right: 25%;
+  animation-delay: 3s; /* 💡 2秒後にスタート */
 }
 
-/* 🎬 アニメーション定義（出現〜消えるまでの変化も優しく） */
-@keyframes popInPlace {
+
+/* 🌟 ふわーっと光って消えるキーフレーム */
+@keyframes medalSparkle {
   0% {
+    transform: scale(0.3) rotate(0deg);
     opacity: 0;
-    transform: scale(0.1);
   }
-  20% {
-    opacity: 0.9;        /* 眩しすぎないよう不透明度をほんのり抑えめに */
-    transform: scale(1.0);/* 大きくなりすぎないよう 1.0 に変更 */
+  20% {                       /* 💡 約0.8秒かけて「ふわーっ」と光る */
+    transform: scale(1.0) rotate(30deg);
+    opacity: 1;
   }
-  50% {
+  30% {                       /* 💡 少しだけ光の余韻を残す */
+    transform: scale(1.05) rotate(45deg);
+    opacity: 1;
+  }
+  50% {                       /* 💡 約2.0秒地点に向かって「じわーっ」と消える */
+    transform: scale(0.3) rotate(90deg);
     opacity: 0;
-    transform: scale(0.2);
+  }
+  100% {                      /* 💡 残りの 2秒間 は完全にお休み */
+    transform: scale(0.3) rotate(90deg);
+    opacity: 0;
+  }
+}
+
+
+/* 💡 アイコンが飛び出すアニメーション */
+@keyframes victoryPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.2);
   }
   100% {
-    opacity: 0;
-    transform: scale(0.1);
+    transform: scale(1);
+    opacity: 1;
   }
+}
+
+
+/* 勝利数テキスト（シンプル表示） */
+.streak-count-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fbbf24;       /* 読みやすいゴールド */
+  margin-top: -2px;
+  margin-bottom: 16px;
+  letter-spacing: 1.5px;
+  display: inline-block;
 }
 
 
 
 
-/* 🧪 一時テスト用：星とSVG以外を全部「枠線だけ」にして原因をあぶり出す
 
- .achievement-card * {
+/* ===================================================
+   ★ 人間勝利用 メタリック星SVG（共通ベース）
+   =================================================== */
+.star-medal {
+  width: 110px;  /* ★の大きさをここで調整 */
+  height: 110px;
+  display: block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: victoryPop 0.3s ease-out;
+}
+
+/* 🥇 金の星（右上キラン削除版） */
+.star-medal.gold {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="gold-base" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFE082"/><stop offset="18%" stop-color="%23FFF59D"/><stop offset="45%" stop-color="%23FFB300"/><stop offset="70%" stop-color="%23FF6F00"/><stop offset="85%" stop-color="%23FFE082"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="gold-dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFB300"/><stop offset="50%" stop-color="%23FF6F00"/><stop offset="100%" stop-color="%234E2600"/></linearGradient><linearGradient id="gold-light" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="30%" stop-color="%23FFF8E1"/><stop offset="70%" stop-color="%23FFE082"/><stop offset="100%" stop-color="%23FFB300"/></linearGradient><linearGradient id="gold-rim" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="%234E2600"/><stop offset="25%" stop-color="%23FF6F00"/><stop offset="55%" stop-color="%23FFB300"/><stop offset="80%" stop-color="%23FFF59D"/><stop offset="100%" stop-color="%233E1C00"/></linearGradient><filter id="shadow-gold" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1" dy="5" stdDeviation="3" flood-color="%233E1C00" flood-opacity="0.75"/></filter></defs><g filter="url(%23shadow-gold)" transform="translate(-2, 4) scale(0.92)"><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="none" stroke="url(%23gold-rim)" stroke-width="5" stroke-linejoin="miter"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23gold-base)" stroke="%233E1C00" stroke-width="1.5" stroke-linejoin="miter"/><path d="M 50 50 L 73.6 84.6 L 50 72.2 Z" fill="url(%23gold-dark)" opacity="0.75"/><path d="M 50 50 L 30.9 58.3 L 26.4 84.6 Z" fill="url(%23gold-dark)" opacity="0.45"/><path d="M 50 12 L 61.8 35.9 L 50 50 Z" fill="url(%23gold-light)" opacity="0.9"/><path d="M 50 50 L 88.2 39.7 L 69.1 58.3 Z" fill="url(%23gold-light)" opacity="0.8"/><path d="M 50 50 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23gold-light)" opacity="0.98"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7" fill="none" stroke="%23FFF8E1" stroke-width="1" opacity="0.9"/><path d="M 50 12 L 50 50" fill="none" stroke="%23FFFFFF" stroke-width="1.2" opacity="0.95"/><path d="M 38.2 35.9 L 50 50 L 88.2 39.7" fill="none" stroke="%23FFF8E1" stroke-width="0.8" opacity="0.8"/></g></svg>');
+}
+
+/* 🥈 銀の星 */
+.star-medal.silver {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="silver-base" x1="15%" y1="0%" x2="85%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="20%" stop-color="%23ECEFF1"/><stop offset="45%" stop-color="%2390A4AE"/><stop offset="70%" stop-color="%23455A64"/><stop offset="88%" stop-color="%23CFD8DC"/><stop offset="100%" stop-color="%2337474F"/></linearGradient><linearGradient id="silver-dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23CFD8DC"/><stop offset="50%" stop-color="%2390A4AE"/><stop offset="100%" stop-color="%23455A64"/></linearGradient><linearGradient id="silver-light" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%23FFFFFF" stop-opacity="0.8"/><stop offset="60%" stop-color="%23ECEFF1"/><stop offset="100%" stop-color="%23CFD8DC"/></linearGradient><linearGradient id="silver-rim" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="%2337474F"/><stop offset="25%" stop-color="%23455A64"/><stop offset="55%" stop-color="%2390A4AE"/><stop offset="80%" stop-color="%23ECEFF1"/><stop offset="100%" stop-color="%23102027"/></linearGradient><filter id="shadow-silver" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1" dy="5" stdDeviation="3" flood-color="%23102027" flood-opacity="0.6"/></filter></defs><g filter="url(%23shadow-silver)" transform="translate(-2, 4) scale(0.92)"><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="none" stroke="url(%23silver-rim)" stroke-width="5" stroke-linejoin="miter"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23silver-base)" stroke="%23263238" stroke-width="1.5" stroke-linejoin="miter"/><path d="M 50 50 L 73.6 84.6 L 50 72.2 Z" fill="url(%23silver-dark)" opacity="0.75"/><path d="M 50 50 L 30.9 58.3 L 26.4 84.6 Z" fill="url(%23silver-dark)" opacity="0.45"/><path d="M 50 12 L 61.8 35.9 L 50 50 Z" fill="url(%23silver-light)" opacity="0.9"/><path d="M 50 50 L 88.2 39.7 L 69.1 58.3 Z" fill="url(%23silver-light)" opacity="0.8"/><path d="M 50 50 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23silver-light)" opacity="0.98"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="1" opacity="0.85"/><path d="M 50 12 L 50 50" fill="none" stroke="%23FFFFFF" stroke-width="1.2" opacity="0.9"/><path d="M 38.2 35.9 L 50 50 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="0.8" opacity="0.75"/></g></svg>');
+}
+
+/* 🥉 銅の星 */
+.star-medal.bronze {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="bronze-base" x1="15%" y1="0%" x2="85%" y2="100%"><stop offset="0%" stop-color="%23FFF0DD"/><stop offset="20%" stop-color="%23E8956A"/><stop offset="45%" stop-color="%238C3B1A"/><stop offset="70%" stop-color="%23B85830"/><stop offset="88%" stop-color="%23F2C09F"/><stop offset="100%" stop-color="%234A1D0B"/></linearGradient><linearGradient id="bronze-dark" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%239E411B"/><stop offset="50%" stop-color="%236E250A"/><stop offset="100%" stop-color="%233D1102"/></linearGradient><linearGradient id="bronze-light" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23FFFFFF"/><stop offset="25%" stop-color="%23FFF3E0"/><stop offset="60%" stop-color="%23E8956A"/><stop offset="100%" stop-color="%23B85830"/></linearGradient><linearGradient id="bronze-rim" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="%233D1102"/><stop offset="25%" stop-color="%238C3B1A"/><stop offset="55%" stop-color="%23E8956A"/><stop offset="80%" stop-color="%23FFF0DD"/><stop offset="100%" stop-color="%235C2108"/></linearGradient><filter id="shadow-bronze" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="1" dy="5" stdDeviation="3" flood-color="%23210800" flood-opacity="0.7"/></filter></defs><g filter="url(%23shadow-bronze)" transform="translate(-2, 4) scale(0.92)"><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="none" stroke="url(%23bronze-rim)" stroke-width="5" stroke-linejoin="miter"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7 L 69.1 58.3 L 73.6 84.6 L 50 72.2 L 26.4 84.6 L 30.9 58.3 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23bronze-base)" stroke="%234A1D0B" stroke-width="1.5" stroke-linejoin="miter"/><path d="M 50 50 L 73.6 84.6 L 50 72.2 Z" fill="url(%23bronze-dark)" opacity="0.75"/><path d="M 50 50 L 30.9 58.3 L 26.4 84.6 Z" fill="url(%23bronze-dark)" opacity="0.45"/><path d="M 50 12 L 61.8 35.9 L 50 50 Z" fill="url(%23bronze-light)" opacity="0.9"/><path d="M 50 50 L 88.2 39.7 L 69.1 58.3 Z" fill="url(%23bronze-light)" opacity="0.8"/><path d="M 50 50 L 11.8 39.7 L 38.2 35.9 Z" fill="url(%23bronze-light)" opacity="0.98"/><path d="M 50 12 L 61.8 35.9 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="1" opacity="0.85"/><path d="M 50 12 L 50 50" fill="none" stroke="%23FFFFFF" stroke-width="1.2" opacity="0.9"/><path d="M 38.2 35.9 L 50 50 L 88.2 39.7" fill="none" stroke="%23FFFFFF" stroke-width="0.8" opacity="0.75"/></g></svg>');
+}
+
+
+
+
+
+
+/* ==========================================
+    デバッグ用
+   ========================================== */
+
+/* 🧪 究極のレイアウトデバッグ用：全要素を赤枠で囲う 
+*, *::before, *::after {
   outline: 1px solid red !important;
-}
-
-
-
-/* ---------------------------------------------------
-   🚫 実績パネル側はスッキリ（影・後光をカット）
-   --------------------------------------------------- */
-.achievement-panel .achievement-icon-wrapper,
-.achievement-panel .reward-icon,
-.achievement-panel .sparkle-frame {
-  filter: none !important;
-  box-shadow: none !important;
-  background-color: transparent !important;
-}
-
-.achievement-panel .sparkle-star {
-  text-shadow: none !important;
-}
-
-
-/* ---------------------------------------------------
-   🌟 ポップアップ（✨後光・発光を強力に復活！）
-   --------------------------------------------------- */
-/* 1. アイコン自体の輝く後光（ドロップシャドウ） */
-.reward-modal-overlay .sparkle-popup {
-  filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.8)) 
-          drop-shadow(0 0 24px rgba(234, 179, 8, 0.5)) !important;
-}
-
-/* 2. 星（✦）のぼんやり黄金発光（テキシャドウ） */
-.reward-modal-overlay .sparkle-popup .sparkle-star {
-  text-shadow: 
-    0 0 6px #ffffff,
-    0 0 12px #fef08a,
-    0 0 18px #eab308 !important;
-}
-
-/* 🔒 ロック時の鍵バッジ（少し大きく＆リアルに） */
-.lock-badge {
-  position: absolute;
-  bottom: -2px;            /* 👈 枠の左下に少しだけ引っ掛ける位置 */
-  left: -2px;
-  width: 20px !important;  /* 👈 もうちょい大きく見やすく調整 */
-  height: 20px !important;
-  z-index: 10;
   
-  /* ダークな丸背景にうっすらフチをつけて、どんなアイコンの上でも視認性抜群に */
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  padding: 3px;
-  box-sizing: border-box;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  /* ↓ 背景をほんのり赤くして、透明な重なりを見つけたい場合はこれのコメントを外す */
+  /* background: rgba(255, 0, 0, 0.05) !important; */
 }
 
+*/
+
+
+ </style>
+
+
+</head>
+<body>
+
+  <div id="root"></div>
+  <script type="text/babel">
+
+ const { useState, useCallback, useMemo, useEffect, useRef } = React;
+
+const EMPTY_BOARD = () => [[[], [], []], [[], [], []], [[], [], []]];
+    const LINES = [
+      [[0,0],[0,1],[0,2]], [[1,0],[1,1],[1,2]], [[2,0],[2,1],[2,2]],
+      [[0,0],[1,0],[2,0]], [[0,1],[1,1],[2,1]], [[0,2],[1,2],[2,2]],
+      [[0,0],[1,1],[2,2]], [[0,2],[1,1],[2,0]]
+    ];
 
 
 
+ function cloneBoard(b) { return b.map(r => r.map(c => [...c])); }
 
 
 
-
-
-
-
-
-`;
-document.head.appendChild(achievementStyle);
-
-
-
-
-
-
-// ---------------------------------------------------
-// ⚙️ 報酬設定データ（5勝=メダル / 10勝=トロフィー / 20勝=王冠）
-// ---------------------------------------------------
-const REWARD_CONFIG = {
-  5: {
-    baseClass: 'reward-medal-icon', // 🏅 メダル用
-   easy:   { colorClass: 'medal-bronze', name: '銅メダル', grade: '9級', title: null },
-    medium: { colorClass: 'medal-silver', name: '銀メダル', grade: '6級', title: null },
-    hard:   { colorClass: 'medal-gold',   name: '金メダル', grade: '3級', title: null }
-  },
- 
-  10: {
-    baseClass: 'reward-trophy-icon', // 🏆 トロフィー用
-   easy:   { colorClass: 'trophy-bronze', name: '銅のトロフィー', grade: '8級', title: null },
-    medium: { colorClass: 'trophy-silver', name: '銀のトロフィー', grade: '5級', title: null },
-    hard:   { colorClass: 'trophy-gold',   name: '金のトロフィー', grade: '2級', title: null }
-  },
-
- 20: {
-    baseClass: 'reward-crown-icon', // 👑 王冠用
-    easy:   { colorClass: 'crown-bronze', name: '銅の王冠', grade: '7級', title: 'ブロンズマスター' },
-    medium: { colorClass: 'crown-silver', name: '銀の王冠', grade: '4級', title: 'シルバーマスター' },
-    hard:   { colorClass: 'crown-gold',   name: '金の王冠', grade: '1級', title: 'ゴールドマスター' }
+ // 🏆 画面の演出用にも、AIの高速先読み用にも、これ1つで最速処理する統合版・勝利判定関数
+function checkWinner(board) {
+  const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
+  for (const line of LINES) {
+    const colors = line.map(([r, c]) => top[r][c]);
+    if (colors[0] && colors[0] === colors[1] && colors[1] === colors[2]) {
+      return { winner: colors[0], line }; // 揃った色とラインの座標をオブジェクトで返す
+    }
   }
+  return null;
+}
 
-};
-
-
-
-
-// ---------------------------------------------------
-// 3. 📦 本体の難易度ボタン横にメダルアイコンを自動で差し込む処理
-// ---------------------------------------------------
-window.addEventListener('DOMContentLoaded', () => {
-  // id="btn-easy", "btn-medium", "btn-hard" のボタンを探してアイコンをつける
-  const btnEasy   = document.getElementById('btn-easy');
-  const btnMedium = document.getElementById('btn-medium');
-  const btnHard   = document.getElementById('btn-hard');
-
-  if (btnEasy)   btnEasy.innerHTML   += ` <span class="diff-icon">${DIFFICULTY_CONFIG.easy.icon}</span>`;
-  if (btnMedium) btnMedium.innerHTML += ` <span class="diff-icon">${DIFFICULTY_CONFIG.medium.icon}</span>`;
-  if (btnHard)   btnHard.innerHTML   += ` <span class="diff-icon">${DIFFICULTY_CONFIG.hard.icon}</span>`;
-});
-
-
-// ---------------------------------------------------
-// 4. 🎯 勝利時に呼ぶメイン関数（5勝・10勝・20勝判定＆ポップアップ表示）
-// ---------------------------------------------------
-function checkAndShowReward(winCount, difficulty = 'easy') {
-  
-  // 5勝・10勝・20勝の時だけ発動
-  if (winCount !== 5 && winCount !== 10 && winCount !== 20) return;
-
-  // 設定を取得
-  const rewardGroup = REWARD_CONFIG[winCount];
-  if (!rewardGroup) return; // 🌟安全ガードを追加
-
-  const diffData = rewardGroup[difficulty] || rewardGroup.easy;
-  if (!diffData) return; // 🌟安全ガードを追加
-
-  // 💡【お掃除ポイント1】難易度の日本語表記を、HTMLの外で一瞬で安全に変換！
-  const diffMap = {
-    easy: 'よわい', 'イージー': 'よわい',
-    medium: 'ふつう', 'ミディアム': 'ふつう',
-    hard: 'つよい', 'ハード': 'つよい'
-  };
-  const displayDiff = diffMap[diffData.label || difficulty] || (diffData.label || difficulty);
-
-  // 💡【お掃除ポイント2】エラー防止ガード付きの色判定とクラス名をすっきり一本化！
-  const color = diffData.colorClass || '';
-  const rankClass = color.includes('bronze') ? 'rank-bronze' 
-                  : color.includes('silver') ? 'rank-silver' 
-                  : 'rank-gold';
-
-  // 既存のモーダルがあれば一旦閉じる
-  closeRewardModal();
-
-  // ① 最前面でクラッカー🎉を発射＆連続発射ループを開始
-  if (typeof confetti === 'function') {
-    
-    // 💡 勝利数に応じた「初動の量」と「ループの間隔(ms)」の設定
-    const initialCount = winCount === 20 ? 200 : (winCount === 10 ? 100 : 50);
-    const intervalSpeed = winCount === 20 ? 180 : (winCount === 10 ? 300 : 450);
-
-    const defaultPalette = [
-      '#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42',
-      '#ffa62d', '#ff36ff', '#00ffcc', '#ff3366', '#33ccff', '#99ff33'
-    ];
-
-    // 1. 最初の下からのドカン！🎉（左＆右）
-    confetti({ particleCount: initialCount, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, zIndex: 99999 });
-    confetti({ particleCount: initialCount, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, zIndex: 99999 });
-
-    // 2. 降り続けるループ✨（発射パラメータをまとめてスッキリ化）
-    const launchPoints = [
-      { angle: 35,  spread: 55, startVelocity: 30, origin: { x: -0.05, y: -0.15 } }, // 左上
-      { angle: 90,  spread: 80, startVelocity: 15, origin: { x: 0.5,   y: -0.15 } }, // 中央上
-      { angle: 145, spread: 55, startVelocity: 30, origin: { x: 1.05,  y: -0.15 } }  // 右上
-    ];
-
-    if (window.confettiLoop) clearInterval(window.confettiLoop);
-
-    window.confettiLoop = setInterval(() => {
-      // 🌟【お掃除ポイント3】色のランダム計算をループの中に正しく配置！これで毎回違うカラフルな色が綺麗に舞い続けます
-      const randomColor = [defaultPalette[Math.floor(Math.random() * defaultPalette.length)]];
-
-      // 3方向からそれぞれ2発ずつ（計6発）別々の色で飛ばす
-      launchPoints.forEach(pt => {
-        for (let i = 0; i < 2; i++) {
-          confetti({
-            ...pt,
-            particleCount: 1,
-            gravity: 0.82,
-            ticks: 150,
-            colors: randomColor,
-            zIndex: 99999,
-            scalar: 1.15
-          });
+   
+    function getValidTargets(board, fromRow, fromCol, count, lastMove, currentPlayer) {
+      const t = [];
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          if (r === fromRow && c === fromCol) continue;
+          if (lastMove && lastMove.type === 'move' && lastMove.player !== currentPlayer) {
+            if (fromRow === lastMove.toRow && fromCol === lastMove.toCol && r === lastMove.fromRow && c === lastMove.fromCol) {
+              if (count > 0 && count === lastMove.count) { continue; }
+              if (count === 0 && board[fromRow][fromCol].length === lastMove.count) { continue; }
+            }
+          }
+          
+          if (board[r][c].length + count <= 3) t.push([r, c]);
         }
-      });
-    }, intervalSpeed);
+      }
+      return t;
+    }
+
+
+    function getPlaceTargets(board) {
+      const t = [];
+      for (let r = 0; r < 3; r++)
+        for (let c = 0; c < 3; c++)
+          if (board[r][c].length < 3) t.push([r, c]);
+      return t;
+    }
+
+
+    function getAllMoves(board, hands, player, lastMove) {
+      const moves = [];
+      if (hands[player] > 0) {
+        for (let r = 0; r < 3; r++)
+          for (let c = 0; c < 3; c++)
+            if (board[r][c].length < 3) moves.push({ type: 'place', row: r, col: c });
+      }
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const stack = board[r][c];
+          if (stack.length === 0) continue;
+          for (let n = 1; n <= stack.length; n++) {
+            for (let tr = 0; tr < 3; tr++) {
+              for (let tc = 0; tc < 3; tc++) {
+                if (tr === r && tc === c) continue;
+                if (lastMove && lastMove.type === 'move' && lastMove.player !== player) {
+                  if (r === lastMove.toRow && c === lastMove.toCol && 
+                      tr === lastMove.fromRow && tc === lastMove.fromCol && 
+                      n === lastMove.count) { continue; }
+                }
+                if (board[tr][tc].length + n <= 3) {
+                  moves.push({ type: 'move', fromRow: r, fromCol: c, count: n, toRow: tr, toCol: tc });
+                }
+              }
+            }
+          }
+        }
+      }
+      return moves;
+    }
+
+
+// -------------------------------------------------------------
+// ファンクション　アプライムーブ（着手、反映）
+// -------------------------------------------------------------
+function applyMove(board, hands, player, move) {
+  const b = cloneBoard(board);
+  const h = { ...hands };
+  if (move.type === 'place') {
+    b[move.row][move.col].push(player);
+    h[player]--;
+  } else {
+    const from = b[move.fromRow][move.fromCol];
+    const pieces = from.splice(from.length - move.count, move.count);
+    b[move.toRow][move.toCol].push(...pieces);
+  }
+  return { board: b, hands: h };
+}
+
+function evaluate(board, aiColor) {
+  const opColor = aiColor === 'yellow' ? 'blue' : 'yellow';
+  const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
+  let score = 0;
+  for (const line of LINES) {
+    const colors = line.map(([r, c]) => top[r][c]);
+    const ai = colors.filter(c => c === aiColor).length;
+    const op = colors.filter(c => c === opColor).length;
+    if (ai === 3) return 10000;
+    if (op === 3) return -10000;
+    if (op === 0) { if (ai === 2) score += 30; else if (ai === 1) score += 3; }
+    if (ai === 0) { if (op === 2) score -= 25; else if (op === 1) score -= 2; }
+  }
+  if (top[1][1] === aiColor) score += 8;
+  else if (top[1][1] === opColor) score -= 8;
+  return score;
+}
+
+// -------------------------------------------------------------
+// ファンクション　ミニマックス
+// -------------------------------------------------------------
+function minimax(board, hands, player, depth, alpha, beta, aiColor, maximizing, lastMove) {
+  /* 🌟 checkWinnerSimple から 新しい統合版 checkWinner の呼び出し（?.winner）に変えました！ */
+  const w = checkWinner(board)?.winner;
+  if (w === aiColor) return 10000 + depth;
+  if (w && w !== aiColor) return -10000 - depth;
+  if (depth === 0) return evaluate(board, aiColor);
+  const moves = getAllMoves(board, hands, player, lastMove);
+  if (moves.length === 0) return evaluate(board, aiColor);
+  const nextPlayer = player === 'blue' ? 'yellow' : 'blue';
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const { board: nb, hands: nh } = applyMove(board, hands, player, move);
+      const val = minimax(nb, nh, nextPlayer, depth - 1, alpha, beta, aiColor, false, move);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const { board: nb, hands: nh } = applyMove(board, hands, player, move);
+      const val = minimax(nb, nh, nextPlayer, depth - 1, alpha, beta, aiColor, true, move);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+// -------------------------------------------------------------
+// ファンクション　ゲットAIムーブ
+// -------------------------------------------------------------
+function getAIMove(board, hands, aiColor, difficulty, lastMove) {
+  const moves = getAllMoves(board, hands, aiColor, lastMove);
+  if (moves.length === 0) return null;
+  const opColor = aiColor === 'blue' ? 'yellow' : 'blue';
+
+  // 1. 勝ち筋があれば即座に打つ
+  for (const move of moves) {
+    const { board: nb } = applyMove(board, hands, aiColor, move);
+    /* 🌟 ここも ?.winner に変更！ */
+    if (checkWinner(nb)?.winner === aiColor) return move; 
   }
 
-  // ② ポップアップ（HTML）を組み立てて表示
-  const modalHtml = `
-    <div id="rewardModalOverlay" class="reward-modal-overlay">
-      <div class="reward-modal-box">
-        <div style="color: #facc15; font-size: 12px; font-weight: bold;">
-          ★ ACHIEVEMENTS UNLOCKED ★
+  // 2. 守りのロジック
+  if (difficulty !== 'easy') {
+    const enemyMoves = getAllMoves(board, hands, opColor, null);
+    let lethalEnemyMove = null;
+    for (const em of enemyMoves) {
+      const { board: eb } = applyMove(board, hands, opColor, em);
+      /* 🌟 ここも ?.winner に変更！ */
+      if (checkWinner(eb)?.winner === opColor) { lethalEnemyMove = em; break; }
+    }
+
+    if (lethalEnemyMove) {
+      for (const move of moves) {
+        const { board: nb } = applyMove(board, hands, aiColor, move);
+        const nextEnemyMoves = getAllMoves(nb, hands, opColor, null);
+        /* 🌟 ここも ?.winner に変更！ */
+        const stillLethal = nextEnemyMoves.some(nem => checkWinner(applyMove(nb, hands, opColor, nem).board)?.winner === opColor);
+        if (!stillLethal) return move;
+      }
+    }
+  }
+
+  const depthMap = { easy: 1, medium: 2, hard: 4 };
+  const depth = depthMap[difficulty] || 2;
+
+  // 3. 難易度ごとのバカ度（ランダム判定）
+  if (difficulty === 'easy' && Math.random() < 0.60) {
+    return moves[Math.floor(Math.random() * moves.length)];
+  }
+  if (difficulty === 'medium' && Math.random() < 0.75) {
+    return moves[Math.floor(Math.random() * moves.length)];
+  }
+
+  // 4. Minimax法による最善手の探索
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  const nextPlayer = aiColor === 'blue' ? 'yellow' : 'blue';
+
+  for (const move of moves) {
+    const { board: nb, hands: nh } = applyMove(board, hands, aiColor, move);
+    const score = minimax(nb, nh, nextPlayer, depth - 1, -Infinity, Infinity, aiColor, false, move);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMoves = [move];
+    } else if (score === bestScore) {
+      bestMoves.push(move);
+    }
+  }
+
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+ // -------------------------------------------------------------
+  // ファンクションパック
+  // -------------------------------------------------------------
+
+
+// 🌟 重複計算とスタイル増殖を完全にゼロにした、究極に軽い Puck
+function Puck({ color, index, isGlowing = false, onClick }) {
+  const liftY = index * -14; 
+  const microZ = 4 + (index * 0.2);
+  const isBlue = color === 'blue';
+
+  /* 🌟 ID名は、基地に登録した固定のID（indexを含めない）を呼び出します */
+  const topGradId = `puckTopGrad-${color}`;
+  const sideGradId = `puckSideGrad-${color}`;
+  const defaultStroke = isBlue ? "#93c5fd" : "#fef08a";
+
+  return (
+    <div 
+      className="puck-svg-container"
+      onClick={onClick}
+      style={{ 
+        transform: `translateX(-10%) rotateZ(6deg) rotateX(-34deg) translateZ(${microZ}px) translateY(${liftY}px)`,
+        zIndex: 10 + index,
+        cursor: onClick ? 'pointer' : 'default',
+        /* 🌟 アニメーションの命令は、CSS側で用意したクラス名に切り替えるだけにします */
+        animation: isGlowing ? 'puckGlow 1.5s infinite ease-in-out' : 'none'
+      }}
+    >
+      <svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 7,34 A 25,15 0 0,0 57,34 L 57,50 A 25,15 0 0,1 7,50 Z" fill={`url(#${sideGradId})`} />
+        <ellipse cx="32" cy="34" rx="25" ry="15" fill={`url(#${topGradId})`} />
+        <ellipse 
+          cx="32" 
+          cy="34" 
+          rx="23" 
+          ry="13" 
+          fill="none" 
+          stroke={defaultStroke} 
+          strokeWidth={1.8} 
+          strokeOpacity={0.9}
+        />
+      </svg>
+    </div>
+  );
+}
+
+
+
+ // -------------------------------------------------------------
+  // ファンクションハンドパック
+  // -------------------------------------------------------------
+
+// 🌟 グラデーションの重複計算を完全に無くした、超軽量版の HandPuck
+function HandPuck({ color }) {
+  const hTopGradId = `hTopGrad-${color}`;
+  const hSideGradId = `hSideGrad-${color}`;
+
+  return (
+    <div className="w-full h-full">
+      <svg width="100%" height="100%" viewBox="0 0 60 76" xmlns="http://w3.org">
+        {/* 上で作った基地のID名（#hSideGrad-blue など）を呼び出して一瞬で色を塗る */}
+        <path d="M 5,30 A 25,15 0 0,0 55,30 L 55,48 A 25,15 0 0,1 5,48 Z" fill={`url(#${hSideGradId})`} />
+        <ellipse cx="30" cy="30" rx="25" ry="15" fill={`url(#${hTopGradId})`} stroke="#ffffff" strokeWidth="2.5" />
+        <ellipse cx="30" cy="30" rx="19" ry="11" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" strokeDasharray="4,2" />
+      </svg>
+    </div>
+  );
+}
+
+
+
+ // -------------------------------------------------------------
+  // ファンクション コインのグラデーション用
+  // -------------------------------------------------------------
+// 🎨 すべてのグラフィックスの重複計算を最初に1回だけ計算して保存しておく中央基地
+function GameSvgDefs() {
+  return (
+    <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        {/* 🔵 手札のコイン（HandPuck）用 */}
+        <radialGradient id="hTopGrad-blue" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#60a5fa" /><stop offset="40%" stopColor="#2563eb" /><stop offset="85%" stopColor="#1e3a8a" /><stop offset="100%" stopColor="#0f172a" />
+        </radialGradient>
+        <linearGradient id="hSideGrad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#1e3a8a" />
+        </linearGradient>
+
+        {/* 🟡 手札のコイン（HandPuck）用 */}
+        <radialGradient id="hTopGrad-yellow" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#fbbf24" /><stop offset="40%" stopColor="#d97706" /><stop offset="85%" stopColor="#78350f" /><stop offset="100%" stopColor="#451a03" />
+        </radialGradient>
+        <linearGradient id="hSideGrad-yellow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#92400e" />
+        </linearGradient>
+
+        {/* 🔵 盤面のコマ（Puck）用グラデーション */}
+        <radialGradient id="puckTopGrad-blue" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#93c5fd" /><stop offset="100%" stopColor="#2563eb" />
+        </radialGradient>
+        <linearGradient id="puckSideGrad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#1e3a8a" />
+        </linearGradient>
+
+        {/* 🟡 盤面のコマ（Puck）用グラデーション */}
+        <radialGradient id="puckTopGrad-yellow" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#fef08a" /><stop offset="100%" stopColor="#d97706" />
+        </radialGradient>
+        <linearGradient id="puckSideGrad-yellow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#fbbf24" /><stop offset="40%" stopColor="#b45309" /><stop offset="100%" stopColor="#78350f" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
+
+
+
+
+ // -------------------------------------------------------------
+ // ファンクションセルストック
+ // -------------------------------------------------------------
+
+  function CellStack({ 
+  stack, isSelected, isValidTarget, onClick, winHighlight, disabled,
+  rowIdx, colIdx, lastMove,
+  winResult /* 🌟 親から勝敗結果（winResult）を新しく受け取ります */
+}) {
+
+  /* 🌟 勝者が誰かによって当てるCSSクラスを切り替える */
+  let winClass = '';
+  if (winHighlight && winResult) {
+    winClass = winResult.winner === 'blue' ? 'cell-win-blue' : 'cell-win-amber';
+  }
+
+  /* 💡 'cell-win' の代わりに、上で決めた 'winClass' をクラス名に組み込みます */
+  const cls = `cell-3d ${isSelected ? 'cell-selected' : ''} ${isValidTarget ? 'cell-valid' : ''} ${winClass}`;
+  
+  return (
+    <div 
+      className={`${cls} ${disabled ? 'cell-disabled' : 'cell-interactive'}`} 
+      onClick={disabled ? undefined : onClick}
+    >
+      <div className="cell-top" />
+      <div className="cell-top" />
+      
+      {stack.map((color, i) => {
+        /* 🌟 複数枚の駒を同時に光らせるためのロジック */
+        let isGlowing = false;
+
+        if (lastMove) {
+          if (lastMove.type === 'place' && lastMove.row === rowIdx && lastMove.col === colIdx) {
+            // 配置の時は、一番上に乗った1枚だけを光らせる
+            isGlowing = (i === stack.length - 1);
+          } else if (lastMove.type === 'move' && lastMove.toRow === rowIdx && lastMove.toCol === colIdx) {
+            // 移動の時は、移動してきた枚数（count）ぶん、上から数えて光らせる
+            const moveCount = lastMove.count || 1;
+            isGlowing = (i >= stack.length - moveCount);
+          }
+        }
+
+        return (
+          <Puck 
+            key={i} 
+            color={color} 
+            index={i} 
+            rowIdx={rowIdx} 
+            colIdx={colIdx} 
+            isGlowing={isGlowing} /* 🌟 判定結果をパックに伝える */
+            onClick={disabled ? undefined : onClick}
+          />
+        );
+      })}
+      
+      {stack.length > 0 && (
+        <div className="stack-count-badge">
+          {stack.length}
         </div>
+      )}
+    </div>
+  );
+}
 
-        <!-- 🏅 アイコン ＋ 級バッジ -->
-        <div class="reward-medal-container">
 
-          <!-- ✨ メダル・王冠・トロフィー共通（CSS背景画像＋キラキラ表示） -->
-          <span class="${rewardGroup.baseClass || ''} ${color} sparkle-popup">
-            <i class="sparkle-star star-1">✦</i>
-            <i class="sparkle-star star-2">✦</i>
-            <i class="sparkle-star star-3">✦</i>
-            <i class="sparkle-star star-4">✦</i>
-          </span>
 
-          ${diffData.grade ? `<span class="badge-grade ${rankClass}">${diffData.grade}</span>` : ''}
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ムーブカウントセレクター
+ // -------------------------------------------------------------
+
+function MoveCountSelector({ maxCount, onSelect, onCancel }) {
+  return (
+    <div className="move-count-selector">
+      <span className="move-count-label">取る数:</span>
+      
+      {Array.from({ length: maxCount }, (_, i) => i + 1).map(n => (
+        <button 
+          key={n} 
+          onClick={() => onSelect(n)}
+          className="selector-btn btn-primary"
+        >
+          {n}
+        </button>
+      ))}
+      
+      <button 
+        onClick={onCancel} 
+        className="selector-btn btn-secondary"
+      >
+        戻る
+      </button>
+    </div>
+  );
+}
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ウインオーバーレイ　リザルト画面の管理
+ // -------------------------------------------------------------
+
+
+// 💡 引数に difficulty と winStreak を追加！
+function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStreak }) {
+  
+  // 🌟 クラッシュ防止：難易度の日本語表記マッピングを追加
+  const diffLabel = {
+    easy: 'よわい',
+    medium: 'ふつう',
+    hard: 'つよい'
+  };
+
+  // ★ ここを追加！勝利画面が出た瞬間に5勝判定＆ポップアップ呼出 ★
+  React.useEffect(() => {
+    // プレイヤー（青）が勝った ＆ AI対戦の時だけ実行
+    if (winner === 'blue' && gameMode === 'ai') {
+      if (typeof window.checkAndShowReward === 'function') {
+        window.checkAndShowReward(winStreak, difficulty);
+      }
+    }
+  }, [winner, gameMode, winStreak, difficulty]);
+
+  const nameMap = { 
+    blue: 'プレイヤー1(青)', 
+    yellow: gameMode === '2p' ? 'プレイヤー2(黄)' : 'CPU(黄)' 
+  };
+  const name = nameMap[winner];
+  const color = winner === 'blue' ? 'text-blue-400' : 'text-amber-400';
+
+  // 💡 CPU勝利かどうかの判定
+  const isCpuWin = gameMode !== '2p' && winner === 'yellow';
+
+  // 💡 星の色を決める（デフォルトは金）
+  let starColor = 'gold';
+
+if (gameMode === 'ai') {
+  if (difficulty === 'easy') starColor = 'bronze';   // よわい：銅の星
+  if (difficulty === 'medium') starColor = 'silver'; // ふつう：銀の星
+}
+// ※ gameMode === 'friends'（人間同士）のときはデフォルトの 'gold' のまま
+
+  return (
+    <div className="overlay-backdrop">
+      <div className="overlay-card overlay-enter flex flex-col items-center">
+
+        {/* 勝利アイコン／ロボット／星 表示エリア */}
+        <div className="victory-icon-container">
+          {isCpuWin ? (
+            // ① CPU勝利のときはロボット（文字アイコン用クラス）
+            <span className="icon-robot">🤖</span>
+          ) : (
+            // ② 人間勝利のときは★（色に応じたクラスを付与）
+            <div className={`star-medal ${starColor}`}></div>
+          )}
         </div>
-
-        <!-- 💡 マスター称号バッジ（アイコンのすぐ下） -->
-        ${diffData.title ? `<div class="badge-title-container"><span class="badge-title ${rankClass}">👑 ${diffData.title}</span></div>` : ''}
-
-        <!-- 🌟 上で変換した displayDiff を使って、HTMLのコードが最高に読みやすくなりました！ -->
-        <p style="margin: 1px 0 -15px 0; font-size: 12px; font-weight: bold; color: #cbd5e1;">
-          【 難易度：${displayDiff} 】
+        
+       {/* 1. 誰の勝ち */}
+        <p className={`text-[18px] font-black ${color} mb-2 whitespace-nowrap text-center`}>
+          {name} の勝利！
         </p>
 
-        <h2 style="margin: 25px 0 15px 0; font-size: 22px;">${winCount}勝達成！</h2>
-        
-        <!-- 1. メダル・トロフィー・王冠名 -->
-        <p style="font-size: 12px; color: #ccc; margin: 0;">${diffData.name || ''}を獲得しました！</p>
-        
-        <!-- 2. 級の授与（grade が存在する場合のみ表示） -->
-        ${diffData.grade ? `<p style="font-size: 13px; color: #bae6fd; margin: 10px 0 0 0; font-weight: 500; line-height: 1.5; white-space: normal;">「${diffData.grade}」を取得しました！</p>` : ''}
-        
-        <!-- 3. マスター称号の獲得（title が存在する場合のみ表示） -->
-        ${diffData.title ? `<p style="font-size: 12px; color: #ffd700; margin: 8px 0 0 0; font-weight: bold; line-height: 1.5; white-space: normal;">称号「${diffData.title}」が<br />授与されました！</p>` : ''}
+        {/* 💡 CPU戦のときに難易度を表示（勝利・敗北どちらでも表示） */}
+        {gameMode !== '2p' && difficulty && (
+          <p className="text-sm font-bold text-gray-300 mb-3">
+            【難易度： {diffLabel[difficulty] || difficulty} 】
+          </p>
+        )}
 
-        <!-- 💡 ボタン（上下マージンを上20px・下10pxに拡張） -->
-        <button class="reward-close-btn" onclick="closeRewardModal()" style="margin: 30px 0 20px 0;">受け取る！</button>
+        {/* 💡 人間勝利時のみ通算勝利数を表示 */}
+        {winStreak > 0 && !isCpuWin && (
+          <p className="streak-count-text">TOTAL: {winStreak}勝達成！</p>
+        )}
+       
+        {/* 2. ゲーム終了 */}
+        <h2 className="text-base font-bold text-gray-400 mt-2 mb-8 tracking-widest">
+          — ゲーム終了 —
+        </h2>
+        
+        {/* 3. ボタンエリア */}
+        <div className="flex flex-col gap-3 w-full items-center">
+          {/* もう一度遊ぶボタン */}
+          <button onClick={onReset} className="overlay-btn w-full">
+            もう一度遊ぶ
+          </button>
+          {/* メニューに戻るボタン */}
+          <button onClick={backToMenu} className="overlay-btn w-full secondary">
+            メニューに戻る
+          </button>
+        </div>
+
       </div>
     </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-
-// 🎁 「受け取る！」ボタンを押した時
-function closeRewardModal() {
-  // ① これから出る紙吹雪のタイマーをストップ！
-  if (window.confettiLoop) {
-    clearInterval(window.confettiLoop);
-    window.confettiLoop = null;
-  }
-
-  // ② 今画面で舞っている紙吹雪を一瞬でピタッと完全消去！✨
-  if (typeof confetti === 'function' && typeof confetti.reset === 'function') {
-    confetti.reset();
-  }
-
-  // ④ モーダルを閉じる
-  const modal = document.getElementById('rewardModalOverlay');
-  if (modal) modal.remove();
+  );
 }
 
 
-
-// ---------------------------------------------------
-// 🏆 メニュー画面用：獲得実績コレクション（完成・絶対安全版）
-// ---------------------------------------------------
-window.AchievementCollection = function(props) {
-  var streaks = (props && props.streaks) ? props.streaks : {};
-  var e = React.createElement;
-
- // ⚙️ 9個のコレクション実績リスト定義（REWARD_CONFIGと完全連動）
-const COLLECTION_ITEMS = [
-
-  // 🥉 1段目：銅（Easy）グループ
-  { id: 'm_easy',   streak: 5,  diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-medal-icon',   colorClass: 'medal-bronze',  grade: '9級', title: null },
-  { id: 't_easy',   streak: 10, diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-bronze', grade: '8級', title: null },
-  { id: 'c_easy',   streak: 20, diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-bronze',  grade: '7級', title: 'ブロンズマスター' },
-
-  // 🥈 2段目：銀（Normal）グループ
-  { id: 'm_medium', streak: 5,  diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-medal-icon',   colorClass: 'medal-silver',  grade: '6級', title: null },
-  { id: 't_medium', streak: 10, diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-trophy-icon',  colorClass: 'trophy-silver', grade: '5級', title: null },
-  { id: 'c_medium', streak: 20, diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-crown-icon',   colorClass: 'crown-silver',  grade: '4級', title: 'シルバーマスター' },
-
-  // 🥇 3段目：金（Hard）グループ
-  { id: 'm_hard',   streak: 5,  diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-medal-icon',   colorClass: 'medal-gold',    grade: '3級', title: null },
-  { id: 't_hard',   streak: 10, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-gold',   grade: '2級', title: null },
-  { id: 'c_hard',   streak: 20, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-gold',    grade: '1級', title: 'ゴールドマスター' },
-
-];
+// -------------------------------------------------------------
+// 説明書
+// -------------------------------------------------------------
 
 
-  // 9個のカード要素を1つずつ安全に生成
-var cards = COLLECTION_ITEMS.map(function(item) {
-  var count = Number(streaks[item.diff]) || 0;
-  var isUnlocked = count >= item.streak;
+  function InstructionScreen({ onBack, hasActiveGame, onResumeGame }) {
+  return (
+   
+ <div className="instruction-container">
+     
+ <h2 className="text-xl font-black text-white mb-5 text-center border-b-2 border-gray-700 pb-3">
+        📜 公式ゲーム説明書</h2>
+
+   <div className="space-y-6 text-[14px] leading-relaxed">
+
+   <div className="instruction-section">
+
+     <h3 className="instruction-title">🏆 基本ルール（勝利条件）</h3>
+
+ <p>
+  上から見て、自分の持ち駒を縦、横、斜めのいずれかに、<strong>先に3つ並べた方が勝ち</strong>となります。<br />
+  <span style={{ fontSize: '0.9em', color: '#f59e0b', marginTop: '4px', display: 'inline-block' }}>
+    ⏱️ 思考時間は<strong>1分（60秒）</strong>まで！時間を過ぎると負けになります。
+  </span>
+</p>
+    
+  </div>
+
+    <div className="instruction-section">
+
+    <h3 className="instruction-title">🛠 3つのルールポイント</h3>
+
+    <p className="mb-3">プレイヤーは順番ごとに<strong>【1回1動作】</strong>を行うことができます。</p>
+          
+     <div className="instruction-list">
+
+  <p className="text-[20px] font-black text-amber-500 mt-2 mb-0 tracking-wide">
+     ① 相手の駒も動かせます！
+   </p>
+
+{/* 画像 d1.jpg  */}
+   <div className="w-full text-center my-0">
+     <img 
+       src="./d1.jpg" 
+       alt="相手の駒も動かせるルールの図解" 
+       className="w-full max-w-[250px] mx-auto rounded-xl border border-gray-600 shadow-md block"
+       onError={(e) => {
+         e.target.style.display = 'none';
+         console.log("d1.jpg が見つかりません。HTMLと同じフォルダにあるか確認してね！");
+       }}
+     />
+   </div>
+
+
+<p>「持ち駒を置く」か、「自分の駒を移動させる」か、あるいはマス上にある<strong>「相手の駒を移動させる」</strong>ことができます。</p>
+<p>※ マス上に置いた駒を、自分の手元に引き取る事は出来ません。また、相手の手元にある持ち駒を動かせるのは、相手のみです。</p>
+
+
+ <p className="text-[20px] font-black text-amber-500 mt-2 mb-0 tracking-wide">
+     ② 3個まで上に重ねられます！
+   </p>
+
+
+{/* 画像 d2.jpg  */}
+   <div className="w-full text-center my-0">
+     <img 
+       src="./d2.jpg" 
+       alt="相手の駒も動かせるルールの図解" 
+       className="w-full max-w-[250px] mx-auto rounded-xl border border-gray-600 shadow-md block"
+       onError={(e) => {
+         e.target.style.display = 'none';
+         console.log("d2.jpg が見つかりません。HTMLと同じフォルダにあるか確認してね！");
+       }}
+     />
+   </div>
+
+
+  <p>すでに駒があるマスにも重ねられます。ただし、1マスに重ねられるのは<strong>最大3個まで</strong>です。</p>
+
+
+<p className="text-[20px] font-black text-amber-500 mt-2 mb-0 tracking-wide">
+     ③ まとめて持って移動できます！
+   </p>
+
+{/* 画像 d3.jpg  */}
+   <div className="w-full text-center my-0">
+     <img 
+       src="./d3.jpg" 
+       alt="相手の駒も動かせるルールの図解" 
+       className="w-full max-w-[250px] mx-auto rounded-xl border border-gray-600 shadow-md block"
+       onError={(e) => {
+         e.target.style.display = 'none';
+         console.log("d3.jpg が見つかりません。HTMLと同じフォルダにあるか確認してね！");
+       }}
+     />
+   </div>
+
+
+ <p><strong>「1個〜3個重なったまま」</strong>一塊として移動させることができます。</p>
+          </div>
+        </div>
+
+      {/* 🌟 禁止事項セクション */}
+        <div className="instruction-section">
+          <h3 className="text-amber-500 font-black mb-1.5 text-[16px]">🚫 禁止事項・ルール</h3>
+          <div className="space-y-2.5">
+            <p><strong>・同手戻しの禁止:</strong><br />相手が移動させた駒をそのまま逆に戻す行為は禁止です。</p>
+            <p><strong>・下からの並び出しに注意:</strong><br />駒を移動させて退かした際に、<strong>下にあった相手の駒が3つ並んでしまう</strong>と、動かした側の負けとなります。</p>
+            <p><strong>・ドロー（引き分け）判定:</strong><br />お互いに同じ手の繰り返しでゲームが先に進まないループ状態になった時は、違う別の手で先に進むか、ドロー判定としてリセットボタンを押してゲームを最初からやり直してください。</p>
+          </div>
+        </div>
+  </div>
+
+
+        {/* 🌟 ここから追加：脳力セクション（サイズ修正版） */}
+        <div className="instruction-section mt-6 border-t border-gray-800 pt-5">
+          <h3 className="text-indigo-400 font-black mb-2 text-[16px]">🧠 こんな「脳力」が身に付きます</h3>
+          <p className="text-[11px] text-gray-400 mb-4 font-bold">
+            ※「脳力」とは、様々に考える力という意味の造語です。
+          </p>
+          
+          {/* 🌟 空間認知能力の箇条書きも、ここ全体と同じ text-sm（標準サイズ）に統一 */}
+          <div className="space-y-5 text-sm text-gray-300 leading-relaxed font-bold">
+            <p>
+              これからの現代人に必要な考える力を、大人から子供まで楽しめるゲームにしました。
+            </p>
+            
+            <div className="bg-indigo-950/40 p-4 rounded-xl border border-indigo-900/60 text-xs">
+              <span className="text-indigo-300 font-black text-sm">👨‍⚕️ 考案者プロフィール</span>
+             <p className="mt-1 text-gray-300">
+  健康療法の専門家<strong>＜息吹友也・東洋医学名誉博士＞</strong>が考案。誰もが面白く、簡単に脳力を鍛えられるゲームです。<span className="text-amber-400 font-bold ml-1">＜特許出願中＞</span>
+</p>
+            </div>
+
+           {/* 🌟 箇条書き：各項目を1つずつ独立した見出し＆説明のセットにして読みやすくしました */}
+<div className="space-y-5 pt-2">
+  
+  {/* 🔹 既存の項目 */}
+  <div className="flex items-start gap-2.5">
+    <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+    <div className="flex-1">
+      <h4 className="text-white font-black text-base mb-1">空間認知能力の発動</h4>
+      <p className="text-gray-300 leading-relaxed">
+        駒を立体に積む事で、立体的に物事を考える、注目の空間認知能力を発動できます。（空間認知能力は多方面からの思考を必要とするため脳力をフル活動しやすく、IQや運動能力にも大きな関係があると話題に。）
+      </p>
+    </div>
+  </div>
+
+  {/* 💡★ 様々な能力アップに */}
+  <div className="flex items-start gap-2.5">
+    <span className="text-indigo-400 mt-0.5 text-lg">🔹</span>
+    <div className="flex-1">
+      <h4 className="text-white font-black text-base mb-1">様々な能力アップに</h4>
+      <p className="text-gray-300 leading-relaxed">
+        空間認知能力、集中力、観察力、判断力、など総合的な洞察が身に付きます。
+      </p>
+    </div>
+  </div>
+
+       
+  {/* 🏆 勝利報酬と昇級システム */}
+              <div className="flex items-start gap-2.5">
+                <span className="text-yellow-400 mt-0.5 text-lg">🏆</span>
+                
+                <div className="flex-1">
+                  <h4 className="text-white font-black text-base mb-1">勝利を重ねて昇級＆マスター称号を獲得！</h4>
+                 <p className="text-gray-300 leading-relaxed">
+                    ＣＰＵ（コンピュータ）との対戦で勝利を重ねる毎に、昇級やマスターの称号が授与されます。<br />
+                    <br />
+                    <span className="text-amber-600 font-bold">・「よわい」</span><br />
+                      5勝：銅メダル <span className="text-sky-300 font-bold">9級</span><br />
+                     10勝：銅のトロフィー <span className="text-sky-300 font-bold">8級</span><br />
+                     20勝：銅の王冠 <span className="text-sky-300 font-bold">7級</span> ＋<br />
+                       <span className="text-amber-300 font-bold">　👑 ブロンズマスターの称号授与</span><br />
+                    <br />
+                    <span className="text-gray-200 font-bold">・「ふつう」</span><br />
+                      5勝：銀メダル <span className="text-sky-300 font-bold">6級</span><br />
+                     10勝：銀のトロフィー <span className="text-sky-300 font-bold">5級</span><br />
+                     20勝：銀の王冠 <span className="text-sky-300 font-bold">4級</span> ＋<br />
+                      <span className="text-amber-300 font-bold">　👑 シルバーマスターの称号授与</span><br />
+                    <br />
+                    <span className="text-yellow-400 font-bold">・「つよい」</span><br />
+                      5勝：金メダル <span className="text-sky-300 font-bold">3級</span><br />
+                     10勝：金のトロフィー <span className="text-sky-300 font-bold">2級</span><br />
+                     20勝：金の王冠 <span className="text-sky-300 font-bold">1級</span> ＋<br />
+                      <span className="text-amber-300 font-bold">　👑 ゴールドマスターの称号授与</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* ⚠️ 通算記録とリセットの注意点 */}
+              <div className="flex items-start gap-2.5">
+                <span className="text-amber-400 mt-0.5 text-lg">⚠️</span>
+                <div className="flex-1">
+                  <h4 className="text-white font-black text-base mb-1">通算記録の保存とリセット</h4>
+                  <p className="text-gray-300 leading-relaxed text-sm">
+                    通算勝利記録は自動保存されます。説明欄の一番下にある「通算勝利記録をリセットする」を実行すると、通算勝利記録がすべて0になります。元に戻せませんのでご注意ください。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 🌟 ここから追加：洞察力セクション（ここもサイズ修正版） */}
+        <div className="instruction-section mt-5 bg-amber-950/20 p-4 rounded-xl border border-amber-900/40">
+          <h3 className="text-amber-500 font-black mb-2.5 text-[16px]">🔍 面白さのポイントは「洞察力」</h3>
+          {/* 🌟 洞察力の説明も、標準サイズの text-sm に拡大 */}
+          <div className="text-sm text-gray-300 leading-relaxed font-bold space-y-3">
+            <p>
+              このゲームは、誰もが簡単に遊べるゲームでありながら、<strong>洞察力</strong>を養う事ができます。
+            </p>
+            <p className="text-gray-400">
+              自分の駒ばかり見ていると、自分の駒を動かした時に、<span className="text-amber-400 font-black">その下にあった対戦者の駒が3つ並んでしまう事</span>に気付きません。
+            </p>
+            <p className="text-rose-400">
+              🚨 うっかり駒を動かした時点で、即座に対戦者に勝ちをあげる（自爆負けする）ことになります！
+            </p>
+          </div>
+  　　　 </div>
+
+
+
+
+      <div className="flex flex-col gap-3 mt-8">
+        {hasActiveGame && (
+          <button onClick={onResumeGame} className="overlay-btn">
+            🎮 ゲームに戻る (続きから)
+          </button>
+        )}
+        <button onClick={onBack} className="btn-menu-back active:scale-95">
+          メインメニューに戻る
+        </button>
+
+
+
+
+{/* ルール説明の末尾などに配置 */}
+<div className="mt-8 pt-4 border-t border-gray-200 text-center">
+  <button
+    type="button"
+    onClick={() => {
+      const ok = window.confirm('これまでの通算勝利記録をすべてリセットしますか？\n（この操作は取り消せません）');
+      if (ok) {
+        // 1. ストレージからデータを消去
+        localStorage.removeItem('game_streaks');
+        
+        alert('通算勝利記録をリセットしました。');
+        
+        // 2. 画面を自動リロード（保存データが消えた状態で初期化・再描画されます！）
+        window.location.reload();
+      }
+    }}
+    className="text-xs text-red-500 hover:text-red-700 underline cursor-pointer transition-colors"
+  >
+    通算勝利記録をリセットする
+  </button>
+</div>
+
+
+
+      </div>
+    </div>
+  );
+}
+
+
+ // -------------------------------------------------------------
+ // ファンクションメニュースクリーン
+ // -------------------------------------------------------------
+
+
+function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInstructions, hasHistory }) {
+  // 🛠️ 1行でデバッグの有効/無効を切り替え（本番時は false に変更）
+  const IS_DEBUG = true; 
+
+  // 1. 内部State（親のstreaksと同期させつつ、デバッグ操作時に即座に再描画させる）
+  const [streaks, setLocalStreaks] = useState(propStreaks);
+
+  // 親から渡されるstreaksが変更されたら同期
+  React.useEffect(() => {
+    if (propStreaks) {
+      setLocalStreaks(propStreaks);
+    }
+  }, [propStreaks]);
+
+  // 2. 状態（State）の設定
+  const [mode, setMode] = useState(null);               
+  const [selectedDiff, setSelectedDiff] = useState(null); 
+  const [debugTapCount, setDebugTapCount] = useState(0);  
+  const [showDebug, setShowDebug] = useState(false);      
+
+  // 3. メニュー画面が開いた瞬間にスクロール位置を最上部にリセット
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, []);
+
+  // 4. 難易度選択ハンドラー
+  const handleDiffSelect = (diff) => {
+    setSelectedDiff(diff);
+    setMode('turn');
+  };
+
+  // 5. タイトル5回クリック/タップでデバッグ表示切替
+  const handleTitleTap = () => {
+    if (!IS_DEBUG) return;
+
+    const next = debugTapCount + 1;
+    if (next >= 5) {
+      setShowDebug(prev => !prev);
+      setDebugTapCount(0);
+    } else {
+      setDebugTapCount(next);
+    }
+  };
+
+  // 6. 勝利数更新用の共通処理（画面・保存・親コンポーネントを確実更新）
+  const updateStreaksData = (newStreaks) => {
+    const fresh = { ...newStreaks };
+
+    // ① ローカルState更新（画面が100%即時書き換わります）
+    setLocalStreaks(fresh);
+
+    // ② localStorageに保存
+    localStorage.setItem('game_streaks', JSON.stringify(fresh));
+
+    // ③ 親コンポーネントのsetStreaksを実行
+    if (typeof setStreaks === 'function') {
+      setStreaks(fresh);
+    }
+  };
+
+  // 7. 特定の難易度の勝利数を切り替え（トグル機能 + ポップアップ起動）
+  const toggleStreak = (diff, count) => {
+    const current = streaks[diff] || 0;
+    // すでに同じ勝利数なら0リセット、違えばその勝利数にする
+    const nextCount = current === count ? 0 : count;
+
+    const updated = { ...streaks, [diff]: nextCount };
+    updateStreaksData(updated);
+
+    // 🏆 ポップアップイベントの発生（0勝へのリセット時以外）
+    if (nextCount > 0 && typeof window.checkAndShowReward === 'function') {
+      window.checkAndShowReward(nextCount, diff);
+    }
+  };
+
+  // 8. 全リセット
+  const resetAllStreaks = () => {
+    updateStreaksData({ easy: 0, medium: 0, hard: 0 });
+  };
+
+  // 9. 全9種（最高20勝）一括解放
+  const unlockAll = () => {
+    const allMax = { easy: 20, medium: 20, hard: 20 };
+    updateStreaksData(allMax);
+
+    // 全開放時にも金メダルのポップアップを発火
+    if (typeof window.checkAndShowReward === 'function') {
+      window.checkAndShowReward(20, 'hard');
+    }
+  };
+
+  return (
+    <div className="menu-container">
+
+      {/* ① メインメニュー表示時 */}
+      {mode === null && (
+        <>
+          <div className="menu-main-content">
+            <h1 
+              onClick={handleTitleTap} 
+              className="text-[42px] font-black text-white mb-[5px] tracking-tight cursor-pointer select-none"
+              title={IS_DEBUG ? "5回クリックでデバッグ表示" : ""}
+            >
+              3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
+            </h1>
+
+          <p className="text-gray-400 text-[15px] mb-2 tracking-widest">脳力活性ゲーム！</p>
+
+<p className="text-gray-200 text-[13px] mb-7 tracking-widest font-bold">洞察力が身に付く立体３目並べ</p>
+
+
+
+
+
+
+
+            <div className="flex flex-col gap-5 w-64">
+              {hasHistory && (
+                <button onClick={() => onStart('resume', null)} className="menu-btn btn-resume animate-pulse">
+                  途中から再開
+                </button>
+
+              )}
+              <button onClick={() => onStart('2p', null)} className="menu-btn btn-2p">2人対戦</button>
+              <button onClick={() => setMode('ai')} className="menu-btn btn-ai">CPU対戦</button>
+              <button onClick={onOpenInstructions} className="menu-btn btn-sub mt-2">📄 遊び方を見る</button>
+            </div>
+          </div>
+
+          {/* 🏆 獲得実績コレクション */}
+          {window.AchievementCollection && (
+            <window.AchievementCollection streaks={streaks} />
+          )}
+        </>
+      )}
+
+      {/* ② 難易度選択画面 */}
+      {mode === 'ai' && (
+        <div className="menu-main-content">
+          <h1 
+            onClick={handleTitleTap} 
+            className="text-[42px] font-black text-white mb-[5px] tracking-tight cursor-pointer select-none"
+          >
+            3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
+          </h1>
+          <p className="text-gray-400 text-[15px] mb-6 tracking-widest">脳力活性ゲーム！</p>
+
+          <div className="flex flex-col gap-4 w-64">
+            <p className="text-gray-400 text-[14px] mb-1 font-bold">難易度を選択</p>
+            
+            <button id="btn-easy" onClick={() => handleDiffSelect('easy')} className="menu-btn bg-green-600 text-white">よわい</button>
+            <button id="btn-medium" onClick={() => handleDiffSelect('medium')} className="menu-btn bg-orange-600 text-white">ふつう</button>
+            <button id="btn-hard" onClick={() => handleDiffSelect('hard')} className="menu-btn bg-red-600 text-white">つよい</button>
+            
+            <button onClick={() => setMode(null)} className="menu-btn btn-sub mt-1">戻る</button>
+          </div>
+        </div>
+      )}
+
+      {/* ③ 先攻・後攻の選択画面 */}
+      {mode === 'turn' && (
+        <div className="menu-main-content">
+          <h1 
+            onClick={handleTitleTap} 
+            className="text-[42px] font-black text-white mb-[5px] tracking-tight cursor-pointer select-none"
+          >
+            3<span className="text-indigo-400">ライン</span><span className="text-amber-500">！</span> 
+          </h1>
+          <p className="text-gray-400 text-[15px] mb-6 tracking-widest">脳力活性ゲーム！</p>
+
+          <div className="flex flex-col gap-4 w-64">
+            <p className="text-gray-400 text-[14px] mb-1 font-bold">順番を選択</p>
+            
+            <button onClick={() => onStart('ai', selectedDiff, 'blue')} className="menu-btn bg-indigo-600 text-white">先攻</button>
+            <button onClick={() => onStart('ai', selectedDiff, 'yellow')} className="menu-btn bg-amber-600 text-white">後攻</button>
+            
+            <button onClick={() => setMode('ai')} className="menu-btn btn-sub mt-1">戻る</button>
+          </div>
+        </div>
+      )}
+
+
+      {/* 🛠️ デバッグパネル（銅・銀・金：5勝/10勝/20勝・ポップアップ連動対応） */}
+      {IS_DEBUG && showDebug && (
+        <div className="mt-6 p-4 bg-gray-900/95 border border-amber-500/50 rounded-xl w-full max-w-sm text-center z-50 shadow-2xl">
+          <p className="text-amber-400 text-xs font-bold mb-3">🛠️ 実績・ポップアップテストパネル</p>
+
+          {/* 9種類の実績切り替えボタン群（5勝/10勝/20勝） */}
+          <div className="space-y-2 text-xs mb-3">
+            {/* Easy */}
+            <div className="bg-gray-800/60 p-2 rounded-lg">
+              <p className="text-green-400 font-bold mb-1 text-left text-[11px]">🟢 よわい（Easy）</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button 
+                  onClick={() => toggleStreak('easy', 5)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.easy >= 5 && streaks.easy < 10 ? 'bg-amber-700 text-white ring-2 ring-amber-400' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥉 5勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('easy', 10)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.easy >= 10 && streaks.easy < 20 ? 'bg-slate-400 text-gray-900 ring-2 ring-slate-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥈 10勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('easy', 20)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.easy >= 20 ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥇 20勝
+                </button>
+              </div>
+            </div>
+
+            {/* Medium */}
+            <div className="bg-gray-800/60 p-2 rounded-lg">
+              <p className="text-orange-400 font-bold mb-1 text-left text-[11px]">🟠 ふつう（Medium）</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button 
+                  onClick={() => toggleStreak('medium', 5)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.medium >= 5 && streaks.medium < 10 ? 'bg-amber-700 text-white ring-2 ring-amber-400' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥉 5勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('medium', 10)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.medium >= 10 && streaks.medium < 20 ? 'bg-slate-400 text-gray-900 ring-2 ring-slate-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥈 10勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('medium', 20)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.medium >= 20 ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥇 20勝
+                </button>
+              </div>
+            </div>
+
+            {/* Hard */}
+            <div className="bg-gray-800/60 p-2 rounded-lg">
+              <p className="text-red-400 font-bold mb-1 text-left text-[11px]">🔴 つよい（Hard）</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button 
+                  onClick={() => toggleStreak('hard', 5)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.hard >= 5 && streaks.hard < 10 ? 'bg-amber-700 text-white ring-2 ring-amber-400' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥉 5勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('hard', 10)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.hard >= 10 && streaks.hard < 20 ? 'bg-slate-400 text-gray-900 ring-2 ring-slate-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥈 10勝
+                </button>
+                <button 
+                  onClick={() => toggleStreak('hard', 20)}
+                  className={`p-1.5 rounded font-bold transition-all active:scale-95 ${streaks.hard >= 20 ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-700 text-gray-300'}`}
+                >
+                  🥇 20勝
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 一括操作・リセットエリア */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <button 
+              onClick={unlockAll}
+              className="p-2 bg-amber-500 hover:bg-amber-400 text-gray-900 font-extrabold rounded text-xs transition-transform active:scale-95"
+            >
+              🏆 全9種を一括解禁
+            </button>
+            <button 
+              onClick={resetAllStreaks}
+              className="p-2 bg-gray-700 hover:bg-gray-600 text-red-300 font-bold rounded text-xs transition-transform active:scale-95"
+            >
+              🔄 全リセット
+            </button>
+          </div>
+
+          <button 
+            onClick={() => setShowDebug(false)}
+            className="text-[11px] text-gray-400 underline hover:text-white"
+          >
+            パネルをたたむ
+          </button>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+
+// ===================================================
+// ファンクション　ハンドエリア (HandArea)
+// ===================================================
+function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerLabel, disabled }) {
+  const isBlue = color === 'blue';
+
+  /* 💡【手番状態の判定】 */
+  const bgClass = isCurrentPlayer
+    ? (isBlue 
+        ? 'bg-blue-950/70 border-blue-400 animate-syncGlowBlue' 
+        : 'bg-amber-950/70 border-amber-400 animate-syncGlowAmber')
+    : 'bg-gray-900/90 border-gray-700';
+
+  /* 💡【安全なクリック処理】 */
+  const handleSelect = () => {
+    if (!disabled && isCurrentPlayer && onSelect) {
+      onSelect();
+    }
+  };
+
+  return (
+    /* 💡【手札全体の外枠カード】 */
+    <div className={`hand-card ${bgClass}`}>
+      
+      {/* 💡【上段：プレイヤー名 ＆ 手番マーク】 */}
+      <div className="hand-player-header">
+        <span className={`hand-player-name ${isCurrentPlayer ? '' : 'is-inactive'}`}>
+          {playerLabel}
+        </span>
+        
+        {isCurrentPlayer && (
+          <span className="hand-player-arrow animate-syncTriangle">
+            ◀
+          </span>
+        )}
+      </div>
+
+      {/* 💡【下段：所持している駒（コイン）の並び】 */}
+      <div className="hand-area-row">
+        <div className="hand-area-inner">
+          
+          {/* コインが1個以上ある場合 */}
+          {count > 0 ? (
+            <>
+              {/* 所持コインのリスト描画 */}
+              <div className="hand-piece-list">
+                {Array.from({ length: count }).map((_, i) => {
+                  const isSelectedTarget = isSelected && i === count - 1;
+                  
+                  return (
+                    <div 
+                      key={i} 
+                      onClick={handleSelect} 
+                      className={`hand-piece-slot ${isSelectedTarget ? 'is-selected' : ''}`}
+                    >
+                      <Puck 
+                        color={color} 
+                        index={0} 
+                        isGlowing={false} 
+                        onClick={handleSelect}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* コインの右側に枚数を表示（全角スペースを削除！） */}
+              <div className="hand-count-text">x{count}</div>
+            </>
+          ) : (
+            /* コインが0個の場合の表示 */
+            <span className="hand-empty-text">なし</span>
+          )}
+
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------
+// ファンクション　ゲームタイマー
+// -------------------------------------------------------------
+
+
+// ⏱️ 1秒ごとの更新をこの中だけに閉じ込める、独立したタイマーコンポーネント
+function GameTimer({ screen, winResult, interactionDisabled, currentPlayer, onTimeOut }) {
+  const [timeLeft, setTimeLeft] = useState(60);
+
+  // 💡 ターンが替わった（プレイヤーが変わった）時に60秒にリセット
+  useEffect(() => {
+    setTimeLeft(60);
+  }, [currentPlayer]);
+
+  // 💡 1秒ごとにタイマーを減らす処理
+  useEffect(() => {
+    // 📍 画面が「game」じゃないとき、勝敗が決まっているとき、操作不能のときはタイマーを動かさない！
+    if (screen !== 'game' || winResult || interactionDisabled) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          onTimeOut(); // 0秒になったら親コンポーネントの「時間切れ関数」を実行
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // クリーンアップ
+    return () => clearInterval(timer);
+  }, [screen, winResult, interactionDisabled, onTimeOut]);
+
+  /* 🌟 元の状態（時計アイコンやクラス名、残り時間表記）を100%そのまま再現しました */
+  return (
+    <div className={`timer-display ${timeLeft <= 10 ? 'warning' : ''}`}>
+      <span className="timer-icon">⏱️</span>
+      残り時間: {timeLeft}秒
+    </div>
+  );
+}
+
+const phaseMessagesBase = {
+  placeSelect: '配置先を選んでください',
+  moveCountSelect: '取る駒の数を選んでください',
+  moveTargetSelect: '移動先を選んでください',
+  winDelay: '決着！盤面を確認中...', 
+  gameOver: ''
+};
+
+
+
+// =============================================================
+// 🖲️ 盤面の描画とルールチェックだけを閉じ込める、独立したコンポーネント
+// =============================================================
+function GameBoard({ 
+  board, selectedCell, isValidTarget, lastMove, winLineSet, winResult, 
+  handleCellClick, interactionDisabled 
+}) {
+  return (
+    <div className="board-space-block">
+      <div className="board-scaler">
+        <div className="board-iso-grid">
+          {board.map((row, r) => row.map((cell, c) => (
+            <CellStack 
+              key={`${r}-${c}`} 
+              stack={cell} 
+              isSelected={selectedCell?.row === r && selectedCell?.col === c} 
+              isValidTarget={isValidTarget(r, c)} 
+              rowIdx={r} 
+              colIdx={c} 
+              lastMove={lastMove} 
+              winHighlight={winLineSet.has(`${r},${c}`)} 
+              winResult={winResult} 
+              onClick={() => handleCellClick(r, c)} 
+              disabled={interactionDisabled} 
+            />
+          )))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+// -------------------------------------------------------------
+// ファンクション　App　// -------------------------------------------------------------
+
+function App() {
+  const [screen, setScreen] = useState('menu');
+  const [gameMode, setGameMode] = useState('2p');
+  const [difficulty, setDifficulty] = useState(null);
+  const [board, setBoard] = useState(EMPTY_BOARD);
+  const [hands, setHands] = useState({ blue: 5, yellow: 5 });
+  const [currentPlayer, setCurrentPlayer] = useState('blue');
+  const [phase, setPhase] = useState('selectAction');
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [moveCount, setMoveCount] = useState(0);
+  const [winResult, setWinResult] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [aiThinking, setAiThinking] = useState(false);
+  const [lastMove, setLastMove] = useState(null);
+  const [hasActiveGame, setHasActiveGame] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60); // 🌟リセット用に残してOK！
+
+  const [firstPlayer, setFirstPlayer] = useState('blue');
+
+  // 🏆 1. 初期値を localStorage から取得
+  const [streaks, setStreaks] = useState(() => {
+    const saved = localStorage.getItem('game_streaks');
+    return saved ? JSON.parse(saved) : { '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 };
+  });
 
  
-  // ★王冠アイコンの「頭の上」に載せるマスター称号
-  // （メダル・トロフィーの時は null ではなく空要素にして Error #130 を完全に防ぐ！）
-  var topTitleElem;
-  if (item.title) {
-    topTitleElem = e('span', { 
-      className: 'master-top-ribbon ' + item.diff + (isUnlocked ? '' : ' locked') 
-    }, item.title);
-  } else {
-    topTitleElem = e('div', { className: 'master-top-spacer' }, ''); // 👈 これでエラー回避＆高さ揃え！
+  const aiTimerRef = useRef(null);
+  const delayTimerRef = useRef(null);
+
+  const aiColor = 'yellow';
+  const isAITurn = gameMode === 'ai' && currentPlayer === aiColor && !winResult;
+
+ 
+
+   // =============================================================
+  // 🌟【最終確定版】時間切れ用の処理（即保存対応バージョン）
+  // =============================================================
+  const handleTimeOut = useCallback(() => {
+    const winnerColor = currentPlayer === 'blue' ? 'yellow' : 'blue';
+    
+    setWinResult({ winner: winnerColor, line: [] });
+    setPhase('gameOver');
+    setShowOverlay(true);
+    setHasActiveGame(false);
+
+    // 💡 タイムアウト時：AI対戦でプレイヤー（青）が勝った時だけ加算（負けても維持）
+    if (gameMode === 'ai' && winnerColor === 'blue') {
+      const nextStreaks = {
+        ...streaks,
+        [difficulty]: (streaks[difficulty] || 0) + 1
+      };
+      setStreaks(nextStreaks);
+
+      /* 🌟 タイムアウトで勝利した瞬間もピンポイントで即ローカルストレージへ保存！ */
+      localStorage.setItem('game_streaks', JSON.stringify(nextStreaks));
+    }
+  }, [currentPlayer, gameMode, difficulty, streaks]); /* 🌟 streaks を最新の状態で保存するため、依存配列にも追加しました */
+
+
+
+
+ // -------------------------------------------------------------
+ // ファンクションスタートゲーム
+ // -------------------------------------------------------------
+
+  // 🌟 修正ポイント：手番選択ボタンから引数（startColor）を受け取れるように拡張！
+  function startGame(mode, diff, startColor = 'blue') {
+    if (mode === 'resume') { setScreen('game'); return; }
+    setGameMode(mode); setDifficulty(diff); setBoard(EMPTY_BOARD()); setHands({ blue: 5, yellow: 5 });
+
+    
+// 💡 スタート時の色を決めて、firstPlayer に保存！
+    const initialColor = mode === 'ai' ? startColor : 'blue';
+    setCurrentPlayer(initialColor); 
+    setFirstPlayer(initialColor); // ← ここを追加！
+
+
+
+    setPhase('selectAction'); setSelectedCell(null); setMoveCount(0);
+    setWinResult(null); setShowOverlay(false); setAiThinking(false); setLastMove(null);
+
+   setTimeLeft(60); // 💡 ここに60秒リセットを追加！
+
+ setScreen('game');
+    setHasActiveGame(true);
   }
 
-// ② アイコン（星の配置基準を44pxの外枠へ固定）
-  var iconClass = 'reward-icon ' + item.baseClass + ' ' + item.colorClass;
-  var iconChild = e('span', { className: iconClass });
 
-  var wrapperClass = 'achievement-icon-wrapper' + (isUnlocked ? ' sparkle-frame' : '');
-  var iconWrapper;
 
-  if (isUnlocked) {
-    // 獲得時は星4つを外枠（44pxエリア）の直下に配置
-    var star1 = e('i', { className: 'sparkle-star star-1' }, '✦');
-    var star2 = e('i', { className: 'sparkle-star star-2' }, '✦');
-    var star3 = e('i', { className: 'sparkle-star star-3' }, '✦');
-    var star4 = e('i', { className: 'sparkle-star star-4' }, '✦');
-    iconWrapper = e('div', { className: wrapperClass }, iconChild, star1, star2, star3, star4);
-  } else {
-    // 🔒 ロック時はアイコンの左下にリアルな白い鍵マークを配置
-    var lockBadge = e('svg', {
-      className: 'lock-badge',
-      viewBox: '0 0 24 24',
-      width: '18',
-      height: '18',
-      fill: 'none',
-      stroke: '#ffffff',
-      strokeWidth: '2',
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round'
-    },
-      // 鍵の本体（胴体）
-      e('rect', { x: '3', y: '10', width: '18', height: '12', rx: '2', ry: '2' }),
-      // 上のツル（アーク）
-      e('path', { d: 'M7 10V6a5 5 0 0 1 10 0v4' }),
-      // 🔑 鍵穴（円 + 下に伸びる軸）
-      e('circle', { cx: '12', cy: '15', r: '1.5', fill: '#ffffff', stroke: 'none' }),
-      e('path', { d: 'M12 16.5v2', strokeWidth: '1.8' })
-    );
-    iconWrapper = e('div', { className: wrapperClass }, iconChild, lockBadge);
+ // -------------------------------------------------------------
+ // ファンクション　バックトゥメニュー
+ // -------------------------------------------------------------
+
+  function backToMenu() {
+    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+    if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
+    setScreen('menu'); setAiThinking(false);
+  }
+
+
+// -------------------------------------------------------------
+// ファンクション　オープン・インストラクションズ・フロム・ゲーム
+// -------------------------------------------------------------
+
+  function openInstructionsFromGame() {
+    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+    setAiThinking(false); setScreen('instructions');
+  }
+
+
+// -------------------------------------------------------------
+// ここから独立した処理。最後の駒の配置、勝敗、光るエフェクト
+// -------------------------------------------------------------
+
+
+  const validTargets = useMemo(() => {
+    if (phase === 'placeSelect') return getPlaceTargets(board);
+    if ((phase === 'moveTargetSelect' || phase === 'moveCountSelect') && selectedCell)
+      return getValidTargets(board, selectedCell.row, selectedCell.col, moveCount, lastMove, currentPlayer);
+    return [];
+  }, [phase, board, selectedCell, moveCount, lastMove, currentPlayer]);
+
+  const isValidTarget = useCallback((r, c) => validTargets.some(([tr, tc]) => tr === r && tc === c), [validTargets]);
+  const winLineSet = useMemo(() => { if (!winResult) return new Set(); return new Set(winResult.line.map(([r, c]) => `${r},${c}`)); }, [winResult]);
+
+  const isLastMoveTarget = useCallback((r, c) => {
+    if (!lastMove) return false;
+    if (lastMove.type === 'place') return lastMove.row === r && lastMove.col === c;
+    else if (lastMove.type === 'move') return lastMove.toRow === r && lastMove.toCol === c;
+    return false;
+  }, [lastMove]);
+
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ドゥネクストターン　勝敗チェックと勝った時の処理
+ // -------------------------------------------------------------
+
+function doNextTurn(newBoard, newHands, move = null) {
+    const moveWithPlayer = move ? { ...move, player: currentPlayer } : null;
+    setLastMove(moveWithPlayer); 
+    const result = checkWinner(newBoard);
+
+    if (result) {
+      setWinResult(result); 
+      setPhase('winDelay'); 
+      setHasActiveGame(false);
+
+     // 💡 AI対戦でプレイヤー（青）が勝った時だけ、難易度ごとに+1（加算・負けても維持）
+      if (gameMode === 'ai' && result.winner === 'blue') {
+        const nextStreaks = {
+          ...streaks,
+          [difficulty]: (streaks[difficulty] || 0) + 1
+        };
+        setStreaks(nextStreaks);
+        
+        /* 🌟 通常勝利した瞬間だけピンポイントで即ローカルストレージへ保存！ */
+        localStorage.setItem('game_streaks', JSON.stringify(nextStreaks));
+      }
+
+      delayTimerRef.current = setTimeout(() => { 
+        setPhase('gameOver'); 
+        setShowOverlay(true); 
+      }, 2000); 
+
+    } else {
+      setCurrentPlayer(prev => prev === 'blue' ? 'yellow' : 'blue'); 
+      setPhase('selectAction');
+    }
+
+    setSelectedCell(null); 
+    setMoveCount(0);
   }
 
 
 
-  // ③ 下のテキスト情報（1行目: Easy 5勝 / 2行目: 9級）
-  var streakElem = e('div', { className: 'streak-label' }, item.diffLabel + ' ' + item.streak + '勝‼');
-  var gradeElem = e('span', { className: 'grade-badge grade-' + item.diff }, item.grade);
 
-  var infoArea = e('div', { className: 'achievement-info' }, streakElem, gradeElem);
 
-  // ④ カードの組み立て（順番：トップ称号 ➔ アイコン ➔ 下テキスト（ホバー時））
-  return e('div', {
-    key: item.id,
-    className: 'achievement-card ' + (isUnlocked ? 'unlocked' : 'locked'),
-    title: item.diffLabel + ' ' + item.streak + '勝達成 (' + item.grade + ')'
-  },  topTitleElem, iconWrapper, infoArea);
-});
 
-  // ⑤ 全体パネルの組み立て
-  return e('div', { className: 'achievement-panel' },
-    e('h3', { className: 'achievement-title' }, '🏆 獲得実績コレクション'),
-    e('div', { className: 'achievement-scroll-list' }, cards)
-  );
+ // この下は誤作動やAIの挙動などのコード
+  useEffect(() => {
+    if (!isAITurn || phase !== 'selectAction' || screen !== 'game') return;
+    setAiThinking(true);
+    aiTimerRef.current = setTimeout(() => {
+      const move = getAIMove(board, hands, aiColor, difficulty, lastMove);
+      if (!move) { setAiThinking(false); return; }
+      const { board: nb, hands: nh } = applyMove(board, hands, aiColor, move);
+      setBoard(nb); setHands(nh); setAiThinking(false); doNextTurn(nb, nh, move);
+    }, 500); 
+    return () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); };
+  }, [isAITurn, phase, board, hands, difficulty, lastMove, screen]);
+
+
+
+
+
+  const interactionDisabled = aiThinking || isAITurn || phase === 'winDelay' || phase === 'gameOver';
+
+ 
+
+ // -------------------------------------------------------------
+ // ファンクション　ハンドルハンドクリック
+ // -------------------------------------------------------------
+
+
+ function handleHandClick() {
+    if (interactionDisabled) return;
+    if (phase === 'selectAction' && hands[currentPlayer] > 0) { setPhase('placeSelect'); setSelectedCell(null); }
+    else if (phase === 'placeSelect') { setPhase('selectAction'); setSelectedCell(null); }
+  }
+
+
+
+
+
+
+// 💡 デバッグ用：コンソールから勝利画面やクラッカー演出を即座にテストする
+useEffect(() => {
+  // ① 数字を変えるだけの関数
+  window.setWins = (count = 10, targetDiff = null) => {
+    const activeDiff = targetDiff || difficulty || 'easy';
+    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
+    console.log(`✅ [デバッグ] 難易度 "${activeDiff}" の勝利数を ${count} に変更しました`);
+  };
+
+  // ② 【✨完全版】画面も切り替えて勝利画面＆演出を表示させる関数
+  window.testWin = (count = 10, targetDiff = null) => {
+    const activeDiff = targetDiff || difficulty || 'easy';
+
+    // 1. 難易度・モード・画面をゲーム画面に設定
+    if (typeof setDifficulty === 'function') setDifficulty(activeDiff);
+    if (typeof setGameMode === 'function') setGameMode('ai');
+    if (typeof setScreen === 'function') setScreen('game'); // 💡 ゲーム画面に強制移動
+
+    // 2. 勝利数をセット
+    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
+
+    // 3. プレイヤー（青）の勝利状態をセット
+    setWinResult({ 
+      winner: 'blue',
+      line: [],
+      winningLine: [],
+      winningCells: []
+    });
+
+    // 4. 勝利画面とオーバーレイを表示フェーズに切り替え！
+    setPhase('gameOver');
+    setShowOverlay(true);
+
+    console.log(`🎉 [テスト実行] 難易度 "${activeDiff}" を ${count} 勝にして勝利画面を表示しました！`);
+  };
+
+ // ③ リセット関数（デバッグ用）
+window.resetWins = () => {
+  localStorage.removeItem('game_streaks');
+  setStreaks({ '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 });
+  console.log('🧹 [デバッグ] 通算勝利数をすべてリセットしました');
+  
+  // 👈 コンソールから実行した時も自動で画面を更新！
+  window.location.reload(); 
 };
+
+}, [difficulty]);
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ハンドルセルクリック
+ // -------------------------------------------------------------
+
+ 
+ function handleCellClick(row, col) {
+    if (interactionDisabled || winResult) return;
+    
+   if (phase === 'selectAction') {
+      const stackHeight = board[row][col].length;
+      if (stackHeight === 0) return;
+
+      setSelectedCell({ row, col });
+
+      if (stackHeight === 1) {
+        setMoveCount(1); // 👈 1枚に固定
+        setPhase('moveTargetSelect');
+      } else {
+        setMoveCount(0); // 👈 2枚以上の時は一旦0にリセットして選択画面へ
+        setPhase('moveCountSelect');
+      }
+
+    } else if (phase === 'placeSelect') {
+      if (!isValidTarget(row, col)) return;
+      const newBoard = cloneBoard(board);
+      newBoard[row][col].push(currentPlayer);
+      const newHands = { ...hands, [currentPlayer]: hands[currentPlayer] - 1 };
+      setBoard(newBoard); setHands(newHands); doNextTurn(newBoard, newHands, { type: 'place', row, col });
+
+    } else if (phase === 'moveCountSelect') {
+      if (row === selectedCell.row && col === selectedCell.col) { 
+        setPhase('selectAction'); setSelectedCell(null); return; 
+      }
+      if (board[row][col].length > 0) {
+        setSelectedCell({ row, col });
+      }
+
+    } else if (phase === 'moveTargetSelect') {
+      if (row === selectedCell.row && col === selectedCell.col) { 
+        setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); return; 
+      }
+      if (!isValidTarget(row, col)) return;
+      const newBoard = cloneBoard(board);
+      const from = newBoard[selectedCell.row][selectedCell.col];
+      const pieces = from.splice(from.length - moveCount, moveCount);
+      newBoard[row][col].push(...pieces); setBoard(newBoard);
+      doNextTurn(newBoard, hands, { type: 'move', fromRow: selectedCell.row, fromCol: selectedCell.col, toRow: row, toCol: col, count: moveCount });
+    }
+  }
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ハンドルムーブカウントセレクト
+ // -------------------------------------------------------------
+
+
+// マスの動かし、キャンセルなど
+  function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
+  function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
+
+
+
+
+// ===================================================
+// 　ファンクション　リセットゲーム　 (App 内部の関数 ＆ 描画ロジック)
+// ===================================================
+
+/* 💡 ゲームリセット用関数 */
+function resetGame() {
+  if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+  if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
+  
+  setBoard(EMPTY_BOARD()); 
+  setHands({ blue: 5, yellow: 5 }); 
+
+  // 💡 リロードや対戦途中で変わった手番ではなく、「最初のスタート手番」に戻す！
+  setCurrentPlayer(firstPlayer); 
+  
+  setPhase('selectAction'); 
+  setSelectedCell(null); 
+  setMoveCount(0); 
+  setWinResult(null); 
+  setShowOverlay(false); 
+  setAiThinking(false); 
+  setLastMove(null);
+  setHasActiveGame(true);
+  setTimeLeft(60); // タイマーリセット
+}
+
+// --- メインコンポーネント(App)の描画 (return) 部分 ---
+
+const maxMovable = selectedCell ? board[selectedCell.row][selectedCell.col].length : 0;
+const turnLabel = currentPlayer === 'blue' ? 'プレイヤー1(青)' : (gameMode === '2p' ? 'プレイヤー2(黄)' : 'CPU(黄)');
+const turnColor = currentPlayer === 'blue' ? 'text-blue-400' : 'text-amber-500';
+const diffLabel = { easy: 'よわい', medium: 'ふつう', hard: 'つよい' };
+
+const phaseMessages = {
+  ...phaseMessagesBase,
+  selectAction: aiThinking ? 'CPU思考中...' : '駒をタップして配置、または移動'
+};
+
+
+/* 🌟 HTMLの中から複雑な計算を追い出し、ここでスッキリ連勝数を計算しておきます */
+const currentWinStreak = winResult 
+  ? (gameMode === '2p' ? streaks[winResult.winner === 'blue' ? '2p_blue' : '2p_yellow'] : streaks[difficulty]) 
+  : 0;
+
+
+
+return (
+  <div className="app-screen">
+  <GameSvgDefs /> 
+
+    {/* ==========================================
+        1. 画面の切り替え処理（メニュー / 説明）
+       ========================================== */}
+
+    {/* 【メニュー画面】いまの状態が 'menu' のときに表示 */}
+    {screen === 'menu' && (
+      <MenuScreen 
+        streaks={streaks} 
+        onStart={startGame} 
+        onOpenInstructions={() => setScreen('instructions')} 
+        hasHistory={hasActiveGame} 
+      />
+    )}
+
+    {/* 【説明画面】いまの状態が 'instructions' のときに表示 */}
+    {screen === 'instructions' && (
+      <InstructionScreen 
+        onBack={backToMenu} 
+        hasActiveGame={hasActiveGame} 
+        onResumeGame={() => setScreen('game')} 
+      />
+    )}
+
+    {/* ==========================================
+        2. ゲーム本番画面（ここからゲーム中の中身）
+       ========================================== */}
+
+    {/* 【ゲーム本番画面】いまの状態が 'game' のときに表示 */}    
+    {screen === 'game' && (
+      <>
+        {/* 🌟 【画面上部のヘッダーエリア（３ライン、プレイヤー】 */}
+        <div className="text-center w-full">
+
+          {/* ゲームのタイトル（3ライン！） */}
+          <h1 className="text-base font-black text-white mb-2 tracking-tight">
+            3<span className="text-indigo-400">ライン</span>！
+          </h1>
+             
+        {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
+<div className={`text-[16px] h-5 mt-0.5 mb-1 transition-all duration-300 ${
+  !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
+}`}>
+  
+  {/* 【手番 or 決着の表示切り替え】 */}
+  {!winResult ? (
+    <>
+      <span className={`font-black ${turnColor}`}>{turnLabel}</span>
+      <span className="text-gray-400 ml-1 font-bold">の番</span>
+    </>
+  ) : (
+    /* 🌟 勝者が blue なら text-blue-400、それ以外（黄/CPU）なら text-amber-500 に切り替え */
+    <span className={`font-black animate-pulse ${
+      winResult.winner === 'blue' ? 'text-blue-400' : 'text-amber-500'
+    }`}>
+      ★ WINNER ★
+    </span>
+  )}
+
+</div>
+</div>
+
+          
+{/* 🔵 P1 (青) の手札エリア */}
+ {/* 🌟 key を安全な固定値に変更しました！これでフェーズ変更時のチラつき・バグが完全に消えます */}
+        <HandArea 
+          key="game-hand-blue"
+          color="blue" 
+          count={hands.blue} 
+          isCurrentPlayer={currentPlayer === 'blue' && !winResult} 
+          isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} 
+          onSelect={handleHandClick} 
+          playerLabel="P1 青" 
+          disabled={interactionDisabled} 
+        />
+
+       
+
+        {/* 🟡 メッセージ＆操作エリア */}
+        <div className="game-message-container">
+
+          <div className={`game-message-text ${
+            !winResult 
+              ? (currentPlayer === 'blue' ? 'text-blue-200 animate-syncTextBlue' : 'text-amber-200 animate-syncTextAmber') 
+              : 'text-gray-200'
+          }`}>
+            {phaseMessages[phase]}
+          </div>
+
+          <div className="game-action-row">
+
+            {phase === 'moveCountSelect' && selectedCell && !interactionDisabled && <MoveCountSelector maxCount={maxMovable} onSelect={handleMoveCountSelect} onCancel={cancelAction} />}
+            {(phase === 'placeSelect' || phase === 'moveTargetSelect') && !interactionDisabled && <button onClick={cancelAction} className="btn-cancel">キャンセル</button>}
+          </div>
+        </div>
+
+        <GameTimer 
+  screen={screen}
+  winResult={winResult}
+  interactionDisabled={interactionDisabled}
+  currentPlayer={currentPlayer}
+  onTimeOut={handleTimeOut}
+/>
+
+        {/* 🌟 以前の長い board-space-block の塊をこれに差し替えます */}
+        <GameBoard 
+          board={board}
+          selectedCell={selectedCell}
+          isValidTarget={isValidTarget}
+          lastMove={lastMove}
+          winLineSet={winLineSet}
+          winResult={winResult}
+          handleCellClick={handleCellClick}
+          interactionDisabled={interactionDisabled}
+        />
+
+
+
+        {/* 🟡 P2 / CPU (黄) の手札エリア */}
+        {/* 🌟 こちらの key も同様に安全な固定値へ修正しました */}
+        <HandArea 
+          key="game-hand-yellow"
+          color="yellow" 
+          count={hands.yellow} 
+          isCurrentPlayer={currentPlayer === 'yellow' && !winResult} 
+          isSelected={phase === 'placeSelect' && currentPlayer === 'yellow'} 
+          onSelect={handleHandClick} 
+          playerLabel={gameMode === '2p' ? 'P2 黄' : `CPU (${diffLabel[difficulty] || 'ふつう'})`} 
+          disabled={interactionDisabled || gameMode === 'ai'} 
+        />
+
+
+<div className="flex flex-col items-center gap-2 w-full mb-auto pt-4">
+  {!winResult && (
+    <button 
+      onClick={openInstructionsFromGame} 
+      className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform"
+    >
+📄 試合を中断して説明を読む
+ </button>
+  )}
+
+  <div className="flex gap-4 mt-4">
+    <button 
+      onClick={resetGame} 
+      className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
+    >
+Reset
+</button>
+
+<button 
+onClick={backToMenu} 
+className="w-32 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all animate-none"
+    >
+メニューへ
+</button>
+</div>
+</div>
+
+
+{/* 🌟 カッコのズレを完璧に修正した最終確定版です！そのまま上書きしてください */}
+{showOverlay && winResult && (
+  <WinOverlay 
+    winner={winResult.winner} 
+    onReset={resetGame} 
+    gameMode={gameMode} 
+    backToMenu={backToMenu}
+    difficulty={difficulty}
+    winStreak={currentWinStreak} 
+  />
+)}
+
+
+
+  </>
+)}
+</div>
+);
+
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
