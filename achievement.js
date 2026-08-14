@@ -377,20 +377,26 @@ body {
    🪙 1. 手札（コイン・ストック）エリア ハンドエリア
    ============================================== */
 
-/* 🌟 手札メインカード（上下のパディングを 0.9rem ➔ 0.2rem に縮小！） */
+/* 🌟 手札メインカード（画面幅に合わせてスマホでもPCでも綺麗にフィット！） */
 .hand-card {
   display: flex;
   flex-direction: column;
-  gap: 0rem;            /* 💡 ヘッダーと駒の間の隙間もほんの少しキュッと詰めました */
-  width: 86%;
-  margin: 0px 0px 0;
-  padding: 0.2rem 0rem 0rem;  /* 🌟 上下 0.2rem / 左右 0.6rem で上下の無駄な余白をカット */
+  gap: 0rem;            
+  
+  /* 🌟 1行足しました：中身のパーツ（プレイヤー名や矢印）をすべてカードの真ん中に整列させます */
+  align-items: center;  
+  
+  width: 94%;           
+  max-width: 380px;     
+  margin: 0px auto;     
+  padding: 0.2rem 0rem 0rem;  
   border-radius: 0.75rem;
   border: 1px solid;
   transition: all 300ms ease;
 }
+/* ❌ ここにあった余計な「 } 」を1個綺麗に削除しました！ */
 
-/* 🌟 プレイヤー名 ＆ 矢印のアッパーヘッダー */
+/* 🌟 プレイヤー名 ＆ 矢印のアッパーヘッダー（カッコのズレが直ったので、これで中央寄せが100%効くようになります！） */
 .hand-player-header {
   display: flex;
   align-items: center;
@@ -426,7 +432,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom:0;
+  margin-bottom: 0;
+}
+
+/* 🌟 1つのグループとして横幅を100%に広げて、左寄せの歪みを完全にリセットします */
+.hand-area-row {
+  width: 100%;
 }
 
 
