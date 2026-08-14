@@ -60,27 +60,36 @@ body {
 
 
 
-/* ゲーム盤のスペース */
- .board-space-block { 
+
+
+/* ==========================================================================
+   ゲーム盤   ========================================================================== */
+
+
+/* 🌟 ゲーム盤のスペース */
+.board-space-block { 
   width: 100%;
-  height: 280px; 
+  height: 250px;             /* 💡 高さは250px前後でちょうど良いサイズ感に */
   display: flex; 
   justify-content: center; 
   align-items: center; 
-  margin: 0 0 15px 0; 
   position: relative; 
+
+  /* 🌟 上下にマージンを指定！ (順序: 上 左右 下) */
+  margin: -2px 0 35px 0;    /* 💡 上に10px / 下に15px の隙間 */
 }
 
-/* ゲーム盤の位置？パースペクティブ（遠近感。px分離れた位置のカメラ） */
+
+/* 🌟 カメラの視点設定（中のズレをリセット） */
 .board-scaler { 
   display: flex; 
   justify-content: center; 
   align-items: center; 
   perspective: 1000px; 
   width: 100%; 
- transform: translateY(-15px); /* 👈 マイナスを増やすとさらに上に上がる */
+  
+  /* 💡 translateY(-15px) は削除！ (外枠で上に上げているため) */
 }
-
 
 
 .board-iso-grid { 
@@ -262,6 +271,13 @@ body {
 
 
 
+/* ✨ 盤面のコマ（Puck）が直前に動いた時にフワフワ優しく光るエフェクト */
+@keyframes puckGlow {
+  0%, 100% { filter: brightness(1.0) drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 10px rgba(255,255,255,0.6)); }
+}
+
+
 
 /* 🌟 本番環境用に修正：
   puck-svg-container の中に直接 `puck-glowing-container` クラスがつく形に合わせたよ！
@@ -273,23 +289,86 @@ body {
 
 
 
+/* =============================================================
+   🏆 勝利時マスの光り分け（セルの枠と背景の発光エフェクト）
+   ============================================================= */
 
- .cell-win .cell-top { 
-   border-color: #eab308; 
-   animation: win-glow 1.0s ease-in-out infinite; }
+/* 🔵 プレイヤー1（青）が勝ったときの光り方 */
+.cell-win-blue .cell-top { 
+   border-color: #60a5fa; /* blue-400 */
+   animation: win-glow-blue 1.0s ease-in-out infinite; 
+}
+
+@keyframes win-glow-blue {
+  0%, 100% { 
+    box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.3), 0 0 15px rgba(96, 165, 250, 0.5); 
+    background: linear-gradient(135deg, #0f172a, #030712); 
+  }
+  50% { 
+    box-shadow: inset 0 0 35px rgba(96, 165, 250, 0.6), 0 0 25px rgba(96, 165, 250, 0.7); 
+    background: linear-gradient(135deg, #1e3a8a, #0f172a); 
+  } 
+}
+
+/* 🟡 プレイヤー2またはCPU（アンバー）が勝ったときの光り方 */
+.cell-win-amber .cell-top { 
+   border-color: #eab308; /* amber-500 */
+   animation: win-glow-amber 1.0s ease-in-out infinite; 
+}
+
+@keyframes win-glow-amber {
+  0%, 100% { 
+    box-shadow: inset 0 0 20px rgba(234, 179, 8, 0.3), 0 0 15px rgba(234, 179, 8, 0.5); 
+    background: linear-gradient(135deg, #3d300c, #1f1702); 
+  }
+  50% { 
+    box-shadow: inset 0 0 35px rgba(234, 179, 8, 0.6), 0 0 25px rgba(234, 179, 8, 0.7); 
+    background: linear-gradient(135deg, #665011, #332704); 
+  } 
+}
 
 
- @keyframes win-glow {
-    0%,100% { box-shadow: inset 0 0 20px rgba(234,179,8,0.3), 0 0 15px rgba(234,179,8,0.5); background: linear-gradient(135deg, #3d300c, #1f1702); }
-      50% { box-shadow: inset 0 0 35px rgba(234,179,8,0.6), 0 0 25px rgba(234,179,8,0.7); background: linear-gradient(135deg, #665011, #332704); } 
-　　 }
-    
- 
- .overlay-enter { 
-animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-    @keyframes fade-in { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+/* ===================================================
+   🌟 手番完全同期アニメーション (枠と文字を分離版)
+   =================================================== */
 
+/* 1. 手札エリア（枠線と枠外のぼんやりした影）用 */
+@keyframes syncGlowBlue {
+  0%, 100% { border-color: rgba(96,165,250,0.5); box-shadow: 0 0 10px rgba(59,130,246,0.3); }
+  50% { border-color: rgba(147,197,253,1); box-shadow: 0 0 28px rgba(59,130,246,0.9); }
+}
+
+@keyframes syncGlowAmber {
+  0%, 100% { border-color: rgba(251,191,36,0.5); box-shadow: 0 0 10px rgba(217,119,6,0.3); }
+  50% { border-color: rgba(254,240,138,1); box-shadow: 0 0 28px rgba(217,119,6,0.9); }
+}
+
+/* 2. テキスト（文字自体と発光）専用 ※四角い影はつけない */
+@keyframes syncTextBlue {
+  0%, 100% { opacity: 0.65; color: rgba(147,197,253,0.8); text-shadow: 0 0 6px rgba(59,130,246,0.4); }
+  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
+}
+
+@keyframes syncTextAmber {
+  0%, 100% { opacity: 0.65; color: rgba(254,240,138,0.8); text-shadow: 0 0 6px rgba(217,119,6,0.4); }
+  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
+}
+
+/* 3. 緑の三角（◀）用 */
+@keyframes syncTriangle {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1.0; transform: scale(1.05); }
+}
+
+/* 🌟 クラスの割り当て (-20s遅延で点滅タイミングは完全同期) */
+.animate-syncGlowBlue { animation: syncGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
+.animate-syncGlowAmber { animation: syncGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
+
+.animate-syncTextBlue { animation: syncTextBlue 2s infinite ease-in-out; animation-delay: -20s; }
+.animate-syncTextAmber { animation: syncTextAmber 2s infinite ease-in-out; animation-delay: -20s; }
+
+.animate-syncTriangle { animation: syncTriangle 2s infinite ease-in-out; animation-delay: -20s; }
 
 
 
@@ -302,10 +381,10 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .hand-card {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;            /* 💡 ヘッダーと駒の間の隙間もほんの少しキュッと詰めました */
-  width: 90%;
-  margin: 4px auto 0;
-  padding: 0.2rem 0.6rem 0rem;  /* 🌟 上下 0.2rem / 左右 0.6rem で上下の無駄な余白をカット */
+  gap: 0rem;            /* 💡 ヘッダーと駒の間の隙間もほんの少しキュッと詰めました */
+  width: 80%;
+  margin: 0px 0px 0;
+  padding: 0.2rem 0rem 0rem;  /* 🌟 上下 0.2rem / 左右 0.6rem で上下の無駄な余白をカット */
   border-radius: 0.75rem;
   border: 1px solid;
   transition: all 300ms ease;
@@ -367,7 +446,7 @@ animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
   transform-origin: center center;
   transition: transform 0.2s ease-out;
-transform: scale(0.7) translateY(4px);
+transform: scale(0.7) translateY(8px);
 }
 
 /* 💡★ 選択時にピョンと跳ね上がる高さ */
@@ -433,12 +512,11 @@ transform: translateY(-3px);
   padding-right: 0.5rem;
   text-align: center;
   width: 95%;
-　margin-top:2px;
+  margin-top: 3px;     /* 👈 ここを半角スペースに修正！ */
   margin-bottom: 4px;
   white-space: pre-line;
   transition: all 0.3s ease;
 }
-
 /* ボタンが並ぶ行の高さと中央配置 */
 .game-action-row {
   height: 40px;
@@ -533,46 +611,43 @@ transform: translateY(-3px);
   background-color: #374151;
 }
 
-/* ==============================================
-   🔲 5. ポップアップ（ダイアログ・モーダル）共通
-   ============================================== */
 
-/* 画面全体を暗くすりガラス状にする背景幕 */
-.overlay-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-  padding: 16px;
+/* ==========================================
+   ⏱️ タイマー表示のスタイル（上下中央揃え版）
+   ========================================== */
+.timer-display {
+  display: flex;           /* 💡 Flexboxを使う！（これで中身を整列させる） */
+  justify-content: center; /* 💡 横方向を真ん中に寄せる */
+  align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
+  
+  font-size: 0.9rem;        /* 通常の文字サイズ */
+  font-weight: bold;       
+  color: #e0e0ff;          
+  padding-top:3px;
+　margin-bottom: 2px;     
+  text-align: center;      /* Flexboxが効かない環境への保険 */
 }
 
-/* ポップアップ中央の白い/黒いカード枠 */
-.overlay-card {
-  background: #111827; /* gray-900 */
-  border: 1px solid #374151; /* gray-700 */
-  border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-  width: 100%;
-  max-width: 320px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+/* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
+.timer-display .timer-icon {
+  font-size: 1.1rem;       /* 絵文字を大きくする */
+  margin-right: 4px;       /* 文字との間の隙間 */
+  
+  line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
+
+  /* 💡絵文字だけを少し上に持ち上げる設定 */
+  display: inline-block;       /* 👈 位置調整（transform）を確実に利かせるため */
+  transform: translateY(-2px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
 }
 
-/* ポップアップ内の決定・OKボタン */
-.overlay-btn {
-  width: 100%;
-  padding: 10px;
-  background: #4f46e5; /* indigo-600 */
-  color: #fff;
-  border-radius: 12px;
-  font-weight: 900;
-  font-size: 14px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+/* 🌟 ラスト10秒の赤点滅 */
+.timer-display.warning {
+  color: #ff4d4d;
+  animation: timerBlink 0.8s infinite alternate;
 }
+
+
 
 
 /* ==============================================
@@ -631,16 +706,24 @@ transform: translateY(-3px);
 /* 2. 📱 1画面目のメインコンテンツ（タイトル＋ボタン群） */
 .menu-main-content {
   width: 100%;
-  /* 画面1枚分の高さを確保して上下中央に綺麗に配置 */
-  min-height: calc(100dvh - 60px);
+  /* 画面いっぱいに広げすぎず、適度な高さ（または自動伸縮）にする */
+  min-height: auto; 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  padding: 20px 0 40px 0; /* 👈 上下に程よい余白を作って下の要素との被りを防ぐ */
 }
 
-/* 3. 🔘 メインボタン共通設定 */
+
+
+/* スマホなど縦長画面のときだけ中央揃えのために高さを確保 */
+@media (min-height: 600px) and (max-width: 640px) {
+  .menu-main-content {
+    min-height: calc(100dvh - 80px);
+  }
+}/* 3. 🔘 メインボタン共通設定 */
 .menu-btn {
   padding: 12px;
   border-radius: 12px;
@@ -689,90 +772,55 @@ transform: translateY(-3px);
   margin-bottom: 32px;
 }
 
-/* ==========================================
-   ⏱️ タイマー表示のスタイル（上下中央揃え版）
-   ========================================== */
-.timer-display {
-  display: flex;           /* 💡 Flexboxを使う！（これで中身を整列させる） */
-  justify-content: center; /* 💡 横方向を真ん中に寄せる */
-  align-items: center;     /* 💡 【コレが重要！】縦方向（上下）をド真ん中に揃える！ */
-  
-  font-size: 0.9rem;        /* 通常の文字サイズ */
-  font-weight: bold;       
-  color: #e0e0ff;          
-  padding-top:3px;
-　margin-bottom: 2px;     
-  text-align: center;      /* Flexboxが効かない環境への保険 */
+
+
+
+/* ==============================================
+   🔲  ポップアップ（ダイアログ・モーダル）共通
+   ============================================== */
+
+/* 画面全体を暗くすりガラス状にする背景幕 */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 16px;
 }
 
-/* ⏱️ タイマーの絵文字（アイコン）だけのスタイル */
-.timer-display .timer-icon {
-  font-size: 1.1rem;       /* 絵文字を大きくする */
-  margin-right: 4px;       /* 文字との間の隙間 */
-  
-  line-height: 1;          /* 絵文字自身の高さをスッキリさせる */
+/* ポップアップ中央の白い/黒いカード枠 */
+.overlay-card {
+  background: #111827; /* gray-900 */
+  border: 1px solid #374151; /* gray-700 */
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
 
-  /* 💡絵文字だけを少し上に持ち上げる設定 */
-  display: inline-block;       /* 👈 位置調整（transform）を確実に利かせるため */
-  transform: translateY(-4px); /* 👈 マイナスの数値で上に上がります（-1px〜-4px等で微調整OK） */
+/* ポップアップ内の決定・OKボタン */
+.overlay-btn {
+  width: 100%;
+  padding: 10px;
+  background: #4f46e5; /* indigo-600 */
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 
-/* 🌟 ラスト10秒の赤点滅 */
-.timer-display.warning {
-  color: #ff4d4d;
-  animation: timerBlink 0.8s infinite alternate;
-}
+ .overlay-enter { 
+animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-
-
-/* ===================================================
-   🌟 手番完全同期アニメーション (枠と文字を分離版)
-   =================================================== */
-
-/* 1. 手札エリア（枠線と枠外のぼんやりした影）用 */
-@keyframes syncGlowBlue {
-  0%, 100% { border-color: rgba(96,165,250,0.5); box-shadow: 0 0 10px rgba(59,130,246,0.3); }
-  50% { border-color: rgba(147,197,253,1); box-shadow: 0 0 28px rgba(59,130,246,0.9); }
-}
-
-@keyframes syncGlowAmber {
-  0%, 100% { border-color: rgba(251,191,36,0.5); box-shadow: 0 0 10px rgba(217,119,6,0.3); }
-  50% { border-color: rgba(254,240,138,1); box-shadow: 0 0 28px rgba(217,119,6,0.9); }
-}
-
-/* 2. テキスト（文字自体と発光）専用 ※四角い影はつけない */
-@keyframes syncTextBlue {
-  0%, 100% { opacity: 0.65; color: rgba(147,197,253,0.8); text-shadow: 0 0 6px rgba(59,130,246,0.4); }
-  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(147,197,253,1), 0 0 25px rgba(59,130,246,0.8); }
-}
-
-@keyframes syncTextAmber {
-  0%, 100% { opacity: 0.65; color: rgba(254,240,138,0.8); text-shadow: 0 0 6px rgba(217,119,6,0.4); }
-  50% { opacity: 1.0; color: rgba(255,255,255,1); text-shadow: 0 0 16px rgba(254,240,138,1), 0 0 25px rgba(217,119,6,0.8); }
-}
-
-/* 3. 緑の三角（◀）用 */
-@keyframes syncTriangle {
-  0%, 100% { opacity: 0.4; transform: scale(0.95); }
-  50% { opacity: 1.0; transform: scale(1.05); }
-}
-
-/* 🌟 クラスの割り当て (-20s遅延で点滅タイミングは完全同期) */
-.animate-syncGlowBlue { animation: syncGlowBlue 2s infinite ease-in-out; animation-delay: -20s; }
-.animate-syncGlowAmber { animation: syncGlowAmber 2s infinite ease-in-out; animation-delay: -20s; }
-
-.animate-syncTextBlue { animation: syncTextBlue 2s infinite ease-in-out; animation-delay: -20s; }
-.animate-syncTextAmber { animation: syncTextAmber 2s infinite ease-in-out; animation-delay: -20s; }
-
-.animate-syncTriangle { animation: syncTriangle 2s infinite ease-in-out; animation-delay: -20s; }
-
-
-
-
-
-
-
+    @keyframes fade-in { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
 
 
@@ -800,6 +848,85 @@ transform: translateY(-3px);
    display: inline-block;
   line-height: 1;
   animation: victoryPop 0.3s ease-out;
+}
+
+
+
+
+/* ==============================================
+   🌟 金・銀・銅 メダル（スター）本体 ＆ 基準点設定　ポップアップ
+   ============================================== */
+
+.star-medal {
+  /* 📐 メダルのサイズ ＆ 表示設定 */
+  width: 90px;               /* ★の大きさ */
+  height: 90px;
+  display: inline-block;      /* 幅・高さを効かせつつインライン配置 */
+  line-height: 1;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /* 💡 疑似要素（キラリ✦）を内側に配置するための基準点 */
+  position: relative;         
+
+  /* 🚀 飛び出しアニメーション */
+  animation: victoryPop 0.3s ease-out;
+}
+
+
+
+/* 🌟 キラリマークの呼び出し部分（全体で4秒周期に変更） */
+.star-medal::before,
+.star-medal::after {
+  content: '✦';
+  position: absolute;
+  font-size: 0.35em;
+  color: #ffffff;
+  text-shadow: 0 0 5px #fef08a, 0 0 8px #eab308;
+  opacity: 0;
+  pointer-events: none;
+  /* 💡 全体を 4秒 に設定（約2秒光る ＋ 約2秒お休み） */
+  animation: medalSparkle 4s infinite ease-in-out; 
+}
+
+/* 📍 1箇所目：左上（すぐスタート） */
+.star-medal::before {
+  top: 25%;
+  left: 25%;
+  animation-delay: 1s;
+}
+
+/* 📍 2箇所目：右下（2秒ずらして交互に） */
+.star-medal::after {
+  bottom: 25%;
+  right: 25%;
+  animation-delay: 3s; /* 💡 2秒後にスタート */
+}
+
+
+/* 🌟 ふわーっと光って消えるキーフレーム */
+@keyframes medalSparkle {
+  0% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  20% {                       /* 💡 約0.8秒かけて「ふわーっ」と光る */
+    transform: scale(1.0) rotate(30deg);
+    opacity: 1;
+  }
+  30% {                       /* 💡 少しだけ光の余韻を残す */
+    transform: scale(1.05) rotate(45deg);
+    opacity: 1;
+  }
+  50% {                       /* 💡 約2.0秒地点に向かって「じわーっ」と消える */
+    transform: scale(0.3) rotate(90deg);
+    opacity: 0;
+  }
+  100% {                      /* 💡 残りの 2秒間 は完全にお休み */
+    transform: scale(0.3) rotate(90deg);
+    opacity: 0;
+  }
 }
 
 
@@ -867,19 +994,6 @@ transform: translateY(-3px);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==========================================
     デバッグ用
    ========================================== */
@@ -919,29 +1033,19 @@ const EMPTY_BOARD = () => [[[], [], []], [[], [], []], [[], [], []]];
 
 
 
- function checkWinner(board) {
-      const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
-      for (const line of LINES) {
-        const colors = line.map(([r, c]) => top[r][c]);
-        if (colors[0] && colors[0] === colors[1] && colors[1] === colors[2])
-          return { winner: colors[0], line };
-      }
-      return null;
+ // 🏆 画面の演出用にも、AIの高速先読み用にも、これ1つで最速処理する統合版・勝利判定関数
+function checkWinner(board) {
+  const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
+  for (const line of LINES) {
+    const colors = line.map(([r, c]) => top[r][c]);
+    if (colors[0] && colors[0] === colors[1] && colors[1] === colors[2]) {
+      return { winner: colors[0], line }; // 揃った色とラインの座標をオブジェクトで返す
     }
+  }
+  return null;
+}
 
-
-
-    function checkWinnerSimple(board) {
-      const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
-      for (const line of LINES) {
-        const colors = line.map(([r, c]) => top[r][c]);
-        if (colors[0] && colors[0] === colors[1] && colors[1] === colors[2]) return colors[0];
-      }
-      return null;
-    }
-
-
-
+   
     function getValidTargets(board, fromRow, fromCol, count, lastMove, currentPlayer) {
       const t = [];
       for (let r = 0; r < 3; r++) {
@@ -1002,188 +1106,156 @@ const EMPTY_BOARD = () => [[[], [], []], [[], [], []], [[], [], []]];
     }
 
 
-    function applyMove(board, hands, player, move) {
-      const b = cloneBoard(board);
-      const h = { ...hands };
-      if (move.type === 'place') {
-        b[move.row][move.col].push(player);
-        h[player]--;
-      } else {
-        const from = b[move.fromRow][move.fromCol];
-        const pieces = from.splice(from.length - move.count, move.count);
-        b[move.toRow][move.toCol].push(...pieces);
-      }
-      return { board: b, hands: h };
+// -------------------------------------------------------------
+// ファンクション　アプライムーブ（着手、反映）
+// -------------------------------------------------------------
+function applyMove(board, hands, player, move) {
+  const b = cloneBoard(board);
+  const h = { ...hands };
+  if (move.type === 'place') {
+    b[move.row][move.col].push(player);
+    h[player]--;
+  } else {
+    const from = b[move.fromRow][move.fromCol];
+    const pieces = from.splice(from.length - move.count, move.count);
+    b[move.toRow][move.toCol].push(...pieces);
+  }
+  return { board: b, hands: h };
+}
+
+function evaluate(board, aiColor) {
+  const opColor = aiColor === 'yellow' ? 'blue' : 'yellow';
+  const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
+  let score = 0;
+  for (const line of LINES) {
+    const colors = line.map(([r, c]) => top[r][c]);
+    const ai = colors.filter(c => c === aiColor).length;
+    const op = colors.filter(c => c === opColor).length;
+    if (ai === 3) return 10000;
+    if (op === 3) return -10000;
+    if (op === 0) { if (ai === 2) score += 30; else if (ai === 1) score += 3; }
+    if (ai === 0) { if (op === 2) score -= 25; else if (op === 1) score -= 2; }
+  }
+  if (top[1][1] === aiColor) score += 8;
+  else if (top[1][1] === opColor) score -= 8;
+  return score;
+}
+
+// -------------------------------------------------------------
+// ファンクション　ミニマックス
+// -------------------------------------------------------------
+function minimax(board, hands, player, depth, alpha, beta, aiColor, maximizing, lastMove) {
+  /* 🌟 checkWinnerSimple から 新しい統合版 checkWinner の呼び出し（?.winner）に変えました！ */
+  const w = checkWinner(board)?.winner;
+  if (w === aiColor) return 10000 + depth;
+  if (w && w !== aiColor) return -10000 - depth;
+  if (depth === 0) return evaluate(board, aiColor);
+  const moves = getAllMoves(board, hands, player, lastMove);
+  if (moves.length === 0) return evaluate(board, aiColor);
+  const nextPlayer = player === 'blue' ? 'yellow' : 'blue';
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const { board: nb, hands: nh } = applyMove(board, hands, player, move);
+      const val = minimax(nb, nh, nextPlayer, depth - 1, alpha, beta, aiColor, false, move);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
     }
-//アプライ（着手、反映）
-
-
-    function evaluate(board, aiColor) {
-      const opColor = aiColor === 'yellow' ? 'blue' : 'yellow';
-      const top = board.map(row => row.map(cell => cell.length > 0 ? cell[cell.length - 1] : null));
-      let score = 0;
-      for (const line of LINES) {
-        const colors = line.map(([r, c]) => top[r][c]);
-        const ai = colors.filter(c => c === aiColor).length;
-        const op = colors.filter(c => c === opColor).length;
-        if (ai === 3) return 10000;
-        if (op === 3) return -10000;
-        if (op === 0) { if (ai === 2) score += 30; else if (ai === 1) score += 3; }
-        if (ai === 0) { if (op === 2) score -= 25; else if (op === 1) score -= 2; }
-      }
-      if (top[1][1] === aiColor) score += 8;
-      else if (top[1][1] === opColor) score -= 8;
-      return score;
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const { board: nb, hands: nh } = applyMove(board, hands, player, move);
+      const val = minimax(nb, nh, nextPlayer, depth - 1, alpha, beta, aiColor, true, move);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
     }
+    return best;
+  }
+}
 
-
-    function minimax(board, hands, player, depth, alpha, beta, aiColor, maximizing, lastMove) {
-      const w = checkWinnerSimple(board);
-      if (w === aiColor) return 10000 + depth;
-      if (w && w !== aiColor) return -10000 - depth;
-      if (depth === 0) return evaluate(board, aiColor);
-      const moves = getAllMoves(board, hands, player, lastMove);
-      if (moves.length === 0) return evaluate(board, aiColor);
-      const nextPlayer = player === 'blue' ? 'yellow' : 'blue';
-      if (maximizing) {
-        let best = -Infinity;
-        for (const move of moves) {
-          const { board: nb, hands: nh } = applyMove(board, hands, player, move);
-          const val = minimax(nb, nh, nextPlayer, depth - 1, alpha, beta, aiColor, false, move);
-          best = Math.max(best, val);
-          alpha = Math.max(alpha, val);
-          if (beta <= alpha) break;
-        }
-        return best;
-      } else {
-        let best = Infinity;
-        for (const move of moves) {
-          const { board: nb, hands: nh } = applyMove(board, hands, player, move);
-          const val = minimax(nb, nh, nextPlayer, depth - 1, alpha, beta, aiColor, true, move);
-          best = Math.min(best, val);
-          beta = Math.min(beta, val);
-          if (beta <= alpha) break;
-        }
-        return best;
-      }
-    }
-
-
-
-
+// -------------------------------------------------------------
+// ファンクション　ゲットAIムーブ
+// -------------------------------------------------------------
 function getAIMove(board, hands, aiColor, difficulty, lastMove) {
-
   const moves = getAllMoves(board, hands, aiColor, lastMove);
-
   if (moves.length === 0) return null;
-
   const opColor = aiColor === 'blue' ? 'yellow' : 'blue';
 
-  
-
-  // -------------------------------------------------------------
-
   // 1. 勝ち筋があれば即座に打つ
-
-  // -------------------------------------------------------------
-
   for (const move of moves) {
-  const { board: nb } = applyMove(board, hands, aiColor, move);
-   if (checkWinnerSimple(nb) === aiColor) return move; 
- }
-
- 
-
-  // -------------------------------------------------------------
+    const { board: nb } = applyMove(board, hands, aiColor, move);
+    /* 🌟 ここも ?.winner に変更！ */
+    if (checkWinner(nb)?.winner === aiColor) return move; 
+  }
 
   // 2. 守りのロジック
-
-  // -------------------------------------------------------------
-
   if (difficulty !== 'easy') {
     const enemyMoves = getAllMoves(board, hands, opColor, null);
     let lethalEnemyMove = null;
     for (const em of enemyMoves) {
       const { board: eb } = applyMove(board, hands, opColor, em);
-      if (checkWinnerSimple(eb) === opColor) { lethalEnemyMove = em; break; }
-
+      /* 🌟 ここも ?.winner に変更！ */
+      if (checkWinner(eb)?.winner === opColor) { lethalEnemyMove = em; break; }
     }
 
     if (lethalEnemyMove) {
       for (const move of moves) {
         const { board: nb } = applyMove(board, hands, aiColor, move);
         const nextEnemyMoves = getAllMoves(nb, hands, opColor, null);
-        const stillLethal = nextEnemyMoves.some(nem => checkWinnerSimple(applyMove(nb, hands, opColor, nem).board) === opColor);
-
+        /* 🌟 ここも ?.winner に変更！ */
+        const stillLethal = nextEnemyMoves.some(nem => checkWinner(applyMove(nb, hands, opColor, nem).board)?.winner === opColor);
         if (!stillLethal) return move;
       }
     }
   }
 
-
-
-  // 深さの設定はそのまま（easy:1, medium:2, hard:4）
   const depthMap = { easy: 1, medium: 2, hard: 4 };
   const depth = depthMap[difficulty] || 2;
 
-  
-
-  // -------------------------------------------------------------
-
-  // 3. 【修正箇所】難易度ごとのバカ度（ランダム判定）
-
-  // -------------------------------------------------------------
-
+  // 3. 難易度ごとのバカ度（ランダム判定）
   if (difficulty === 'easy' && Math.random() < 0.60) {
-    // イージー：60%の確率で適当な手を打つ
     return moves[Math.floor(Math.random() * moves.length)];
-
   }
-
-  
   if (difficulty === 'medium' && Math.random() < 0.75) {
-    // ミディアム：75%の確率で適当な手を打つ（★ここを変更しました！）
     return moves[Math.floor(Math.random() * moves.length)];
   }
- 
-
-  // -------------------------------------------------------------
 
   // 4. Minimax法による最善手の探索
-
-  // -------------------------------------------------------------
-
   let bestScore = -Infinity;
   let bestMoves = [];
   const nextPlayer = aiColor === 'blue' ? 'yellow' : 'blue';
 
-  
   for (const move of moves) {
     const { board: nb, hands: nh } = applyMove(board, hands, aiColor, move);
     const score = minimax(nb, nh, nextPlayer, depth - 1, -Infinity, Infinity, aiColor, false, move);
-
     if (score > bestScore) {
       bestScore = score;
       bestMoves = [move];
     } else if (score === bestScore) {
-
-     bestMoves.push(move);
+      bestMoves.push(move);
     }
   }
 
   return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
 
-} 
+ // -------------------------------------------------------------
+  // ファンクションパック
+  // -------------------------------------------------------------
 
 
-
+// 🌟 重複計算とスタイル増殖を完全にゼロにした、究極に軽い Puck
 function Puck({ color, index, isGlowing = false, onClick }) {
   const liftY = index * -14; 
   const microZ = 4 + (index * 0.2);
   const isBlue = color === 'blue';
 
-  const topGradId = `topGrad-${color}-${index}`;
-  const sideGradId = `sideGrad-${color}-${index}`;
+  /* 🌟 ID名は、基地に登録した固定のID（indexを含めない）を呼び出します */
+  const topGradId = `puckTopGrad-${color}`;
+  const sideGradId = `puckSideGrad-${color}`;
   const defaultStroke = isBlue ? "#93c5fd" : "#fef08a";
 
   return (
@@ -1194,37 +1266,11 @@ function Puck({ color, index, isGlowing = false, onClick }) {
         transform: `translateX(-10%) rotateZ(6deg) rotateX(-34deg) translateZ(${microZ}px) translateY(${liftY}px)`,
         zIndex: 10 + index,
         cursor: onClick ? 'pointer' : 'default',
-        /* 🌟 修正ポイント：isGlowingの時だけ、独自の animation を適用します */
+        /* 🌟 アニメーションの命令は、CSS側で用意したクラス名に切り替えるだけにします */
         animation: isGlowing ? 'puckGlow 1.5s infinite ease-in-out' : 'none'
       }}
     >
-      {/* 🌟 修正ポイント：透明度を一切下げない、独自の明滅アニメーション */}
-      {isGlowing && (
-        <style>{`
-          @keyframes puckGlow {
-            0%, 100% { filter: brightness(1.0) drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
-            50% { filter: brightness(1.3) drop-shadow(0 0 10px rgba(255,255,255,0.6)); }
-          }
-        `}</style>
-      )}
-
       <svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id={topGradId} cx="35%" cy="35%" r="65%">
-            {isBlue ? (
-              <><stop offset="0%" stopColor="#93c5fd" /><stop offset="100%" stopColor="#2563eb" /></>
-            ) : (
-              <><stop offset="0%" stopColor="#fef08a" /><stop offset="100%" stopColor="#d97706" /></>
-            )}
-          </radialGradient>
-          <linearGradient id={sideGradId} x1="0%" y1="0%" x2="100%" y2="0%">
-            {isBlue ? (
-              <><stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#1e3a8a" /></>
-            ) : (
-              <><stop offset="0%" stopColor="#fbbf24" /><stop offset="40%" stopColor="#b45309" /><stop offset="100%" stopColor="#78350f" /></>
-            )}
-          </linearGradient>
-        </defs>
         <path d="M 7,34 A 25,15 0 0,0 57,34 L 57,50 A 25,15 0 0,1 7,50 Z" fill={`url(#${sideGradId})`} />
         <ellipse cx="32" cy="34" rx="25" ry="15" fill={`url(#${topGradId})`} />
         <ellipse 
@@ -1244,33 +1290,19 @@ function Puck({ color, index, isGlowing = false, onClick }) {
 
 
 
+ // -------------------------------------------------------------
+  // ファンクションハンドパック
+  // -------------------------------------------------------------
 
- function HandPuck({ color }) {
-  const isBlue = color === 'blue';
+// 🌟 グラデーションの重複計算を完全に無くした、超軽量版の HandPuck
+function HandPuck({ color }) {
   const hTopGradId = `hTopGrad-${color}`;
   const hSideGradId = `hSideGrad-${color}`;
 
   return (
-
-<div className="w-full h-full">
-<svg width="100%" height="100%" viewBox="0 0 60 76" xmlns="http://www.w3.org/2000/svg">
-       
- <defs>
-          <radialGradient id={hTopGradId} cx="35%" cy="35%" r="65%">
-            {isBlue ? (
-              <><stop offset="0%" stopColor="#60a5fa" /><stop offset="40%" stopColor="#2563eb" /><stop offset="85%" stopColor="#1e3a8a" /><stop offset="100%" stopColor="#0f172a" /></>
-            ) : (
-              <><stop offset="0%" stopColor="#fbbf24" /><stop offset="40%" stopColor="#d97706" /><stop offset="85%" stopColor="#78350f" /><stop offset="100%" stopColor="#451a03" /></>
-            )}
-          </radialGradient>
-          <linearGradient id={hSideGradId} x1="0%" y1="0%" x2="100%" y2="0%">
-            {isBlue ? (
-              <><stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#1e3a8a" /></>
-            ) : (
-              <><stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#92400e" /></>
-            )}
-          </linearGradient>
-        </defs>
+    <div className="w-full h-full">
+      <svg width="100%" height="100%" viewBox="0 0 60 76" xmlns="http://w3.org">
+        {/* 上で作った基地のID名（#hSideGrad-blue など）を呼び出して一瞬で色を塗る */}
         <path d="M 5,30 A 25,15 0 0,0 55,30 L 55,48 A 25,15 0 0,1 5,48 Z" fill={`url(#${hSideGradId})`} />
         <ellipse cx="30" cy="30" rx="25" ry="15" fill={`url(#${hTopGradId})`} stroke="#ffffff" strokeWidth="2.5" />
         <ellipse cx="30" cy="30" rx="19" ry="11" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" strokeDasharray="4,2" />
@@ -1281,12 +1313,73 @@ function Puck({ color, index, isGlowing = false, onClick }) {
 
 
 
-   function CellStack({ 
+ // -------------------------------------------------------------
+  // ファンクション コインのグラデーション用
+  // -------------------------------------------------------------
+// 🎨 すべてのグラフィックスの重複計算を最初に1回だけ計算して保存しておく中央基地
+function GameSvgDefs() {
+  return (
+    <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        {/* 🔵 手札のコイン（HandPuck）用 */}
+        <radialGradient id="hTopGrad-blue" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#60a5fa" /><stop offset="40%" stopColor="#2563eb" /><stop offset="85%" stopColor="#1e3a8a" /><stop offset="100%" stopColor="#0f172a" />
+        </radialGradient>
+        <linearGradient id="hSideGrad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#1e3a8a" />
+        </linearGradient>
+
+        {/* 🟡 手札のコイン（HandPuck）用 */}
+        <radialGradient id="hTopGrad-yellow" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#fbbf24" /><stop offset="40%" stopColor="#d97706" /><stop offset="85%" stopColor="#78350f" /><stop offset="100%" stopColor="#451a03" />
+        </radialGradient>
+        <linearGradient id="hSideGrad-yellow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#92400e" />
+        </linearGradient>
+
+        {/* 🔵 盤面のコマ（Puck）用グラデーション */}
+        <radialGradient id="puckTopGrad-blue" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#93c5fd" /><stop offset="100%" stopColor="#2563eb" />
+        </radialGradient>
+        <linearGradient id="puckSideGrad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#1e3a8a" />
+        </linearGradient>
+
+        {/* 🟡 盤面のコマ（Puck）用グラデーション */}
+        <radialGradient id="puckTopGrad-yellow" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#fef08a" /><stop offset="100%" stopColor="#d97706" />
+        </radialGradient>
+        <linearGradient id="puckSideGrad-yellow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#fbbf24" /><stop offset="40%" stopColor="#b45309" /><stop offset="100%" stopColor="#78350f" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+
+
+
+
+
+ // -------------------------------------------------------------
+ // ファンクションセルストック
+ // -------------------------------------------------------------
+
+  function CellStack({ 
   stack, isSelected, isValidTarget, onClick, winHighlight, disabled,
-  rowIdx, colIdx, lastMove /* 🌟 親からマスの位置と最新の移動履歴をもらいます */
+  rowIdx, colIdx, lastMove,
+  winResult /* 🌟 親から勝敗結果（winResult）を新しく受け取ります */
 }) {
-  // 🌟 枠を光らせる「cell-last-move」はデザインから不要になったので取り除きました！
-  const cls = `cell-3d ${isSelected ? 'cell-selected' : ''} ${isValidTarget ? 'cell-valid' : ''} ${winHighlight ? 'cell-win' : ''}`;
+
+  /* 🌟 勝者が誰かによって当てるCSSクラスを切り替える */
+  let winClass = '';
+  if (winHighlight && winResult) {
+    winClass = winResult.winner === 'blue' ? 'cell-win-blue' : 'cell-win-amber';
+  }
+
+  /* 💡 'cell-win' の代わりに、上で決めた 'winClass' をクラス名に組み込みます */
+  const cls = `cell-3d ${isSelected ? 'cell-selected' : ''} ${isValidTarget ? 'cell-valid' : ''} ${winClass}`;
   
   return (
     <div 
@@ -1337,8 +1430,9 @@ function Puck({ color, index, isGlowing = false, onClick }) {
 
 
 
-
-
+ // -------------------------------------------------------------
+ // ファンクション　ムーブカウントセレクター
+ // -------------------------------------------------------------
 
 function MoveCountSelector({ maxCount, onSelect, onCancel }) {
   return (
@@ -1366,10 +1460,21 @@ function MoveCountSelector({ maxCount, onSelect, onCancel }) {
 }
 
 
+ // -------------------------------------------------------------
+ // ファンクション　ウインオーバーレイ　リザルト画面の管理
+ // -------------------------------------------------------------
+
 
 // 💡 引数に difficulty と winStreak を追加！
 function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStreak }) {
   
+  // 🌟 クラッシュ防止：難易度の日本語表記マッピングを追加
+  const diffLabel = {
+    easy: 'よわい',
+    medium: 'ふつう',
+    hard: 'つよい'
+  };
+
   // ★ ここを追加！勝利画面が出た瞬間に5勝判定＆ポップアップ呼出 ★
   React.useEffect(() => {
     // プレイヤー（青）が勝った ＆ AI対戦の時だけ実行
@@ -1380,10 +1485,9 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
     }
   }, [winner, gameMode, winStreak, difficulty]);
 
-
   const nameMap = { 
-    blue: 'プレイヤー1（青）', 
-    yellow: gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）' 
+    blue: 'プレイヤー1(青)', 
+    yellow: gameMode === '2p' ? 'プレイヤー2(黄)' : 'CPU(黄)' 
   };
   const name = nameMap[winner];
   const color = winner === 'blue' ? 'text-blue-400' : 'text-amber-400';
@@ -1391,45 +1495,47 @@ function WinOverlay({ winner, onReset, gameMode, backToMenu, difficulty, winStre
   // 💡 CPU勝利かどうかの判定
   const isCpuWin = gameMode !== '2p' && winner === 'yellow';
 
- 
-
-
-// 💡 星の色を決める（デフォルトは金）
-let starColor = 'gold';
+  // 💡 星の色を決める（デフォルトは金）
+  let starColor = 'gold';
 
 if (gameMode === 'ai') {
-  if (difficulty === 'easy') starColor = 'bronze';      // よわい：銅の星
-  if (difficulty === 'medium') starColor = 'silver';    // ふつう：銀の星
+  if (difficulty === 'easy') starColor = 'bronze';   // よわい：銅の星
+  if (difficulty === 'medium') starColor = 'silver'; // ふつう：銀の星
 }
 // ※ gameMode === 'friends'（人間同士）のときはデフォルトの 'gold' のまま
 
-return (
-  <div className="overlay-backdrop">
-    <div className="overlay-card overlay-enter flex flex-col items-center">
+  return (
+    <div className="overlay-backdrop">
+      <div className="overlay-card overlay-enter flex flex-col items-center">
 
-        
-       {/* 勝利アイコン／ロボット／星 表示エリア */}
-      <div className="victory-icon-container">
-        {isCpuWin ? (
-          // ① CPU勝利のときはロボット（文字アイコン用クラス）
-          <span className="icon-robot">🤖</span>
-        ) : (
-          // ② 人間勝利のときは★（色に応じたクラスを付与）
-          <div className={`star-medal ${starColor}`}></div>
-        )}
-
+        {/* 勝利アイコン／ロボット／星 表示エリア */}
+        <div className="victory-icon-container">
+          {isCpuWin ? (
+            // ① CPU勝利のときはロボット（文字アイコン用クラス）
+            <span className="icon-robot">🤖</span>
+          ) : (
+            // ② 人間勝利のときは★（色に応じたクラスを付与）
+            <div className={`star-medal ${starColor}`}></div>
+          )}
         </div>
         
-        {/* 1. 誰の勝ち */}
-        <p className={`text-[19px] font-black ${color} mb-3 tracking-wide whitespace-nowrap`}>
+       {/* 1. 誰の勝ち */}
+        <p className={`text-[18px] font-black ${color} mb-2 whitespace-nowrap text-center`}>
           {name} の勝利！
         </p>
 
-        {/* 💡 人間勝利時に現在の勝利数を表示（1勝目から表示） */}
-        {winStreak > 0 && !isCpuWin && (
-          <p className="streak-count-text">TOTAL: {winStreak}勝達成！ </p>
+        {/* 💡 CPU戦のときに難易度を表示（勝利・敗北どちらでも表示） */}
+        {gameMode !== '2p' && difficulty && (
+          <p className="text-sm font-bold text-gray-300 mb-3">
+            【難易度： {diffLabel[difficulty] || difficulty} 】
+          </p>
         )}
-        
+
+        {/* 💡 人間勝利時のみ通算勝利数を表示 */}
+        {winStreak > 0 && !isCpuWin && (
+          <p className="streak-count-text">TOTAL: {winStreak}勝達成！</p>
+        )}
+       
         {/* 2. ゲーム終了 */}
         <h2 className="text-base font-bold text-gray-400 mt-2 mb-8 tracking-widest">
           — ゲーム終了 —
@@ -1451,6 +1557,11 @@ return (
     </div>
   );
 }
+
+
+// -------------------------------------------------------------
+// 説明書
+// -------------------------------------------------------------
 
 
   function InstructionScreen({ onBack, hasActiveGame, onResumeGame }) {
@@ -1615,7 +1726,7 @@ return (
                 <div className="flex-1">
                   <h4 className="text-white font-black text-base mb-1">勝利を重ねて昇級＆マスター称号を獲得！</h4>
                  <p className="text-gray-300 leading-relaxed">
-                    勝利を重ねる毎に、昇級やマスターの称号が授与されます。<br />
+                    ＣＰＵ（コンピュータ）との対戦で勝利を重ねる毎に、昇級やマスターの称号が授与されます。<br />
                     <br />
                     <span className="text-amber-600 font-bold">・「よわい」</span><br />
                       5勝：銅メダル <span className="text-sky-300 font-bold">9級</span><br />
@@ -1644,16 +1755,13 @@ return (
                 <div className="flex-1">
                   <h4 className="text-white font-black text-base mb-1">通算記録の保存とリセット</h4>
                   <p className="text-gray-300 leading-relaxed text-sm">
-                    通算勝利記録は自動保存されます。説明欄の一番下にある「通算勝利記録をリセットする」を実行すると、元に戻せませんのでご注意ください。
+                    通算勝利記録は自動保存されます。説明欄の一番下にある「通算勝利記録をリセットする」を実行すると、通算勝利記録がすべて0になります。元に戻せませんのでご注意ください。
                   </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-
-
 
         {/* 🌟 ここから追加：洞察力セクション（ここもサイズ修正版） */}
         <div className="instruction-section mt-5 bg-amber-950/20 p-4 rounded-xl border border-amber-900/40">
@@ -1718,6 +1826,9 @@ return (
 }
 
 
+ // -------------------------------------------------------------
+ // ファンクションメニュースクリーン
+ // -------------------------------------------------------------
 
 
 function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInstructions, hasHistory }) {
@@ -1903,6 +2014,7 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
         </div>
       )}
 
+
       {/* 🛠️ デバッグパネル（銅・銀・金：5勝/10勝/20勝・ポップアップ連動対応） */}
       {IS_DEBUG && showDebug && (
         <div className="mt-6 p-4 bg-gray-900/95 border border-amber-500/50 rounded-xl w-full max-w-sm text-center z-50 shadow-2xl">
@@ -1935,7 +2047,7 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
               </div>
             </div>
 
-            {/* Normal */}
+            {/* Medium */}
             <div className="bg-gray-800/60 p-2 rounded-lg">
               <p className="text-orange-400 font-bold mb-1 text-left text-[11px]">🟠 ふつう（Medium）</p>
               <div className="grid grid-cols-3 gap-1.5">
@@ -2016,332 +2128,9 @@ function MenuScreen({ streaks: propStreaks = {}, setStreaks, onStart, onOpenInst
 }
 
 
-
-function App() {
-  const [screen, setScreen] = useState('menu');
-  const [gameMode, setGameMode] = useState('2p');
-  const [difficulty, setDifficulty] = useState(null);
-  const [board, setBoard] = useState(EMPTY_BOARD);
-  const [hands, setHands] = useState({ blue: 5, yellow: 5 });
-  const [currentPlayer, setCurrentPlayer] = useState('blue');
-  const [phase, setPhase] = useState('selectAction');
-  const [selectedCell, setSelectedCell] = useState(null);
-  const [moveCount, setMoveCount] = useState(0);
-  const [winResult, setWinResult] = useState(null);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [aiThinking, setAiThinking] = useState(false);
-  const [lastMove, setLastMove] = useState(null);
-  const [hasActiveGame, setHasActiveGame] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
-
- 
-
-const [firstPlayer, setFirstPlayer] = useState('blue');
-
-
-
-
-
-// 🏆 1. 初期値を localStorage から取得（保存がなければ初期オブジェクト）
-  const [streaks, setStreaks] = useState(() => {
-    const saved = localStorage.getItem('game_streaks');
-    return saved ? JSON.parse(saved) : { '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 };
-  });
-
-  // 💾 2. streaks の値が変わるたびに localStorage へ自動保存！
-  useEffect(() => {
-    localStorage.setItem('game_streaks', JSON.stringify(streaks));
-  }, [streaks]);
-
-
-
-
-
-  const aiTimerRef = useRef(null);
-  const delayTimerRef = useRef(null);
-
-  const aiColor = 'yellow';
-  const isAITurn = gameMode === 'ai' && currentPlayer === aiColor && !winResult;
-
-
-
-  // 🌟 修正ポイント：手番選択ボタンから引数（startColor）を受け取れるように拡張！
-  function startGame(mode, diff, startColor = 'blue') {
-    if (mode === 'resume') { setScreen('game'); return; }
-    setGameMode(mode); setDifficulty(diff); setBoard(EMPTY_BOARD()); setHands({ blue: 5, yellow: 5 });
-
-    
-// 💡 スタート時の色を決めて、firstPlayer に保存！
-    const initialColor = mode === 'ai' ? startColor : 'blue';
-    setCurrentPlayer(initialColor); 
-    setFirstPlayer(initialColor); // ← ここを追加！
-
-
-
-    setPhase('selectAction'); setSelectedCell(null); setMoveCount(0);
-    setWinResult(null); setShowOverlay(false); setAiThinking(false); setLastMove(null);
-
-   setTimeLeft(60); // 💡 ここに60秒リセットを追加！
-
- setScreen('game');
-    setHasActiveGame(true);
-  }
-
-  function backToMenu() {
-    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
-    if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
-    setScreen('menu'); setAiThinking(false);
-  }
-
-  function openInstructionsFromGame() {
-    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
-    setAiThinking(false); setScreen('instructions');
-  }
-
-  const validTargets = useMemo(() => {
-    if (phase === 'placeSelect') return getPlaceTargets(board);
-    if ((phase === 'moveTargetSelect' || phase === 'moveCountSelect') && selectedCell)
-      return getValidTargets(board, selectedCell.row, selectedCell.col, moveCount, lastMove, currentPlayer);
-    return [];
-  }, [phase, board, selectedCell, moveCount, lastMove, currentPlayer]);
-
-  const isValidTarget = useCallback((r, c) => validTargets.some(([tr, tc]) => tr === r && tc === c), [validTargets]);
-  const winLineSet = useMemo(() => { if (!winResult) return new Set(); return new Set(winResult.line.map(([r, c]) => `${r},${c}`)); }, [winResult]);
-
-  const isLastMoveTarget = useCallback((r, c) => {
-    if (!lastMove) return false;
-    if (lastMove.type === 'place') return lastMove.row === r && lastMove.col === c;
-    else if (lastMove.type === 'move') return lastMove.toRow === r && lastMove.toCol === c;
-    return false;
-  }, [lastMove]);
-
-
-
-function doNextTurn(newBoard, newHands, move = null) {
-    const moveWithPlayer = move ? { ...move, player: currentPlayer } : null;
-    setLastMove(moveWithPlayer); 
-    const result = checkWinner(newBoard);
-
-    if (result) {
-      setWinResult(result); 
-      setPhase('winDelay'); 
-      setHasActiveGame(false);
-
-      // 💡 AI対戦でプレイヤー（青）が勝った時だけ、難易度ごとに+1（加算・負けても維持）
-      if (gameMode === 'ai' && result.winner === 'blue') {
-        setStreaks(prev => ({
-          ...prev,
-          [difficulty]: (prev[difficulty] || 0) + 1
-        }));
-      }
-
-      delayTimerRef.current = setTimeout(() => { 
-        setPhase('gameOver'); 
-        setShowOverlay(true); 
-      }, 2000); 
-
-    } else {
-      setCurrentPlayer(prev => prev === 'blue' ? 'yellow' : 'blue'); 
-      setPhase('selectAction');
-    }
-
-    setSelectedCell(null); 
-    setMoveCount(0);
-  }
-
-
-
-
-
- // この下は誤作動やAIの挙動などのコード
-  useEffect(() => {
-    if (!isAITurn || phase !== 'selectAction' || screen !== 'game') return;
-    setAiThinking(true);
-    aiTimerRef.current = setTimeout(() => {
-      const move = getAIMove(board, hands, aiColor, difficulty, lastMove);
-      if (!move) { setAiThinking(false); return; }
-      const { board: nb, hands: nh } = applyMove(board, hands, aiColor, move);
-      setBoard(nb); setHands(nh); setAiThinking(false); doNextTurn(nb, nh, move);
-    }, 500); 
-    return () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); };
-  }, [isAITurn, phase, board, hands, difficulty, lastMove, screen]);
-
-  const interactionDisabled = aiThinking || isAITurn || phase === 'winDelay' || phase === 'gameOver';
-
-  function handleHandClick() {
-    if (interactionDisabled) return;
-    if (phase === 'selectAction' && hands[currentPlayer] > 0) { setPhase('placeSelect'); setSelectedCell(null); }
-    else if (phase === 'placeSelect') { setPhase('selectAction'); setSelectedCell(null); }
-  }
-
-
-
-// 💡 1秒ごとにタイマーを減らす処理
-useEffect(() => {
-
- return; // 👈 タイマー止め。あとで削除
-
-
- // 📍 画面が「game」じゃないとき、勝敗が決まっているとき、操作不能のときはタイマーを動かさない！
-  if (screen !== 'game' || winResult || interactionDisabled) return;
-
-
-
-// 1分（0秒）経過したらゲームオーバー処理
-  if (timeLeft <= 0) {
-    const winnerColor = currentPlayer === 'blue' ? 'yellow' : 'blue';
-    
-    setWinResult({ winner: winnerColor, line: [] });
-    setPhase('gameOver');
-    setShowOverlay(true);
-    setHasActiveGame(false);
-    setTimeLeft(60);
-
-
-
-// 💡 タイムアウト時：AI対戦でプレイヤー（青）が勝った時だけ加算（負けても維持）
-    if (gameMode === 'ai' && winnerColor === 'blue') {
-      setStreaks(prev => ({
-        ...prev,
-        [difficulty]: (prev[difficulty] || 0) + 1
-      }));
-    }
-
-    return;
-  }
-
-
-  // 1秒（1000ms）ごとに timeLeft を1減らす
-  const timer = setInterval(() => {
-    setTimeLeft((prev) => prev - 1);
-  }, 1000);
-
- // クリーンアップ
-  return () => clearInterval(timer);
-// 📍 依存配列に screen も忘れずに追加！
-}, [screen, timeLeft, winResult, interactionDisabled]);
-
-// 💡 ターンが替わった（doNextTurnなどでプレイヤーが変わった）時に60秒にリセットする
-useEffect(() => {
-  setTimeLeft(60);
-}, [currentPlayer]);
-
-
-
-
-// 💡 デバッグ用：コンソールから勝利画面やクラッカー演出を即座にテストする
-useEffect(() => {
-  // ① 数字を変えるだけの関数
-  window.setWins = (count = 10, targetDiff = null) => {
-    const activeDiff = targetDiff || difficulty || 'easy';
-    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
-    console.log(`✅ [デバッグ] 難易度 "${activeDiff}" の勝利数を ${count} に変更しました`);
-  };
-
-  // ② 【✨完全版】画面も切り替えて勝利画面＆演出を表示させる関数
-  window.testWin = (count = 10, targetDiff = null) => {
-    const activeDiff = targetDiff || difficulty || 'easy';
-
-    // 1. 難易度・モード・画面をゲーム画面に設定
-    if (typeof setDifficulty === 'function') setDifficulty(activeDiff);
-    if (typeof setGameMode === 'function') setGameMode('ai');
-    if (typeof setScreen === 'function') setScreen('game'); // 💡 ゲーム画面に強制移動
-
-    // 2. 勝利数をセット
-    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
-
-    // 3. プレイヤー（青）の勝利状態をセット
-    setWinResult({ 
-      winner: 'blue',
-      line: [],
-      winningLine: [],
-      winningCells: []
-    });
-
-    // 4. 勝利画面とオーバーレイを表示フェーズに切り替え！
-    setPhase('gameOver');
-    setShowOverlay(true);
-
-    console.log(`🎉 [テスト実行] 難易度 "${activeDiff}" を ${count} 勝にして勝利画面を表示しました！`);
-  };
-
- // ③ リセット関数（デバッグ用）
-window.resetWins = () => {
-  localStorage.removeItem('game_streaks');
-  setStreaks({ '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 });
-  console.log('🧹 [デバッグ] 通算勝利数をすべてリセットしました');
-  
-  // 👈 コンソールから実行した時も自動で画面を更新！
-  window.location.reload(); 
-};
-
-}, [difficulty]);
-
-
-
- 
- function handleCellClick(row, col) {
-    if (interactionDisabled || winResult) return;
-    
-   if (phase === 'selectAction') {
-      const stackHeight = board[row][col].length;
-      if (stackHeight === 0) return;
-
-      setSelectedCell({ row, col });
-
-      if (stackHeight === 1) {
-        setMoveCount(1); // 👈 1枚に固定
-        setPhase('moveTargetSelect');
-      } else {
-        setMoveCount(0); // 👈 2枚以上の時は一旦0にリセットして選択画面へ
-        setPhase('moveCountSelect');
-      }
-
-    } else if (phase === 'placeSelect') {
-      if (!isValidTarget(row, col)) return;
-      const newBoard = cloneBoard(board);
-      newBoard[row][col].push(currentPlayer);
-      const newHands = { ...hands, [currentPlayer]: hands[currentPlayer] - 1 };
-      setBoard(newBoard); setHands(newHands); doNextTurn(newBoard, newHands, { type: 'place', row, col });
-
-    } else if (phase === 'moveCountSelect') {
-      if (row === selectedCell.row && col === selectedCell.col) { 
-        setPhase('selectAction'); setSelectedCell(null); return; 
-      }
-      if (board[row][col].length > 0) {
-        setSelectedCell({ row, col });
-      }
-
-    } else if (phase === 'moveTargetSelect') {
-      if (row === selectedCell.row && col === selectedCell.col) { 
-        setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); return; 
-      }
-      if (!isValidTarget(row, col)) return;
-      const newBoard = cloneBoard(board);
-      const from = newBoard[selectedCell.row][selectedCell.col];
-      const pieces = from.splice(from.length - moveCount, moveCount);
-      newBoard[row][col].push(...pieces); setBoard(newBoard);
-      doNextTurn(newBoard, hands, { type: 'move', fromRow: selectedCell.row, fromCol: selectedCell.col, toRow: row, toCol: col, count: moveCount });
-    }
-  }
-
-
-
-
-// マスの動かし、キャンセルなど
-  function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
-  function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
-
-
-
-
-
-
-
 // ===================================================
-// 1. 手札エリアコンポーネント (HandArea)ハンドエリア
+// ファンクション　ハンドエリア (HandArea)
 // ===================================================
-
 function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerLabel, disabled }) {
   const isBlue = color === 'blue';
 
@@ -2421,8 +2210,448 @@ function HandArea({ color, count, isCurrentPlayer, isSelected, onSelect, playerL
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------
+// ファンクション　ゲームタイマー
+// -------------------------------------------------------------
+
+
+// ⏱️ 1秒ごとの更新をこの中だけに閉じ込める、独立したタイマーコンポーネント
+function GameTimer({ screen, winResult, interactionDisabled, currentPlayer, onTimeOut }) {
+  const [timeLeft, setTimeLeft] = useState(60);
+
+  // 💡 ターンが替わった（プレイヤーが変わった）時に60秒にリセット
+  useEffect(() => {
+    setTimeLeft(60);
+  }, [currentPlayer]);
+
+  // 💡 1秒ごとにタイマーを減らす処理
+  useEffect(() => {
+    // 📍 画面が「game」じゃないとき、勝敗が決まっているとき、操作不能のときはタイマーを動かさない！
+    if (screen !== 'game' || winResult || interactionDisabled) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          onTimeOut(); // 0秒になったら親コンポーネントの「時間切れ関数」を実行
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // クリーンアップ
+    return () => clearInterval(timer);
+  }, [screen, winResult, interactionDisabled, onTimeOut]);
+
+  /* 🌟 元の状態（時計アイコンやクラス名、残り時間表記）を100%そのまま再現しました */
+  return (
+    <div className={`timer-display ${timeLeft <= 10 ? 'warning' : ''}`}>
+      <span className="timer-icon">⏱️</span>
+      残り時間: {timeLeft}秒
+    </div>
+  );
+}
+
+const phaseMessagesBase = {
+  placeSelect: '配置先を選んでください',
+  moveCountSelect: '取る駒の数を選んでください',
+  moveTargetSelect: '移動先を選んでください',
+  winDelay: '決着！盤面を確認中...', 
+  gameOver: ''
+};
+
+
+
+// =============================================================
+// 🖲️ 盤面の描画とルールチェックだけを閉じ込める、独立したコンポーネント
+// =============================================================
+function GameBoard({ 
+  board, selectedCell, isValidTarget, lastMove, winLineSet, winResult, 
+  handleCellClick, interactionDisabled 
+}) {
+  return (
+    <div className="board-space-block">
+      <div className="board-scaler">
+        <div className="board-iso-grid">
+          {board.map((row, r) => row.map((cell, c) => (
+            <CellStack 
+              key={`${r}-${c}`} 
+              stack={cell} 
+              isSelected={selectedCell?.row === r && selectedCell?.col === c} 
+              isValidTarget={isValidTarget(r, c)} 
+              rowIdx={r} 
+              colIdx={c} 
+              lastMove={lastMove} 
+              winHighlight={winLineSet.has(`${r},${c}`)} 
+              winResult={winResult} 
+              onClick={() => handleCellClick(r, c)} 
+              disabled={interactionDisabled} 
+            />
+          )))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+// -------------------------------------------------------------
+// ファンクション　App　// -------------------------------------------------------------
+
+function App() {
+  const [screen, setScreen] = useState('menu');
+  const [gameMode, setGameMode] = useState('2p');
+  const [difficulty, setDifficulty] = useState(null);
+  const [board, setBoard] = useState(EMPTY_BOARD);
+  const [hands, setHands] = useState({ blue: 5, yellow: 5 });
+  const [currentPlayer, setCurrentPlayer] = useState('blue');
+  const [phase, setPhase] = useState('selectAction');
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [moveCount, setMoveCount] = useState(0);
+  const [winResult, setWinResult] = useState(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [aiThinking, setAiThinking] = useState(false);
+  const [lastMove, setLastMove] = useState(null);
+  const [hasActiveGame, setHasActiveGame] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60); // 🌟リセット用に残してOK！
+
+  const [firstPlayer, setFirstPlayer] = useState('blue');
+
+  // 🏆 1. 初期値を localStorage から取得
+  const [streaks, setStreaks] = useState(() => {
+    const saved = localStorage.getItem('game_streaks');
+    return saved ? JSON.parse(saved) : { '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 };
+  });
+
+ 
+  const aiTimerRef = useRef(null);
+  const delayTimerRef = useRef(null);
+
+  const aiColor = 'yellow';
+  const isAITurn = gameMode === 'ai' && currentPlayer === aiColor && !winResult;
+
+ 
+
+   // =============================================================
+  // 🌟【最終確定版】時間切れ用の処理（即保存対応バージョン）
+  // =============================================================
+  const handleTimeOut = useCallback(() => {
+    const winnerColor = currentPlayer === 'blue' ? 'yellow' : 'blue';
+    
+    setWinResult({ winner: winnerColor, line: [] });
+    setPhase('gameOver');
+    setShowOverlay(true);
+    setHasActiveGame(false);
+
+    // 💡 タイムアウト時：AI対戦でプレイヤー（青）が勝った時だけ加算（負けても維持）
+    if (gameMode === 'ai' && winnerColor === 'blue') {
+      const nextStreaks = {
+        ...streaks,
+        [difficulty]: (streaks[difficulty] || 0) + 1
+      };
+      setStreaks(nextStreaks);
+
+      /* 🌟 タイムアウトで勝利した瞬間もピンポイントで即ローカルストレージへ保存！ */
+      localStorage.setItem('game_streaks', JSON.stringify(nextStreaks));
+    }
+  }, [currentPlayer, gameMode, difficulty, streaks]); /* 🌟 streaks を最新の状態で保存するため、依存配列にも追加しました */
+
+
+
+
+ // -------------------------------------------------------------
+ // ファンクションスタートゲーム
+ // -------------------------------------------------------------
+
+  // 🌟 修正ポイント：手番選択ボタンから引数（startColor）を受け取れるように拡張！
+  function startGame(mode, diff, startColor = 'blue') {
+    if (mode === 'resume') { setScreen('game'); return; }
+    setGameMode(mode); setDifficulty(diff); setBoard(EMPTY_BOARD()); setHands({ blue: 5, yellow: 5 });
+
+    
+// 💡 スタート時の色を決めて、firstPlayer に保存！
+    const initialColor = mode === 'ai' ? startColor : 'blue';
+    setCurrentPlayer(initialColor); 
+    setFirstPlayer(initialColor); // ← ここを追加！
+
+
+
+    setPhase('selectAction'); setSelectedCell(null); setMoveCount(0);
+    setWinResult(null); setShowOverlay(false); setAiThinking(false); setLastMove(null);
+
+   setTimeLeft(60); // 💡 ここに60秒リセットを追加！
+
+ setScreen('game');
+    setHasActiveGame(true);
+  }
+
+
+
+ // -------------------------------------------------------------
+ // ファンクション　バックトゥメニュー
+ // -------------------------------------------------------------
+
+  function backToMenu() {
+    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+    if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
+    setScreen('menu'); setAiThinking(false);
+  }
+
+
+// -------------------------------------------------------------
+// ファンクション　オープン・インストラクションズ・フロム・ゲーム
+// -------------------------------------------------------------
+
+  function openInstructionsFromGame() {
+    if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+    setAiThinking(false); setScreen('instructions');
+  }
+
+
+// -------------------------------------------------------------
+// ここから独立した処理。最後の駒の配置、勝敗、光るエフェクト
+// -------------------------------------------------------------
+
+
+  const validTargets = useMemo(() => {
+    if (phase === 'placeSelect') return getPlaceTargets(board);
+    if ((phase === 'moveTargetSelect' || phase === 'moveCountSelect') && selectedCell)
+      return getValidTargets(board, selectedCell.row, selectedCell.col, moveCount, lastMove, currentPlayer);
+    return [];
+  }, [phase, board, selectedCell, moveCount, lastMove, currentPlayer]);
+
+  const isValidTarget = useCallback((r, c) => validTargets.some(([tr, tc]) => tr === r && tc === c), [validTargets]);
+  const winLineSet = useMemo(() => { if (!winResult) return new Set(); return new Set(winResult.line.map(([r, c]) => `${r},${c}`)); }, [winResult]);
+
+  const isLastMoveTarget = useCallback((r, c) => {
+    if (!lastMove) return false;
+    if (lastMove.type === 'place') return lastMove.row === r && lastMove.col === c;
+    else if (lastMove.type === 'move') return lastMove.toRow === r && lastMove.toCol === c;
+    return false;
+  }, [lastMove]);
+
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ドゥネクストターン　勝敗チェックと勝った時の処理
+ // -------------------------------------------------------------
+
+function doNextTurn(newBoard, newHands, move = null) {
+    const moveWithPlayer = move ? { ...move, player: currentPlayer } : null;
+    setLastMove(moveWithPlayer); 
+    const result = checkWinner(newBoard);
+
+    if (result) {
+      setWinResult(result); 
+      setPhase('winDelay'); 
+      setHasActiveGame(false);
+
+     // 💡 AI対戦でプレイヤー（青）が勝った時だけ、難易度ごとに+1（加算・負けても維持）
+      if (gameMode === 'ai' && result.winner === 'blue') {
+        const nextStreaks = {
+          ...streaks,
+          [difficulty]: (streaks[difficulty] || 0) + 1
+        };
+        setStreaks(nextStreaks);
+        
+        /* 🌟 通常勝利した瞬間だけピンポイントで即ローカルストレージへ保存！ */
+        localStorage.setItem('game_streaks', JSON.stringify(nextStreaks));
+      }
+
+      delayTimerRef.current = setTimeout(() => { 
+        setPhase('gameOver'); 
+        setShowOverlay(true); 
+      }, 2000); 
+
+    } else {
+      setCurrentPlayer(prev => prev === 'blue' ? 'yellow' : 'blue'); 
+      setPhase('selectAction');
+    }
+
+    setSelectedCell(null); 
+    setMoveCount(0);
+  }
+
+
+
+
+
+
+ // この下は誤作動やAIの挙動などのコード
+  useEffect(() => {
+    if (!isAITurn || phase !== 'selectAction' || screen !== 'game') return;
+    setAiThinking(true);
+    aiTimerRef.current = setTimeout(() => {
+      const move = getAIMove(board, hands, aiColor, difficulty, lastMove);
+      if (!move) { setAiThinking(false); return; }
+      const { board: nb, hands: nh } = applyMove(board, hands, aiColor, move);
+      setBoard(nb); setHands(nh); setAiThinking(false); doNextTurn(nb, nh, move);
+    }, 500); 
+    return () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); };
+  }, [isAITurn, phase, board, hands, difficulty, lastMove, screen]);
+
+
+
+
+
+  const interactionDisabled = aiThinking || isAITurn || phase === 'winDelay' || phase === 'gameOver';
+
+ 
+
+ // -------------------------------------------------------------
+ // ファンクション　ハンドルハンドクリック
+ // -------------------------------------------------------------
+
+
+ function handleHandClick() {
+    if (interactionDisabled) return;
+    if (phase === 'selectAction' && hands[currentPlayer] > 0) { setPhase('placeSelect'); setSelectedCell(null); }
+    else if (phase === 'placeSelect') { setPhase('selectAction'); setSelectedCell(null); }
+  }
+
+
+
+
+
+
+// 💡 デバッグ用：コンソールから勝利画面やクラッカー演出を即座にテストする
+useEffect(() => {
+  // ① 数字を変えるだけの関数
+  window.setWins = (count = 10, targetDiff = null) => {
+    const activeDiff = targetDiff || difficulty || 'easy';
+    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
+    console.log(`✅ [デバッグ] 難易度 "${activeDiff}" の勝利数を ${count} に変更しました`);
+  };
+
+  // ② 【✨完全版】画面も切り替えて勝利画面＆演出を表示させる関数
+  window.testWin = (count = 10, targetDiff = null) => {
+    const activeDiff = targetDiff || difficulty || 'easy';
+
+    // 1. 難易度・モード・画面をゲーム画面に設定
+    if (typeof setDifficulty === 'function') setDifficulty(activeDiff);
+    if (typeof setGameMode === 'function') setGameMode('ai');
+    if (typeof setScreen === 'function') setScreen('game'); // 💡 ゲーム画面に強制移動
+
+    // 2. 勝利数をセット
+    setStreaks(prev => ({ ...prev, [activeDiff]: count }));
+
+    // 3. プレイヤー（青）の勝利状態をセット
+    setWinResult({ 
+      winner: 'blue',
+      line: [],
+      winningLine: [],
+      winningCells: []
+    });
+
+    // 4. 勝利画面とオーバーレイを表示フェーズに切り替え！
+    setPhase('gameOver');
+    setShowOverlay(true);
+
+    console.log(`🎉 [テスト実行] 難易度 "${activeDiff}" を ${count} 勝にして勝利画面を表示しました！`);
+  };
+
+ // ③ リセット関数（デバッグ用）
+window.resetWins = () => {
+  localStorage.removeItem('game_streaks');
+  setStreaks({ '2p_blue': 0, '2p_yellow': 0, easy: 0, medium: 0, hard: 0 });
+  console.log('🧹 [デバッグ] 通算勝利数をすべてリセットしました');
+  
+  // 👈 コンソールから実行した時も自動で画面を更新！
+  window.location.reload(); 
+};
+
+}, [difficulty]);
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ハンドルセルクリック
+ // -------------------------------------------------------------
+
+ 
+ function handleCellClick(row, col) {
+    if (interactionDisabled || winResult) return;
+    
+   if (phase === 'selectAction') {
+      const stackHeight = board[row][col].length;
+      if (stackHeight === 0) return;
+
+      setSelectedCell({ row, col });
+
+      if (stackHeight === 1) {
+        setMoveCount(1); // 👈 1枚に固定
+        setPhase('moveTargetSelect');
+      } else {
+        setMoveCount(0); // 👈 2枚以上の時は一旦0にリセットして選択画面へ
+        setPhase('moveCountSelect');
+      }
+
+    } else if (phase === 'placeSelect') {
+      if (!isValidTarget(row, col)) return;
+      const newBoard = cloneBoard(board);
+      newBoard[row][col].push(currentPlayer);
+      const newHands = { ...hands, [currentPlayer]: hands[currentPlayer] - 1 };
+      setBoard(newBoard); setHands(newHands); doNextTurn(newBoard, newHands, { type: 'place', row, col });
+
+    } else if (phase === 'moveCountSelect') {
+      if (row === selectedCell.row && col === selectedCell.col) { 
+        setPhase('selectAction'); setSelectedCell(null); return; 
+      }
+      if (board[row][col].length > 0) {
+        setSelectedCell({ row, col });
+      }
+
+    } else if (phase === 'moveTargetSelect') {
+      if (row === selectedCell.row && col === selectedCell.col) { 
+        setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); return; 
+      }
+      if (!isValidTarget(row, col)) return;
+      const newBoard = cloneBoard(board);
+      const from = newBoard[selectedCell.row][selectedCell.col];
+      const pieces = from.splice(from.length - moveCount, moveCount);
+      newBoard[row][col].push(...pieces); setBoard(newBoard);
+      doNextTurn(newBoard, hands, { type: 'move', fromRow: selectedCell.row, fromCol: selectedCell.col, toRow: row, toCol: col, count: moveCount });
+    }
+  }
+
+
+ // -------------------------------------------------------------
+ // ファンクション　ハンドルムーブカウントセレクト
+ // -------------------------------------------------------------
+
+
+// マスの動かし、キャンセルなど
+  function handleMoveCountSelect(count) { setMoveCount(count); setPhase('moveTargetSelect'); }
+  function cancelAction() { setPhase('selectAction'); setSelectedCell(null); setMoveCount(0); }
+
+
+
+
 // ===================================================
-// 2. メインコンポーネント (App 内部の関数 ＆ 描画ロジック)リセットゲーム
+// 　ファンクション　リセットゲーム　 (App 内部の関数 ＆ 描画ロジック)
 // ===================================================
 
 /* 💡 ゲームリセット用関数 */
@@ -2450,21 +2679,26 @@ function resetGame() {
 // --- メインコンポーネント(App)の描画 (return) 部分 ---
 
 const maxMovable = selectedCell ? board[selectedCell.row][selectedCell.col].length : 0;
-const turnLabel = currentPlayer === 'blue' ? 'プレイヤー1（青）' : (gameMode === '2p' ? 'プレイヤー2（黄）' : 'CPU（黄）');
+const turnLabel = currentPlayer === 'blue' ? 'プレイヤー1(青)' : (gameMode === '2p' ? 'プレイヤー2(黄)' : 'CPU(黄)');
 const turnColor = currentPlayer === 'blue' ? 'text-blue-400' : 'text-amber-500';
 const diffLabel = { easy: 'よわい', medium: 'ふつう', hard: 'つよい' };
 
 const phaseMessages = {
-  selectAction: aiThinking ? 'CPU思考中...' : '駒をタップして配置、または移動',
-  placeSelect: '配置先を選んでください',
-  moveCountSelect: '取る駒の数を選んでください',
-  moveTargetSelect: '移動先を選んでください',
-  winDelay: '決着！盤面を確認中...', 
-  gameOver: ''
+  ...phaseMessagesBase,
+  selectAction: aiThinking ? 'CPU思考中...' : '駒をタップして配置、または移動'
 };
+
+
+/* 🌟 HTMLの中から複雑な計算を追い出し、ここでスッキリ連勝数を計算しておきます */
+const currentWinStreak = winResult 
+  ? (gameMode === '2p' ? streaks[winResult.winner === 'blue' ? '2p_blue' : '2p_yellow'] : streaks[difficulty]) 
+  : 0;
+
+
 
 return (
   <div className="app-screen">
+  <GameSvgDefs /> 
 
     {/* ==========================================
         1. 画面の切り替え処理（メニュー / 説明）
@@ -2504,27 +2738,43 @@ return (
             3<span className="text-indigo-400">ライン</span>！
           </h1>
              
-          {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
-          <div className={`text-[16px] h-5 mt-0.5 mb-3 transition-all duration-300 ${
-            !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
-          }`}>
-            
-            {/* 【手番 or 決着の表示切り替え】 */}
-            {!winResult ? (
-              <>
-                <span className={`font-black ${turnColor}`}>{turnLabel}</span>
-                <span className="text-gray-400 ml-1 font-bold">の番</span>
-              </>
-            ) : (
-              <span className="text-amber-500 font-black animate-pulse">★ WINNER ★</span>
-            )}
+        {/* 「〇〇の番」または「★ WINNER ★」を表示する外枠 */}
+<div className={`text-[16px] h-5 mt-0.5 mb-1 transition-all duration-300 ${
+  !winResult ? (currentPlayer === 'blue' ? 'animate-syncTextBlue' : 'animate-syncTextAmber') : ''
+}`}>
+  
+  {/* 【手番 or 決着の表示切り替え】 */}
+  {!winResult ? (
+    <>
+      <span className={`font-black ${turnColor}`}>{turnLabel}</span>
+      <span className="text-gray-400 ml-1 font-bold">の番</span>
+    </>
+  ) : (
+    /* 🌟 勝者が blue なら text-blue-400、それ以外（黄/CPU）なら text-amber-500 に切り替え */
+    <span className={`font-black animate-pulse ${
+      winResult.winner === 'blue' ? 'text-blue-400' : 'text-amber-500'
+    }`}>
+      ★ WINNER ★
+    </span>
+  )}
 
-          </div>
-        </div>
+</div>
+</div>
+
           
-        {/* 🔵 P1 (青) の手札エリア */}
-          <HandArea key={`blue-${currentPlayer}-${phase}-${hands.blue}`}
-            color="blue" count={hands.blue} isCurrentPlayer={currentPlayer === 'blue' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} onSelect={handleHandClick} playerLabel="P1 青" disabled={interactionDisabled} />
+{/* 🔵 P1 (青) の手札エリア */}
+ {/* 🌟 key を安全な固定値に変更しました！これでフェーズ変更時のチラつき・バグが完全に消えます */}
+        <HandArea 
+          key="game-hand-blue"
+          color="blue" 
+          count={hands.blue} 
+          isCurrentPlayer={currentPlayer === 'blue' && !winResult} 
+          isSelected={phase === 'placeSelect' && currentPlayer === 'blue'} 
+          onSelect={handleHandClick} 
+          playerLabel="P1 青" 
+          disabled={interactionDisabled} 
+        />
+
        
 
         {/* 🟡 メッセージ＆操作エリア */}
@@ -2545,80 +2795,90 @@ return (
           </div>
         </div>
 
-        <div className={`timer-display ${timeLeft <= 10 ? 'warning' : ''}`}>
-          <span className="timer-icon">⏱️</span>
-          残り時間: {timeLeft}秒
-        </div>
+        <GameTimer 
+  screen={screen}
+  winResult={winResult}
+  interactionDisabled={interactionDisabled}
+  currentPlayer={currentPlayer}
+  onTimeOut={handleTimeOut}
+/>
 
-        <div className="board-space-block">
-
-          <div className="board-scaler">
-
-            <div className="board-iso-grid">
-
-              {board.map((row, r) => row.map((cell, c) => (
-                <CellStack 
-                  key={`${r}-${c}`} 
-                  stack={cell} 
-                  isSelected={selectedCell?.row === r && selectedCell?.col === c} 
-                  isValidTarget={isValidTarget(r, c)} 
-                  rowIdx={r} 
-                  colIdx={c} 
-                  lastMove={lastMove} 
-                  winHighlight={winLineSet.has(`${r},${c}`)} 
-                  onClick={() => handleCellClick(r, c)} 
-                  disabled={interactionDisabled} 
-                />
-              )))}
-            </div>
-          </div>
-        </div>
-
-{/* 🟡 P2 / CPU (黄) の手札エリア */}
-     <HandArea key={`yellow-${currentPlayer}-${phase}-${hands.yellow}`}
-            color="yellow" count={hands.yellow} isCurrentPlayer={currentPlayer === 'yellow' && !winResult} isSelected={phase === 'placeSelect' && currentPlayer === 'yellow'} onSelect={handleHandClick} playerLabel={gameMode === '2p' ? 'P2 黄' : `CPU (${diffLabel[difficulty] || 'ふつう'})`} disabled={interactionDisabled || gameMode === 'ai'} />
+        {/* 🌟 以前の長い board-space-block の塊をこれに差し替えます */}
+        <GameBoard 
+          board={board}
+          selectedCell={selectedCell}
+          isValidTarget={isValidTarget}
+          lastMove={lastMove}
+          winLineSet={winLineSet}
+          winResult={winResult}
+          handleCellClick={handleCellClick}
+          interactionDisabled={interactionDisabled}
+        />
 
 
-        <div className="flex flex-col items-center gap-2 w-full mb-auto pt-2">
-          {!winResult && <button onClick={openInstructionsFromGame} className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform">📄 試合を中断して説明を読む</button>}
-           
-          <div className="flex gap-4 mt-4">
-            <button 
-              onClick={resetGame} 
-              className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
-            >
-              Reset
-            </button>
 
-            <button 
-              onClick={backToMenu} 
-              className="w-32 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all animate-none"
-            >
-              メニューへ
-            </button>
-          </div>
-        </div>
+        {/* 🟡 P2 / CPU (黄) の手札エリア */}
+        {/* 🌟 こちらの key も同様に安全な固定値へ修正しました */}
+        <HandArea 
+          key="game-hand-yellow"
+          color="yellow" 
+          count={hands.yellow} 
+          isCurrentPlayer={currentPlayer === 'yellow' && !winResult} 
+          isSelected={phase === 'placeSelect' && currentPlayer === 'yellow'} 
+          onSelect={handleHandClick} 
+          playerLabel={gameMode === '2p' ? 'P2 黄' : `CPU (${diffLabel[difficulty] || 'ふつう'})`} 
+          disabled={interactionDisabled || gameMode === 'ai'} 
+        />
 
-        {showOverlay && (
-          <WinOverlay 
-            winner={winResult.winner} 
-            onReset={resetGame} 
-            gameMode={gameMode} 
-            backToMenu={backToMenu}
-            difficulty={difficulty}
-            winStreak={
-              gameMode === '2p' 
-                ? streaks[winResult.winner === 'blue' ? '2p_blue' : '2p_yellow']
-                : streaks[difficulty]
-            } 
-          />
-        )}
-      </>
-    )}
-  </div>
+
+<div className="flex flex-col items-center gap-2 w-full mb-auto pt-4">
+  {!winResult && (
+    <button 
+      onClick={openInstructionsFromGame} 
+      className="w-full py-2 bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 rounded-xl text-sm font-black border border-indigo-800/60 shadow-sm active:scale-95 transition-transform"
+    >
+📄 試合を中断して説明を読む
+ </button>
+  )}
+
+  <div className="flex gap-4 mt-4">
+    <button 
+      onClick={resetGame} 
+      className="w-32 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all"
+    >
+Reset
+</button>
+
+<button 
+onClick={backToMenu} 
+className="w-32 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-black shadow-sm active:scale-95 transition-all animate-none"
+    >
+メニューへ
+</button>
+</div>
+</div>
+
+
+{/* 🌟 カッコのズレを完璧に修正した最終確定版です！そのまま上書きしてください */}
+{showOverlay && winResult && (
+  <WinOverlay 
+    winner={winResult.winner} 
+    onReset={resetGame} 
+    gameMode={gameMode} 
+    backToMenu={backToMenu}
+    difficulty={difficulty}
+    winStreak={currentWinStreak} 
+  />
+)}
+
+
+
+  </>
+)}
+</div>
 );
-}
 
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
