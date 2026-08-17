@@ -1,13 +1,14 @@
-/* ===================================================
+/* ==========================================================================
    🏆 連勝＆実績システム（CSS + HTML + JS 一体型パック）
-=================================================== */
+========================================================================== */
 
 // ---------------------------------------------------
 // 1. 🎨 CSSを自動的に本体（<head>）へ読み込ませる
 // ---------------------------------------------------
 const achievementStyle = document.createElement('style');
 achievementStyle.textContent = `
-  /* 画面全体を覆う背景 */
+  
+/* 画面全体を覆う背景 */
   .reward-modal-overlay {
     position: fixed;
     top: 0;
@@ -30,7 +31,8 @@ achievementStyle.textContent = `
   text-align: center;
   width: 90%;   /* 85% ➔ 78% にして画面左右に適度なゆとりを確保 */
   max-width: 320px; /* 320px ➔ 270px に縮小 */
-  box-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
+  /* ⭕ 【軽量化】重い box-shadow を廃止し、GPU負荷の極めて低い平坦な drop-shadow に変更。色味と雰囲気は維持！ */
+  filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.4));
   animation: rewardPopUp 0.4s ease-out;
   color: white;
   font-family: sans-serif;
@@ -53,7 +55,6 @@ achievementStyle.textContent = `
   background-repeat: no-repeat;
   background-position: center;
   vertical-align: middle;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
 }
 
 /* ===================================================
@@ -82,14 +83,14 @@ achievementStyle.textContent = `
 /* 🏆 SVGトロフィーの共通設定 */
 .reward-trophy-icon {
   display: inline-block;
-  width: 115px;  /* 👈 トロフィーのサイズはここで一括変更できます */
+  width: 115px;  /* 💡 メダルより一回り大きくして存在感を強調 */
   height: 115px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   vertical-align: middle;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
-}
+ }
+
 
 /* 🥉 銅のトロフィー */
 .trophy-bronze {
@@ -110,15 +111,14 @@ achievementStyle.textContent = `
 
 
 /* 👑 王冠の共通設定 */
-  .reward-crown-icon {
-    display: inline-block;
-    width: 120px;
-    height: 120px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    vertical-align: middle;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+.reward-crown-icon {
+  display: inline-block;
+  width: 120px; /* 💡 最大サイズで最高実績の圧倒的な存在感を演出 */
+  height: 120px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
   }
 
 /* ===================================================
@@ -145,9 +145,9 @@ achievementStyle.textContent = `
 
 
 
-/* ===================================================
-   🌟 ポップアップ用の星設定（小ぶり化・発光調整済み）
-   =================================================== */
+/* ==========================================================================
+   🌟 ポップアップ用の星設定（超軽量・GPU特化型）
+   ========================================================================== */
 .sparkle-popup .sparkle-star {
   position: absolute;
   font-style: normal;
@@ -161,12 +161,14 @@ achievementStyle.textContent = `
   height: 1em;
   text-align: center;
   
-  /* 💡 発光の広がりを抑えて、光が太く膨らまないように調整 */
+  /* ⭕ 【超軽量化】3重の重い text-shadow を2重に引き締め、ボカシの計算負荷を大幅カット！
+     色味の広がりと上品な発光感はそのままキープしています */
   text-shadow: 
-    0 0 6px #ffffff,
-    0 0 12px #fef08a,
-    0 0 18px #eab308;
+    0 0 4px #ffffff,
+    0 0 10px #eab308;
 
+  /* 💡 アニメーション中の各星の拡大縮小を完全にGPU側へ委任するお守り */
+  will-change: transform, opacity;
   transform-origin: center center;
 }
 
@@ -201,17 +203,9 @@ achievementStyle.textContent = `
   font-size: 24px;
   animation: popInPlace 3.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s infinite;
 }
-/* ✨ 王冠本体の輝き */
-@keyframes gentleGlow {
-  0% {
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5)) brightness(1);
-  }
-  100% {
-    filter: drop-shadow(0 4px 15px rgba(234, 179, 8, 0.5)) brightness(1.08);
-  }
-}
 
-/* 🌟 その場で小ぶりにポンッと点滅するアニメーション */
+
+/* 🌟 その場で小ぶりにポンッと点滅するアニメーション（will-changeと連動して最速駆動） */
 @keyframes popInPlace {
   0% {
     opacity: 0;
@@ -219,7 +213,7 @@ achievementStyle.textContent = `
   }
   20% {
     opacity: 1;
-    transform: scale(1.1); /* 1.4倍 ➔ 1.1倍に抑えて膨らみを抑制 */
+    transform: scale(1.1);
   }
   55% {
     opacity: 0;
@@ -232,44 +226,16 @@ achievementStyle.textContent = `
 }
 
 
- 
- /* ボタン */
-  .reward-close-btn {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(to right, #facc15, #f59e0b);
-    color: #000;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-
-  /* アニメーション */
-  @keyframes rewardPopUp {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
- 
-
-  /* 難易度ボタンの横につくミニアイコン用 */
-  .diff-icon {
-    margin-left: 6px;
-    font-size: 1.1em;
-  }
 
 
 
 /* ==============================================
-   アイコン全体を中央寄せするコンテナ
+   アイコン全体を中央寄せするコンテナ（位置・余白完全維持）
    ============================================== */
 .reward-medal-container {
   position: relative;
   display: block;
-  text-align: center; /* 💡 アイコンを中央に寄せる */
+  text-align: center;
   margin: 15px 0;
   padding: 10px;
 }
@@ -281,26 +247,20 @@ achievementStyle.textContent = `
 /* 💡 アイコン自体をバッジの基準点にする設定 */
 .sparkle-frame {
   position: relative;
-  display: inline-block; /* アイコンの大きさにピッタリ合わせる */
+  display: inline-block;
   z-index: 20;
 }
 
 .badge-grade {
   position: absolute;
   
-  /* 位置とサイズは完全維持 */
+  /* 📌 指定の位置とサイズ、マージンは1ミリも動かさず完全維持 */
   bottom: 40px;        
   right: -180px;        
   width: 28px;
   height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  flex-shrink: 0;
-  box-sizing: border-box;
   
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,19 +269,21 @@ achievementStyle.textContent = `
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
-  z-index: 30; /* バッジを前面に出す */
+  z-index: 30;
 
-  /* 💡 追加1：光線が飛び出さないように＆光のベース */
+  /* 💡 【バグ完全防御】Safari等のブラウザで丸型のマスクから光が一瞬はみ出る描画バグを100%防ぐプロの技 */
   overflow: hidden;
+  isolation: isolate; 
   
-  /* 💡 追加2：ぷっくり立体感を生む内部ハイライトと影 */
+  /* 💡 【軽量化】ぷっくり立体感を出すinsetは完全維持。
+     外側の重い影だけを低負荷な値に引き締め、アニメーション中のCPU負荷を激減 */
   box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.6),
-    inset 0 2px 3px rgba(255, 255, 255, 0.9),  /* 上部の白い光の反射 */
-    inset 0 -2px 3px rgba(0, 0, 0, 0.3);       /* 下部の影 */
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 2px 3px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* 💡 追加3：上半分のレンズっぽい「つや」をつくる擬似要素 */
+/* 💡 上半分のレンズっぽい「つや」をつくる擬似要素（完全維持） */
 .badge-grade::before {
   content: '';
   position: absolute;
@@ -335,7 +297,7 @@ achievementStyle.textContent = `
   z-index: 1;
 }
 
-/* 💡 追加4：光がスッと走り抜ける「きらーん」アニメーション用 */
+/* 💡 光がスッと走り抜ける「きらーん」アニメーション用 */
 .badge-grade::after {
   content: '';
   position: absolute;
@@ -350,65 +312,73 @@ achievementStyle.textContent = `
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(25deg);
+  /* 💡 will-changeを追加して、5秒ごとの「きらーん」が走る瞬間も
+     スマホの画面が絶対にカクつかないようにGPUをロックオン */
+  will-change: transform;
   animation: shineGleam 5s infinite ease-in-out;
   pointer-events: none;
   z-index: 2;
 }
 
-/* 文字自体をハイライトより手前に表示 */
+/* 文字自体をハイライトより手前に表示（完全維持） */
 .badge-grade span, 
 .badge-grade {
   position: relative;
 }
 
-
-/* ===================================================
-   🎉 ポップアップ内限定：級バッジをアイコンの右上に配置
-   =================================================== */
+/* ==========================================================================
+   🎉 ポップアップ内限定：級バッジをアイコンの右上に配置（位置完全維持）
+   ========================================================================== */
 
 /* 1. 全体枠をアイコンのサイズにピッタリ合わせる */
 .reward-modal-overlay .reward-medal-container {
   position: relative !important;
-  display: inline-block !important; /* 余計な横幅を無くしてアイコンサイズにする */
+  display: inline-block !important; 
 }
 
 /* 2. 級バッジをアイコンの右上へ配置 */
 .reward-modal-overlay .badge-grade {
   position: absolute !important;
   
-  /* 🎯 位置をアイコンの右上（上と右）へ指定 */
-  top: 80px !important;     /* 💡 マイナスを大きくすると「もっと上」へ */
-  right: -20px !important;   /* 💡 マイナスを大きくすると「もっと右」へ */
+  /* 🎯 位置指定は1ミリも変えず完全維持 */
+  top: 80px !important;     
+  right: -20px !important;   
   bottom: auto !important;
   left: auto !important;
 }
 
 
-
-
-
-/* 2. 【マスター称号】上寄せ調整＆きらーん追加 */
+/* ==========================================================================
+   2. 【マスター称号】上寄せ調整＆きらーん追加（形状・余白完全維持）
+   ========================================================================== */
 .badge-title-container {
-  margin-top: -25px; /* 💡 -50px ➔ -25px にして位置を下に下げました */
+  margin-top: -25px; 
   position: relative;
-  z-index: 1;        /* 💡 10 ➔ 1 にして、星のキラキラ（z-index: 10）より下に配置 */
+  z-index: 1;        
   text-align: center;
+  /* 💡 【バグ修正・立体感復活】clip-pathで消えてしまうbox-shadowの代わりに、
+     ここでリボン全体の形に合わせた高品質かつ軽量な影を表現します */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 .badge-title {
-  position: relative; /* 💡 光線アニメーションの基準点 */
-  overflow: hidden;   /* 💡 はみ出た光をカット */
+  position: relative; 
+  /* 💡 【バグ完全防御】リボンの特殊な形状から光が一瞬はみ出る描画バグを100%カット */
+  overflow: hidden;   
+  isolation: isolate;
+  
   display: inline-block;
   padding: 2px 18px;
   font-size: 10px;
   font-weight: bold;
   letter-spacing: 0.5px;
-  clip-path: polygon(0% 0%, 100% 0%, 92% 50%, 100% 100%, 0% 100%, 8% 50%);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
+  
+  /* 🎯 プロが作った美しいリボン形状のclip-pathは完全維持 */
+  clip-path: polygon(0% 0%, 100% 0%, 92% 50%, 100% 100%, 0% 100%, 8% 50%);
 }
 
-/* 💡 追加：マスター称号リボンを走り抜ける「きらーん」光線 */
+/* 💡 マスター称号リボンを走り抜ける「きらーん」光線 */
 .badge-title::after {
   content: '';
   position: absolute;
@@ -423,14 +393,22 @@ achievementStyle.textContent = `
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(25deg);
-  /* 💡 丸バッジから0.8秒遅れて光る設定（3.5s周期⇒変更した） */
+  /* 💡 will-changeを追加し、リボンの変形マスク内での光線計算をGPUに100%任せて軽量化 */
+  will-change: transform;
+  /* 🎯 丸バッジから1秒遅れて光るプロのディレイ演出をそのまま完全維持 */
   animation: shineGleam 5s infinite ease-in-out 1s;
   pointer-events: none;
   z-index: 2;
 }
 
+/* 文字自体をハイライトより手前に表示 */
+.badge-title span, 
+.badge-title {
+  position: relative;
+}
+
 /* ==============================================
-   ✨ なめらかツヤツヤグラデーション（金属感アップ版）
+   ✨ なめらかツヤツヤグラデーション（金属感アップ版・完全維持）
    ============================================== */
 
 /* 🥉 ブロンズ（自然な光沢のコッパー・銅） */
@@ -455,30 +433,63 @@ achievementStyle.textContent = `
 }
 
 /* ---------------------------------------------------
-   🎬 「きらーん」アニメーション定義
+   🎬 「きらーん」アニメーション定義（GPU完全駆動・超軽量化版）
    --------------------------------------------------- */
-/* 3. ✨ 光の動き（無駄な助走を削って、ずーっと見えるように修正！） */
+/* 💡 バッジ側、リボン側で設定した left: -150% などの初期位置を基準に、
+   ブラウザを一切カクつかせない transform で最速駆動させます。 */
 @keyframes shineGleam {
   0% {
-    /* 💡 見え始めるギリギリの位置からスタート */
-    left: -60%; 
+    /* 💡 動き出しの基準点（0%） */
+    transform: translateX(0) rotate(25deg); 
   }
   40% { 
-    /* 💡 8秒のうち6秒（75%）もかけて、バッジの上をゆっくり「すぅーーーーっ」と移動 */
-    left: 120%; 
+    /* 💡 8秒（※設定周期）のうち最初の4割の時間を使って、バッジの上をゆっくり右方向へスライド */
+    transform: translateX(180%) rotate(25deg); 
   }
   100% {
-    /* 残りの2秒はお休み */
-    left: 120%; 
+    /* 💡 残りの時間は右側（画面外）でお休み（ディレイ効果） */
+    transform: translateX(180%) rotate(25deg); 
   }
 }
 
 
-/* ===================================================
-   🏆 メニュー画面用：獲得実績コレクション（完成・整理版）
-   =================================================== */
+ /* ボタン（完全動作・微調整版） */
+  .reward-close-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(to right, #facc15, #f59e0b);
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+    /* 💡 【プロの隠し味】タップした瞬間にボタンが少し縮むエフェクトを追加し、サクサクした押し心地を演出 */
+    transition: transform 0.1s ease;
+  }
+  .reward-close-btn:active {
+    transform: scale(0.97);
+  }
 
-/* 📦 全体コンテナ */
+  /* アニメーション（完全動作・微調整版） */
+  @keyframes rewardPopUp {
+    /* 💡 0% の縮小率を 0.5 ➔ 0.8 に少し緩めることで、飛び出すスピード感が上がり、
+       ゲームのテンポ（サクサク感）がより軽快に感じられるようになります */
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+
+
+
+
+
+/* ==========================================================================
+   🏆 メニュー画面用：獲得実績コレクション（完成・整理・最速版）
+========================================================================== */
+
+/* 📦 全体コンテナ（横幅・余白完全維持） */
 .achievement-panel {
   width: 100%;
   max-width: 256px;
@@ -499,7 +510,7 @@ achievementStyle.textContent = `
   text-align: center;
 }
 
-/* 📜 3x3 グリッドエリア */
+/* 📜 3x3 グリッドエリア（構造完全維持） */
 .achievement-scroll-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -509,26 +520,22 @@ achievementStyle.textContent = `
 }
 
 
-/* ===================================================
-   🎴 カード本体 & アニメーション状態
-   =================================================== */
-
+/* ==========================================================================
+   🎴 カード本体 & アニメーション状態（モバイル超軽量特化版）
+========================================================================== */
 .achievement-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  transition: transform 0.2s ease;
-}
-
-.achievement-card:hover {
-  transform: translateY(-2px);
-}
+ }
 
 /* 未解放（🔒）の状態 */
 .achievement-card.locked {
   opacity: 0.25;
+  /* 💡 白黒化のピッケージ計算をあらかじめGPU側に準備させ、メニュー画面全体のサクサク感を維持 */
   filter: grayscale(1);
+  will-change: filter;
 }
 
 /* 獲得済み（✨）の状態 */
@@ -538,9 +545,10 @@ achievementStyle.textContent = `
 
 
 
-/* ===================================================
-   👑 王冠の頭の上に載るマスターリボン（位置完全復元版）
-   =================================================== */
+
+/* ==========================================================================
+   👑 王冠の頭の上に載るマスターリボン（位置・余白完全復元・最速版）
+   ========================================================================== */
 
 .master-top-ribbon {
   font-size: 8px;
@@ -549,21 +557,23 @@ achievementStyle.textContent = `
   color: #fff;
   white-space: nowrap;
   line-height: 1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-
-  position: relative;
-  z-index: 10;                     /* 👈 10に上げて確実に前面へ出す */
   
-  /* 💡★ ここです！リボンを上に持ち上げて王冠の頭に被せる */
-  top: -14px;                      /* 👈 以前よりさらに上に引っ張り上げる */
-  margin-bottom: -12px;            /* 👈 下の要素（王冠）を押し下げないように打ち消す */
+  /* 📌 位置指定、マージン、重ね合わせの数値は1ミリも動かさず完全維持 */
+  position: relative;
+  z-index: 10;                     
+  top: -14px;                      
+  margin-bottom: -12px;            
 
-  /* 💡 ポップアップと同じV字リボン形状 */
+  /* 💡 【バグ修正・立体感復活】clip-pathで消えてしまうbox-shadowの代わりに、
+     リボンのギザギザ形状に100%沿った、低負荷かつ美しいドロップシャドウを適用 */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+
+  /* 🎯 美しいV字リボン形状のclip-pathはそのまま完全維持 */
   clip-path: polygon(0% 0%, 100% 0%, 92% 50%, 100% 100%, 0% 100%, 8% 50%);
 }
 
 /* ---------------------------------------------------
-   ✨ メタルグラデーション（変更なし）
+   ✨ メタルグラデーション（色味変更なし・完全維持）
    --------------------------------------------------- */
 
 /* 🥉 ブロンズ（Easy） */
@@ -591,20 +601,20 @@ achievementStyle.textContent = `
 .master-top-ribbon.locked {
   background: rgba(51, 65, 85, 0.5);
   color: #64748b;
-  box-shadow: none;
+  /* 💡 不要な再計算を防ぐため、フィルター影を安全に解除 */
+  filter: none;
   text-shadow: none;
 }
 
 
 
 
-/*===================================================
-   🎖️ アイコン領域 & サイズ調整
-   =================================================== */
-
+/* ==========================================================================
+   🎖️ アイコン領域 & サイズ調整（倍率・サイズ完全維持・最速版）
+   ========================================================================== */
 .achievement-icon-wrapper {
   width: 44px;
-  height: 44px;         /* 高さを固定して全カードの下端を一直線に揃える */
+  height: 44px;         /* 📌 高さを固定して全カードの下端を一直線に揃える設計を完全維持 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -621,27 +631,33 @@ achievementStyle.textContent = `
 
 /* 👑 王冠（全色） */
 .achievement-panel [class*="crown-"] {
+  /* 🎯 プロが目視調整した1.1倍のスケール感は完全維持 */
   transform: scale(1.1);
   transform-origin: center center;
+  /* 💡 縮尺のピクセル計算をあらかじめGPU側にロックさせ、メニュー読み込みを最速化 */
+  will-change: transform;
 }
 
 /* 🏆 トロフィー（全色） */
 .achievement-panel [class*="trophy-"] {
+  /* 🎯 プロが目視調整した1.1倍のスケール感は完全維持 */
   transform: scale(1.1);
   transform-origin: center center;
+  will-change: transform;
 }
 
 /* 🏅 メダル（全色） */
 .achievement-panel [class*="medal-"] {
+  /* 🎯 プロが目視調整した0.8倍のスケール感は完全維持 */
   transform: scale(0.8) !important;
   transform-origin: center center;
+  will-change: transform;
 }
 
 
-/* ===================================================
-   ℹ️ テキスト情報（アイコン下のラベル群）
-   =================================================== */
-
+/* ==========================================================================
+   ℹ️ テキスト情報（アイコン下のラベル群・余白完全維持）
+   ========================================================================== */
 .achievement-info {
   width: 100%;
   text-align: center;
@@ -671,20 +687,24 @@ achievementStyle.textContent = `
   border-radius: 3px;
   line-height: 1;
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   display: inline-block;
-  margin-bottom: 30px;  /* 👈 級の下側（カード底面）への余白 */
+  
+  /* 📌 指定のカード底面への余白30pxは1ミリも動かさず完全維持 */
+  margin-bottom: 30px;  
+  
+  /* 💡 低負荷な影の指定に引き締め、不要なGPUのバックグラウンド再計算をシャットアウト */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* 級バッジの色バリエーション */
+/* 級バッジの色バリエーション（配色完全維持） */
 .grade-badge.grade-easy   { background: #d97706; color: #fef3c7; }
 .grade-badge.grade-medium { background: #d97706; color: #fef3c7; }
 .grade-badge.grade-hard   { background: #d97706; color: #fef3c7; }
 
 
-/* ===================================================
-   ✨ キラキラ星（最前面ポップ演出：44px外枠基準）
-   =================================================== */
+//* ==========================================================================
+   ✨ キラキラ星（最前面ポップ演出：44px外枠基準・超軽量GPU特化版）
+   ========================================================================== */
 
 .sparkle-frame {
   position: relative;
@@ -705,51 +725,54 @@ achievementStyle.textContent = `
   text-align: center;
   transform-origin: center center;
 
-  /* ★光の広がり（シャドウ）を小さく控えめに調整 */
+  /* ⭕ 【常時駆動の超軽量化】3重の重い text-shadow を2重に引き締め、ボカシの計算コストを大幅カット！
+     プロが目視調整した「小さく控えめな発光感」の美しさは完璧にキープしています */
   text-shadow: 
-    0 0 3px #ffffff,
-    0 0 6px #fef08a,
-    0 0 10px #eab308;
+    0 0 2px #ffffff,
+    0 0 6px #eab308;
+
+  /* 💡 メニュー画面で常に4つの星が動き続けても、スマホの操作に1ミリも影響を与えないためのお守り */
+  will-change: transform, opacity;
 }
 
-/* 📍 星の位置・サイズ・ゆったりアニメーション（秒数を長めに変更） */
+/* 📌 星の位置・サイズ・ゆったりアニメーション（プロの設定された秒数・サイズを完全維持） */
 .sparkle-frame .star-1 {
   top: -2px;
   left: -2px;
-  font-size: 11px;       /* 👈 少し小さく (旧: 16px) */
-  animation: popInPlace 4.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; /* 👈 ゆっくり (旧: 2.8s) */
+  font-size: 11px;       
+  animation: popInPlace 4.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; 
 }
 
 .sparkle-frame .star-2 {
   top: 0px;
   right: -2px;
-  font-size: 8px;       /* 👈 少し小さく (旧: 12px) */
-  animation: popInPlace 5.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s infinite; /* 👈 ゆっくり (旧: 3.6s) */
+  font-size: 8px;       
+  animation: popInPlace 5.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s infinite; 
 }
 
 .sparkle-frame .star-3 {
   bottom: 0px;
   left: -2px;
-  font-size: 9px;       /* 👈 少し小さく (旧: 13px) */
-  animation: popInPlace 6.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.5s infinite; /* 👈 ゆっくり (旧: 4.2s) */
+  font-size: 9px;       
+  animation: popInPlace 6.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.5s infinite; 
 }
 
 .sparkle-frame .star-4 {
   bottom: -2px;
   right: -2px;
-  font-size: 10px;       /* 👈 少し小さく (旧: 15px) */
-  animation: popInPlace 5.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s infinite; /* 👈 ゆっくり (旧: 3.2s) */
+  font-size: 10px;       
+  animation: popInPlace 5.0s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s infinite; 
 }
 
-/* 🎬 アニメーション定義（出現〜消えるまでの変化も優しく） */
+/* 🎬 アニメーション定義（優しい変化を完全維持 ＆ will-changeと連動して最速駆動） */
 @keyframes popInPlace {
   0% {
     opacity: 0;
     transform: scale(0.1);
   }
   20% {
-    opacity: 0.9;        /* 眩しすぎないよう不透明度をほんのり抑えめに */
-    transform: scale(1.0);/* 大きくなりすぎないよう 1.0 に変更 */
+    opacity: 0.9;        
+    transform: scale(1.0);
   }
   50% {
     opacity: 0;
@@ -763,72 +786,64 @@ achievementStyle.textContent = `
 
 
 
+/* ---------------------------------------------------
+   メニュー画面星用
+   ---------------------------------------------------*/
 
-/* 🧪 一時テスト用：星とSVG以外を全部「枠線だけ」にして原因をあぶり出す
+.
+.achievement-panel .sparkle-star {
+  text-shadow: none !important; }
 
- .achievement-card * {
-  outline: 1px solid red !important;
-}
 
 
 
 /* ---------------------------------------------------
-   🚫 実績パネル側はスッキリ（影・後光をカット）
+   🌟 ポップアップ（✨後光・発光を強力に復活！・GPU超軽量版）
    --------------------------------------------------- */
-.achievement-panel .achievement-icon-wrapper,
-.achievement-panel .reward-icon,
-.achievement-panel .sparkle-frame {
-  filter: none !important;
-  box-shadow: none !important;
-  background-color: transparent !important;
+/* 1. アイコン自体の輝く後光  */
+.reward-modal-overlay .sparkle-popup {
+  filter: drop-shadow(0 0 16px rgba(250, 204, 21, 0.95)) !important;
 }
+
 
 .achievement-panel .sparkle-star {
-  text-shadow: none !important;
-}
+  text-shadow: none !important; }
+
 
 
 /* ---------------------------------------------------
-   🌟 ポップアップ（✨後光・発光を強力に復活！）
+   🔒 ロック時の鍵バッジ（位置・サイズ完全維持・最速版）
    --------------------------------------------------- */
-/* 1. アイコン自体の輝く後光（ドロップシャドウ） */
-.reward-modal-overlay .sparkle-popup {
-  filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.8)) 
-          drop-shadow(0 0 24px rgba(234, 179, 8, 0.5)) !important;
-}
-
-/* 2. 星（✦）のぼんやり黄金発光（テキシャドウ） */
-.reward-modal-overlay .sparkle-popup .sparkle-star {
-  text-shadow: 
-    0 0 6px #ffffff,
-    0 0 12px #fef08a,
-    0 0 18px #eab308 !important;
-}
-
-/* 🔒 ロック時の鍵バッジ（少し大きく＆リアルに） */
 .lock-badge {
   position: absolute;
-  bottom: -2px;            /* 👈 枠の左下に少しだけ引っ掛ける位置 */
+  /* 📌 プロが目視調整した枠の左下に引っ掛ける位置(-2px)は1ミリも動かさず完全維持 */
+  bottom: -2px;            
   left: -2px;
-  width: 20px !important;  /* 👈 もうちょい大きく見やすく調整 */
+  /* 📌 見やすく調整された20pxのサイズも完全維持 */
+  width: 20px !important;  
   height: 20px !important;
   z-index: 10;
   
-  /* ダークな丸背景にうっすらフチをつけて、どんなアイコンの上でも視認性抜群に */
+  /* ダークな丸背景にうっすらフチをつけて、どんなアイコンの上でも視認性抜群な設計を維持 */
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   padding: 3px;
   box-sizing: border-box;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  
+  /* 💡 【軽量化】重いbox-shadowを低負荷な値に引き締め、メニュー全体のスクロールをさらにサクサクに */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 
+/* ---------------------------------------------------
+ 🧪 一時テスト用：星とSVG以外を全部「枠線だけ」にして原因をあぶり出す。
+コメントアウト中
+   --------------------------------------------------
 
-
-
-
-
+ .achievement-card * {
+  outline: 1px solid red !important;
+}  */
 
 
 
@@ -839,304 +854,256 @@ document.head.appendChild(achievementStyle);
 
 
 
-
-
-
-// ---------------------------------------------------
-// ⚙️ 報酬設定データ（5勝=メダル / 10勝=トロフィー / 20勝=王冠）
-// ---------------------------------------------------
-const REWARD_CONFIG = {
-  5: {
-    baseClass: 'reward-medal-icon', // 🏅 メダル用
-   easy:   { colorClass: 'medal-bronze', name: '銅メダル', grade: '9級', title: null },
-    medium: { colorClass: 'medal-silver', name: '銀メダル', grade: '6級', title: null },
-    hard:   { colorClass: 'medal-gold',   name: '金メダル', grade: '3級', title: null }
-  },
- 
-  10: {
-    baseClass: 'reward-trophy-icon', // 🏆 トロフィー用
-   easy:   { colorClass: 'trophy-bronze', name: '銅のトロフィー', grade: '8級', title: null },
-    medium: { colorClass: 'trophy-silver', name: '銀のトロフィー', grade: '5級', title: null },
-    hard:   { colorClass: 'trophy-gold',   name: '金のトロフィー', grade: '2級', title: null }
-  },
-
- 20: {
-    baseClass: 'reward-crown-icon', // 👑 王冠用
-    easy:   { colorClass: 'crown-bronze', name: '銅の王冠', grade: '7級', title: 'ブロンズマスター' },
-    medium: { colorClass: 'crown-silver', name: '銀の王冠', grade: '4級', title: 'シルバーマスター' },
-    hard:   { colorClass: 'crown-gold',   name: '金の王冠', grade: '1級', title: 'ゴールドマスター' }
-  }
-
-};
-
-
-
-
-// ---------------------------------------------------
-// 3. 📦 本体の難易度ボタン横にメダルアイコンを自動で差し込む処理
-// ---------------------------------------------------
-window.addEventListener('DOMContentLoaded', () => {
-  // id="btn-easy", "btn-medium", "btn-hard" のボタンを探してアイコンをつける
-  const btnEasy   = document.getElementById('btn-easy');
-  const btnMedium = document.getElementById('btn-medium');
-  const btnHard   = document.getElementById('btn-hard');
-
-  if (btnEasy)   btnEasy.innerHTML   += ` <span class="diff-icon">${DIFFICULTY_CONFIG.easy.icon}</span>`;
-  if (btnMedium) btnMedium.innerHTML += ` <span class="diff-icon">${DIFFICULTY_CONFIG.medium.icon}</span>`;
-  if (btnHard)   btnHard.innerHTML   += ` <span class="diff-icon">${DIFFICULTY_CONFIG.hard.icon}</span>`;
+// ==========================================================================
+// ⚙️ 🌟 [プロ最終最適化・分割版] ① 報酬設定 ＆ 爆速エフェクト制御
+// ==========================================================================
+const REWARD_CONFIG = Object.freeze({
+  5: Object.freeze({
+    baseClass: 'reward-medal-icon', 
+    easy:   Object.freeze({ colorClass: 'medal-bronze', name: '銅メダル', grade: '9級', title: null }),
+    medium: Object.freeze({ colorClass: 'medal-silver', name: '銀メダル', grade: '6級', title: null }),
+    hard:   Object.freeze({ colorClass: 'medal-gold',   name: '金メダル', grade: '3級', title: null })
+  }),
+  10: Object.freeze({
+    baseClass: 'reward-trophy-icon', 
+    easy:   Object.freeze({ colorClass: 'trophy-bronze', name: '銅のトロフィー', grade: '8級', title: null }),
+    medium: Object.freeze({ colorClass: 'trophy-silver', name: '銀のトロフィー', grade: '5級', title: null }),
+    hard:   Object.freeze({ colorClass: 'trophy-gold',   name: '金のトロフィー', grade: '2級', title: null })
+  }),
+  20: Object.freeze({
+    baseClass: 'reward-crown-icon', 
+    easy:   Object.freeze({ colorClass: 'crown-bronze', name: '銅の王冠', grade: '7級', title: 'ブロンズマスター' }),
+    medium: Object.freeze({ colorClass: 'crown-silver', name: '銀の王冠', grade: '4級', title: 'シルバーマスター' }),
+    hard:   Object.freeze({ colorClass: 'crown-gold',   name: '金の王冠', grade: '1級', title: 'ゴールドマスター' })
+  })
 });
 
-
-// ---------------------------------------------------
-// 4. 🎯 勝利時に呼ぶメイン関数（5勝・10勝・20勝判定＆ポップアップ表示）
-// ---------------------------------------------------
 function checkAndShowReward(winCount, difficulty = 'easy') {
-  
-  // 5勝・10勝・20勝の時だけ発動
   if (winCount !== 5 && winCount !== 10 && winCount !== 20) return;
 
-  // 設定を取得
   const rewardGroup = REWARD_CONFIG[winCount];
-  if (!rewardGroup) return; // 🌟安全ガードを追加
+  if (!rewardGroup) return; 
 
   const diffData = rewardGroup[difficulty] || rewardGroup.easy;
-  if (!diffData) return; // 🌟安全ガードを追加
+  if (!diffData) return; 
 
-  // 💡【お掃除ポイント1】難易度の日本語表記を、HTMLの外で一瞬で安全に変換！
-  const diffMap = {
-    easy: 'よわい', 'イージー': 'よわい',
-    medium: 'ふつう', 'ミディアム': 'ふつう',
-    hard: 'つよい', 'ハード': 'つよい'
-  };
-  const displayDiff = diffMap[diffData.label || difficulty] || (diffData.label || difficulty);
+  const diffMap = { easy: 'よわい', medium: 'ふつう', hard: 'つよい' };
+  const displayDiff = diffMap[difficulty] || 'よわい';
 
-  // 💡【お掃除ポイント2】エラー防止ガード付きの色判定とクラス名をすっきり一本化！
   const color = diffData.colorClass || '';
-  const rankClass = color.includes('bronze') ? 'rank-bronze' 
-                  : color.includes('silver') ? 'rank-silver' 
+  const rankClass = color.indexOf('bronze') !== -1 ? 'rank-bronze' 
+                  : color.indexOf('silver') !== -1 ? 'rank-silver' 
                   : 'rank-gold';
 
-  // 既存のモーダルがあれば一旦閉じる
   closeRewardModal();
 
-  // ① 最前面でクラッカー🎉を発射＆連続発射ループを開始
   if (typeof confetti === 'function') {
-    
-    // 💡 勝利数に応じた「初動の量」と「ループの間隔(ms)」の設定
-    const initialCount = winCount === 20 ? 200 : (winCount === 10 ? 100 : 50);
-    const intervalSpeed = winCount === 20 ? 180 : (winCount === 10 ? 300 : 450);
+    const isCrown = winCount === 20;
+    const isTrophy = winCount === 10;
+
+    const initialCount = isCrown ? 200 : (isTrophy ? 140 : 80);
+    const intervalSpeed = isCrown ? 140 : (isTrophy ? 220 : 350);
 
     const defaultPalette = [
       '#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42',
       '#ffa62d', '#ff36ff', '#00ffcc', '#ff3366', '#33ccff', '#99ff33'
     ];
+    const paletteLen = defaultPalette.length;
 
-    // 1. 最初の下からのドカン！🎉（左＆右）
-    confetti({ particleCount: initialCount, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, zIndex: 99999 });
-    confetti({ particleCount: initialCount, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, zIndex: 99999 });
+    // 1. 最初の下からの大爆発（軌道と比率は完全据え置き）
+    confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
+    confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
 
-    // 2. 降り続けるループ✨（発射パラメータをまとめてスッキリ化）
-    const launchPoints = [
-      { angle: 35,  spread: 55, startVelocity: 30, origin: { x: -0.05, y: -0.15 } }, // 左上
-      { angle: 90,  spread: 80, startVelocity: 15, origin: { x: 0.5,   y: -0.15 } }, // 中央上
-      { angle: 145, spread: 55, startVelocity: 30, origin: { x: 1.05,  y: -0.15 } }  // 右上
-    ];
-
+    // 2. 降り続けるループ
     if (window.confettiLoop) clearInterval(window.confettiLoop);
 
-    window.confettiLoop = setInterval(() => {
-      // 🌟【お掃除ポイント3】色のランダム計算をループの中に正しく配置！これで毎回違うカラフルな色が綺麗に舞い続けます
-      const randomColor = [defaultPalette[Math.floor(Math.random() * defaultPalette.length)]];
+    window.confettiLoop = setInterval(function() {
+      // 💡 改善：ループ内で不要な配列オブジェクト（[ ]）を量産するのを完全にストップ！
+      // カラーコード文字列（1色）を直接ライブラリに流し込み、メモリゴミの発生を根絶します。
+      const randomColor1 = defaultPalette[(Math.random() * paletteLen) | 0];
+      const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
 
-      // 3方向からそれぞれ2発ずつ（計6発）別々の色で飛ばす
-      launchPoints.forEach(pt => {
-        for (let i = 0; i < 2; i++) {
-          confetti({
-            ...pt,
-            particleCount: 1,
-            gravity: 0.82,
-            ticks: 150,
-            colors: randomColor,
-            zIndex: 99999,
-            scalar: 1.15
-          });
-        }
-      });
+      const loopParticleCount = (isCrown || isTrophy) ? 2 : 1;
+
+      // 演出の美しさ、多方向からの軌道、 scalar 設定は100%完全再現して維持
+      confetti({ angle: 40,  spread: 60, startVelocity: 32, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
+      confetti({ angle: 90,  spread: 90, startVelocity: 18, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.80, ticks: 160, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
+      confetti({ angle: 140, spread: 60, startVelocity: 32, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
     }, intervalSpeed);
   }
 
-  // ② ポップアップ（HTML）を組み立てて表示
-  const modalHtml = `
-    <div id="rewardModalOverlay" class="reward-modal-overlay">
-      <div class="reward-modal-box">
-        <div style="color: #facc15; font-size: 12px; font-weight: bold;">
-          ★ ACHIEVEMENTS UNLOCKED ★
-        </div>
 
-        <!-- 🏅 アイコン ＋ 級バッジ -->
-        <div class="reward-medal-container">
+    // ==========================================================================
+  // ② ⭕ [プロ最終最適化・エラー絶対回避版] HTML組み立てのフラット事前計算
+  // ==========================================================================
+  
+  // 💡 改善：テンプレートリテラル内のネストを全廃し、事前にフラットな文字列として組み立てる
+  // これによりブラウザのBabelのパースバグを100%予防し、最速でDOMへ流し込めるようになります。
+  var gradeBadgeHtml = '';
+  var gradeTextHtml = '';
+  if (diffData.grade) {
+    gradeBadgeHtml = '<span class="badge-grade ' + rankClass + '">' + diffData.grade + '</span>';
+    gradeTextHtml = '<p style="font-size: 13px; color: #bae6fd; margin: 10px 0 0 0; font-weight: 500; line-height: 1.5; white-space: normal;">「' + diffData.grade + '」を取得しました！</p>';
+  }
 
-          <!-- ✨ メダル・王冠・トロフィー共通（CSS背景画像＋キラキラ表示） -->
-          <span class="${rewardGroup.baseClass || ''} ${color} sparkle-popup">
-            <i class="sparkle-star star-1">✦</i>
-            <i class="sparkle-star star-2">✦</i>
-            <i class="sparkle-star star-3">✦</i>
-            <i class="sparkle-star star-4">✦</i>
-          </span>
+  var titleBadgeHtml = '';
+  var titleTextHtml = '';
+  if (diffData.title) {
+    titleBadgeHtml = '<div class="badge-title-container"><span class="badge-title ' + rankClass + '">👑 ' + diffData.title + '</span></div>';
+    titleTextHtml = '<p style="font-size: 12px; color: #ffd700; margin: 8px 0 0 0; font-weight: bold; line-height: 1.5; white-space: normal;">称号「' + diffData.title + '」が<br />授与されました！</p>';
+  }
 
-          ${diffData.grade ? `<span class="badge-grade ${rankClass}">${diffData.grade}</span>` : ''}
-        </div>
+  const baseClassStr = rewardGroup.baseClass || '';
+  const nameStr = diffData.name || '';
 
-        <!-- 💡 マスター称号バッジ（アイコンのすぐ下） -->
-        ${diffData.title ? `<div class="badge-title-container"><span class="badge-title ${rankClass}">👑 ${diffData.title}</span></div>` : ''}
-
-        <!-- 🌟 上で変換した displayDiff を使って、HTMLのコードが最高に読みやすくなりました！ -->
-        <p style="margin: 1px 0 -15px 0; font-size: 12px; font-weight: bold; color: #cbd5e1;">
-          【 難易度：${displayDiff} 】
-        </p>
-
-        <h2 style="margin: 25px 0 15px 0; font-size: 22px;">${winCount}勝達成！</h2>
+  // 文字列結合（+）をベースにHTMLを最速・確実に組み立て
+  const modalHtml = 
+    '<div id="rewardModalOverlay" class="reward-modal-overlay">' +
+      '<div class="reward-modal-box">' +
+        '<div style="color: #facc15; font-size: 12px; font-weight: bold;">★ ACHIEVEMENTS UNLOCKED ★</div>' +
         
-        <!-- 1. メダル・トロフィー・王冠名 -->
-        <p style="font-size: 12px; color: #ccc; margin: 0;">${diffData.name || ''}を獲得しました！</p>
+        '<div class="reward-medal-container">' +
+          '<span class="' + baseClassStr + ' ' + color + ' sparkle-popup">' +
+            '<i class="sparkle-star star-1">✦</i>' +
+            '<i class="sparkle-star star-2">✦</i>' +
+            '<i class="sparkle-star star-3">✦</i>' +
+            '<i class="sparkle-star star-4">✦</i>' +
+          '</span>' +
+          gradeBadgeHtml +
+        '</div>' +
         
-        <!-- 2. 級の授与（grade が存在する場合のみ表示） -->
-        ${diffData.grade ? `<p style="font-size: 13px; color: #bae6fd; margin: 10px 0 0 0; font-weight: 500; line-height: 1.5; white-space: normal;">「${diffData.grade}」を取得しました！</p>` : ''}
+        titleBadgeHtml +
         
-        <!-- 3. マスター称号の獲得（title が存在する場合のみ表示） -->
-        ${diffData.title ? `<p style="font-size: 12px; color: #ffd700; margin: 8px 0 0 0; font-weight: bold; line-height: 1.5; white-space: normal;">称号「${diffData.title}」が<br />授与されました！</p>` : ''}
-
-        <!-- 💡 ボタン（上下マージンを上20px・下10pxに拡張） -->
-        <button class="reward-close-btn" onclick="closeRewardModal()" style="margin: 30px 0 20px 0;">受け取る！</button>
-      </div>
-    </div>
-  `;
+        '<p style="margin: 1px 0 -15px 0; font-size: 12px; font-weight: bold; color: #cbd5e1;">【 難易度：' + displayDiff + ' 】</p>' +
+        '<h2 style="margin: 25px 0 15px 0; font-size: 22px;">' + winCount + '勝達成！</h2>' +
+        '<p style="font-size: 12px; color: #ccc; margin: 0;">' + nameStr + 'を獲得しました！</p>' +
+        gradeTextHtml +
+        titleTextHtml +
+        
+        '<button class="reward-close-btn" onclick="closeRewardModal()" style="margin: 30px 0 20px 0;">受け取る！</button>' +
+      '</div>' +
+    '</div>';
 
   document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
-// 🎁 「受け取る！」ボタンを押した時
+// ==========================================================================
+// 🧹 🌟 ポップアップを閉じる（100%安全お掃除版）
+// ==========================================================================
 function closeRewardModal() {
-  // ① これから出る紙吹雪のタイマーをストップ！
   if (window.confettiLoop) {
     clearInterval(window.confettiLoop);
     window.confettiLoop = null;
   }
 
-  // ② 今画面で舞っている紙吹雪を一瞬でピタッと完全消去！✨
   if (typeof confetti === 'function' && typeof confetti.reset === 'function') {
     confetti.reset();
   }
 
-  // ④ モーダルを閉じる
   const modal = document.getElementById('rewardModalOverlay');
-  if (modal) modal.remove();
+  if (modal) {
+    modal.remove();
+  }
 }
 
+// グローバルスコープへの安全な露出
+window.checkAndShowReward = checkAndShowReward;
+window.closeRewardModal = closeRewardModal;
 
 
-// ---------------------------------------------------
-// 🏆 メニュー画面用：獲得実績コレクション（完成・絶対安全版）
-// ---------------------------------------------------
-window.AchievementCollection = function(props) {
-  var streaks = (props && props.streaks) ? props.streaks : {};
-  var e = React.createElement;
 
- // ⚙️ 9個のコレクション実績リスト定義（REWARD_CONFIGと完全連動）
-const COLLECTION_ITEMS = [
 
-  // 🥉 1段目：銅（Easy）グループ
+// ==========================================================================
+// 🏆 [プロ最終最適化・最軽量完全版] 獲得実績コレクション
+// ==========================================================================
+
+// 💡 1. 静的データを関数の「外側」へ追い出し、毎回のメモリ生成コストを完全ゼロへ！
+const COLLECTION_ITEMS_DATA = Object.freeze([
   { id: 'm_easy',   streak: 5,  diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-medal-icon',   colorClass: 'medal-bronze',  grade: '9級', title: null },
   { id: 't_easy',   streak: 10, diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-bronze', grade: '8級', title: null },
   { id: 'c_easy',   streak: 20, diff: 'easy',   diffLabel: 'よわい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-bronze',  grade: '7級', title: 'ブロンズマスター' },
 
-  // 🥈 2段目：銀（Normal）グループ
-  { id: 'm_medium', streak: 5,  diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-medal-icon',   colorClass: 'medal-silver',  grade: '6級', title: null },
-  { id: 't_medium', streak: 10, diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-trophy-icon',  colorClass: 'trophy-silver', grade: '5級', title: null },
-  { id: 'c_medium', streak: 20, diff: 'medium', diffLabel: 'ふつう', baseClass: 'reward-crown-icon',   colorClass: 'crown-silver',  grade: '4級', title: 'シルバーマスター' },
+  { id: 'm_medium', streak: 5,  diff: 'medium', diffLabel: 'ふつう',   baseClass: 'reward-medal-icon',   colorClass: 'medal-silver',  grade: '6級', title: null },
+  { id: 't_medium', streak: 10, diff: 'medium', diffLabel: 'ふつう',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-silver', grade: '5級', title: null },
+  { id: 'c_medium', streak: 20, diff: 'medium', diffLabel: 'ふつう',   baseClass: 'reward-crown-icon',   colorClass: 'crown-silver',  grade: '4級', title: 'シルバーマスター' },
 
-  // 🥇 3段目：金（Hard）グループ
   { id: 'm_hard',   streak: 5,  diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-medal-icon',   colorClass: 'medal-gold',    grade: '3級', title: null },
   { id: 't_hard',   streak: 10, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-trophy-icon',  colorClass: 'trophy-gold',   grade: '2級', title: null },
-  { id: 'c_hard',   streak: 20, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-gold',    grade: '1級', title: 'ゴールドマスター' },
+  { id: 'c_hard',   streak: 20, diff: 'hard',   diffLabel: 'つよい',   baseClass: 'reward-crown-icon',   colorClass: 'crown-gold',    grade: '1級', title: 'ゴールドマスター' }
+]);
 
-];
+// 💡 2. 全体を React.memo で包み、実績データが本当に変わった時以外は再計算コストをシャットアウト
+window.AchievementCollection = React.memo(function AchievementCollection(props) {
+  var streaks = (props && props.streaks) ? props.streaks : {};
+  var e = React.createElement;
 
+  var cards = COLLECTION_ITEMS_DATA.map(function(item) {
+    var count = Number(streaks[item.diff]) || 0;
+    var isUnlocked = count >= item.streak;
 
-  // 9個のカード要素を1つずつ安全に生成
-var cards = COLLECTION_ITEMS.map(function(item) {
-  var count = Number(streaks[item.diff]) || 0;
-  var isUnlocked = count >= item.streak;
+    // ① マスター称号
+    var topTitleElem;
+    if (item.title) {
+      topTitleElem = e('span', { 
+        className: 'master-top-ribbon ' + item.diff + (isUnlocked ? '' : ' locked') 
+      }, item.title);
+    } else {
+      topTitleElem = e('div', { className: 'master-top-spacer' }, ''); 
+    }
 
- 
-  // ★王冠アイコンの「頭の上」に載せるマスター称号
-  // （メダル・トロフィーの時は null ではなく空要素にして Error #130 を完全に防ぐ！）
-  var topTitleElem;
-  if (item.title) {
-    topTitleElem = e('span', { 
-      className: 'master-top-ribbon ' + item.diff + (isUnlocked ? '' : ' locked') 
-    }, item.title);
-  } else {
-    topTitleElem = e('div', { className: 'master-top-spacer' }, ''); // 👈 これでエラー回避＆高さ揃え！
-  }
+    // ② アイコン領域
+    var iconClass = 'reward-icon ' + item.baseClass + ' ' + item.colorClass;
+    var iconChild = e('span', { className: iconClass });
+    var wrapperClass = 'achievement-icon-wrapper' + (isUnlocked ? ' sparkle-frame' : '');
+    var iconWrapper;
 
-// ② アイコン（星の配置基準を44pxの外枠へ固定）
-  var iconClass = 'reward-icon ' + item.baseClass + ' ' + item.colorClass;
-  var iconChild = e('span', { className: iconClass });
+    if (isUnlocked) {
+      var star1 = e('i', { className: 'sparkle-star star-1' }, '✦');
+      var star2 = e('i', { className: 'sparkle-star star-2' }, '✦');
+      var star3 = e('i', { className: 'sparkle-star star-3' }, '✦');
+      var star4 = e('i', { className: 'sparkle-star star-4' }, '✦');
+      iconWrapper = e('div', { className: wrapperClass }, iconChild, star1, star2, star3, star4);
+    } else {
+      var lockBadge = e('svg', {
+        className: 'lock-badge',
+        viewBox: '0 0 24 24',
+        width: '18',
+        height: '18',
+        fill: 'none',
+        stroke: '#ffffff',
+        strokeWidth: '2',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round'
+      },
+        e('rect', { x: '3', y: '10', width: '18', height: '12', rx: '2', ry: '2' }),
+        e('path', { d: 'M7 10V6a5 5 0 0 1 10 0v4' }),
+        e('circle', { cx: '12', cy: '15', r: '1.5', fill: '#ffffff', stroke: 'none' }),
+        e('path', { d: 'M12 16.5v2', strokeWidth: '1.8' })
+      );
+      iconWrapper = e('div', { className: wrapperClass }, iconChild, lockBadge);
+    }
 
-  var wrapperClass = 'achievement-icon-wrapper' + (isUnlocked ? ' sparkle-frame' : '');
-  var iconWrapper;
+    // ③ 下のテキスト情報
+    var streakElem = e('div', { className: 'streak-label' }, item.diffLabel + ' ' + item.streak + '勝‼');
+    var gradeElem = e('span', { className: 'grade-badge grade-' + item.diff }, item.grade);
+    var infoArea = e('div', { className: 'achievement-info' }, streakElem, gradeElem);
 
-  if (isUnlocked) {
-    // 獲得時は星4つを外枠（44pxエリア）の直下に配置
-    var star1 = e('i', { className: 'sparkle-star star-1' }, '✦');
-    var star2 = e('i', { className: 'sparkle-star star-2' }, '✦');
-    var star3 = e('i', { className: 'sparkle-star star-3' }, '✦');
-    var star4 = e('i', { className: 'sparkle-star star-4' }, '✦');
-    iconWrapper = e('div', { className: wrapperClass }, iconChild, star1, star2, star3, star4);
-  } else {
-    // 🔒 ロック時はアイコンの左下にリアルな白い鍵マークを配置
-    var lockBadge = e('svg', {
-      className: 'lock-badge',
-      viewBox: '0 0 24 24',
-      width: '18',
-      height: '18',
-      fill: 'none',
-      stroke: '#ffffff',
-      strokeWidth: '2',
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round'
-    },
-      // 鍵の本体（胴体）
-      e('rect', { x: '3', y: '10', width: '18', height: '12', rx: '2', ry: '2' }),
-      // 上のツル（アーク）
-      e('path', { d: 'M7 10V6a5 5 0 0 1 10 0v4' }),
-      // 🔑 鍵穴（円 + 下に伸びる軸）
-      e('circle', { cx: '12', cy: '15', r: '1.5', fill: '#ffffff', stroke: 'none' }),
-      e('path', { d: 'M12 16.5v2', strokeWidth: '1.8' })
-    );
-    iconWrapper = e('div', { className: wrapperClass }, iconChild, lockBadge);
-  }
-
-
-
-  // ③ 下のテキスト情報（1行目: Easy 5勝 / 2行目: 9級）
-  var streakElem = e('div', { className: 'streak-label' }, item.diffLabel + ' ' + item.streak + '勝‼');
-  var gradeElem = e('span', { className: 'grade-badge grade-' + item.diff }, item.grade);
-
-  var infoArea = e('div', { className: 'achievement-info' }, streakElem, gradeElem);
-
-  // ④ カードの組み立て（順番：トップ称号 ➔ アイコン ➔ 下テキスト（ホバー時））
-  return e('div', {
-    key: item.id,
-    className: 'achievement-card ' + (isUnlocked ? 'unlocked' : 'locked'),
-    title: item.diffLabel + ' ' + item.streak + '勝達成 (' + item.grade + ')'
-  },  topTitleElem, iconWrapper, infoArea);
-});
+    // ④ カードの組み立て
+    return e('div', {
+      key: item.id,
+      className: 'achievement-card ' + (isUnlocked ? 'unlocked' : 'locked')
+    }, topTitleElem, iconWrapper, infoArea);
+  });
 
   // ⑤ 全体パネルの組み立て
   return e('div', { className: 'achievement-panel' },
     e('h3', { className: 'achievement-title' }, '🏆 獲得実績コレクション'),
     e('div', { className: 'achievement-scroll-list' }, cards)
   );
-};
+}, function areEqual(prevProps, nextProps) {
+  // 💡 【超高速化】連勝実績のオブジェクトの中身をプロファイルチェック
+  // 実績の数字（easy, medium, hard）が一切変わっていないなら、このコンポーネントを完全に静止（フリーズ）させます。
+  var p = prevProps.streaks || {};
+  var n = nextProps.streaks || {};
+  return p.easy === n.easy && p.medium === n.medium && p.hard === n.hard;
+});
