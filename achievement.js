@@ -1086,7 +1086,7 @@ window.AchievementCollection = React.memo(function AchievementCollection(props) 
     // ③ 下のテキスト情報
     var streakElem = e('div', { className: 'streak-label' }, item.diffLabel + ' ' + item.streak + '勝‼');
     var gradeElem = e('span', { className: 'grade-badge grade-' + item.diff }, item.grade);
-    var infoArea = e('div', { className: 'achievement-info' }, streakElem, gradeElem);
+    var infoArea = e('div', { className: 'achievement-info' }, streakElem, gradeElem);   
 
     // ④ カードの組み立て
     return e('div', {
