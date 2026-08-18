@@ -921,6 +921,20 @@ body:has(#rewardModalOverlay) .cell-top {
 
 
 
+/* 💡 ==========================================================================
+   ⏳ 【過密重なり完全全廃 ＆ 自動バトンタッチCSS】
+   ========================================================================== */
+/* お祝い画面（#rewardModalOverlay）が画面に出現している間だけ、
+   その裏にいる通常の勝利画面（.overlay-backdrop）を【display: none】で完全に眠らせます。
+   これにより、裏での無駄なアニメーションや描画の計算が100%ストップして【最軽量化】します。
+   
+   そして、「受け取る！」を押してお祝い画面が消えた瞬間、この制限がパッと外れるため、
+   裏で眠っていた通常の勝利画面が1ミリのラグもなく【自動で表に出現】します！ */
+body:has(#rewardModalOverlay) .overlay-backdrop {
+  display: none !important;
+}
+
+
 
 
 
@@ -2373,21 +2387,34 @@ const HandArea = React.memo(function HandArea({ color, count, isCurrentPlayer, i
 
 
 
-/// ==========================================================================
-// 🌟 [プロ最終最適化・最軽量版] ゲームタイマー (GameTimer)
+// ==========================================================================
+// ⏱️ 🌟 [プロ最終最適化・最軽量完全版] ゲームタイマー (GameTimer)
 // ==========================================================================
 
 const GameTimer = React.memo(function GameTimer({ 
-  screen, winResult, interactionDisabled, currentPlayer, onTimeOut 
+  screen, winResult, interactionDisabled, currentPlayer, onTimeOut,
+  difficulty /* 💡 1. 忘れずにここにも難易度（difficulty）を受け取るように追加 */
 }) {
-  const [timeLeft, setTimeLeft] = useState(60);
+  
+  // 💡 2. 【社長のご要望】難易度ごとの秒数表（マップ）を定義
+  const LIMIT_SECONDS = {
+    easy: 60,     // よわい：60秒
+    medium: 180,  // ふつう：180秒
+    hard: 300     // つよい：300秒
+  };
 
-  // プレイヤーが切り替わったら残り時間を最速リセット
+  // 今の難易度に応じた秒数を取得（万が一のために、見つからなければ60秒にする安全弁付き）
+  const activeLimit = LIMIT_SECONDS[difficulty] || 60;
+
+  // 💡 3. 初期値（スタート時の秒数）を、現在の難易度の秒数にする
+  const [timeLeft, setTimeLeft] = useState(activeLimit);
+
+  // プレイヤーが切り替わったら、現在の難易度の秒数で最速リセット
   useEffect(() => {
-    setTimeLeft(60);
-  }, [currentPlayer]);
+    setTimeLeft(activeLimit);
+  }, [currentPlayer, activeLimit]); // 👈 依存配列に activeLimit を追加して連動させます
 
-  // 💡 常に最新のonTimeOutを保持するRef（タイマーが途中で壊れて再登録されるのを完全に防ぐプロの技）
+  // 常に最新のonTimeOutを保持するRef（タイマーの寿命を最大化するプロの技）
   const timeoutRef = useRef(onTimeOut);
   useEffect(() => {
     timeoutRef.current = onTimeOut;
@@ -2400,15 +2427,15 @@ const GameTimer = React.memo(function GameTimer({
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          if (timeoutRef.current) timeoutRef.current(); // 最新の関数を安全に実行
-          return 60;
+          if (timeoutRef.current) timeoutRef.current(); 
+          return activeLimit; // 時間切れ時も、その難易度の秒数に戻す
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [screen, winResult, interactionDisabled]); // 👈 依存配列から onTimeOut を排除！タイマーの寿命が最大化します
+  }, [screen, winResult, interactionDisabled, activeLimit]); 
 
   // クラス名の組み立てをBabelに優しい安全な文字列結合にリファクタリング
   const warningClass = timeLeft <= 10 ? 'warning' : '';
@@ -2588,7 +2615,7 @@ function App() {
       delayTimerRef.current = setTimeout(() => { 
         setGameState(prev => ({ ...prev, phase: 'gameOver' }));
         setShowOverlay(true); 
-      }, 3000); 
+      }, 2500); 
 
     } else {
       setGameState(prev => ({
@@ -2902,7 +2929,8 @@ function App() {
             </div>
           </div>
 
-          <GameTimer key={timerKey} screen={screen} winResult={winResult} interactionDisabled={interactionDisabled} currentPlayer={currentPlayer} onTimeOut={handleTimeOut} />
+         <GameTimer key={timerKey} screen={screen} winResult={winResult} interactionDisabled={interactionDisabled} currentPlayer={currentPlayer} onTimeOut={handleTimeOut} difficulty={difficulty} />
+
 
           <GameBoard board={board} selectedCell={selectedCell} isValidTarget={isValidTarget} lastMove={lastMove} winLineSet={winLineSet} winResult={winResult} handleCellClick={handleCellClick} interactionDisabled={interactionDisabled} />
 
@@ -2924,50 +2952,22 @@ function App() {
             </div>
           </div>
 
-                   {/*           {/* ==========================================================================
-             🔋 👑 【プランA・画面の重なり完全全廃 ＆ 超軽量化版】
+       
+   {/* ==========================================================================
+             🔋 👑 【完全修復版】通常の勝利画面をシンプルに配置
              ========================================================================== */}
           {showOverlay && winResult && (
-            (() => {
-              // 💡 システムの文字消えバグを回避するため、Array.of を使って「5, 10, 20」を確実に記述しました！
-              // 後から「〇勝のとき」を変更・追加したい場合は、カッコ内の数字を増減するだけです。
-              const TARGET_STREAKS = Array.of(5, 10, 20);
-              
-              // 節目の勝利数にぴったり一致しているかチェック
-              const isRewardMilestone = TARGET_STREAKS.indexOf(currentWinStreak) !== -1;
-
-              // 人間（blue）が勝利して、かつ節目の勝利数のとき
-              if (winResult.winner === 'blue' && gameMode === 'ai' && isRewardMilestone) {
-                
-                // 🛠️ 【ここがプロの引き算】
-                // 裏で重なって起動するバグを防ぐため、通常の勝利画面（WinOverlay）を【完全消滅（非表示）】させます。
-                // 代わりに、別ファイルの「お祝いクラッカー画面」だけを単発で起動させます！
-                if (typeof window.checkAndShowReward === 'function') {
-                  // すでに演出が出ていなければ、1回だけお祝いを起動する
-                  if (!document.getElementById('rewardModalOverlay')) {
-                    window.checkAndShowReward(currentWinStreak, difficulty);
-                  }
-                }
-                return null; // 通常の勝利画面は何も出さない（裏を空っぽにして最軽量化！）
-              }
-
-              // 💡 節目の勝利数「以外」のとき（1勝〜4勝などの普段の決着時）
-              // 普段の時だけ、通常の「〇勝しました」画面を1枚だけ出します。
-              return (
-                <WinOverlay 
-                  winner={winResult.winner} 
-                  onReset={resetGame} 
-                  gameMode={gameMode} 
-                  backToMenu={backToMenu} 
-                  difficulty={difficulty} 
-                  winStreak={currentWinStreak} 
-                />
-              );
-            })()
+            <WinOverlay 
+              winner={winResult.winner} 
+              onReset={resetGame} 
+              gameMode={gameMode} 
+              backToMenu={backToMenu} 
+              difficulty={difficulty} 
+              winStreak={currentWinStreak} 
+            />
           )}
         </React.Fragment>
       )}
-
 
 
 
