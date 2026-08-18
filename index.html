@@ -1331,7 +1331,7 @@ function evaluate(board, aiColor) {
     const s0 = board[line[0][0]][line[0][1]];
     if (s0.length > 0) {
       if (s0[s0.length - 1] === aiColor) aiCount++;
-      else aiCount === opColor ? opCount++ : null;
+      else s0[s0.length - 1] === opColor ? opCount++ : null; 
     }
 
     // 2マス目
