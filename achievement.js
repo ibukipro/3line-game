@@ -897,12 +897,12 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
 
   closeRewardModal();
 
-    if (typeof confetti === 'function') {
+   if (typeof confetti === 'function') {
     const isCrown = winCount === 20;
     const isTrophy = winCount === 10;
     
-    // 💡 大爆発の枚数を、見た目の大迫力感を100%維持した「45枚 / 35枚 / 25枚」に微調整！
-    const initialCount = isCrown ? 45 : (isTrophy ? 35 : 25);
+    // 💥 あなたの一番お気に入りだった、最初の左右同時大爆発の枚数（200枚/140枚/80枚）を100%完全復活！
+    const initialCount = isCrown ? 200 : (isTrophy ? 140 : 80);
     const intervalSpeed = isCrown ? 240 : (isTrophy ? 350 : 500);
 
     const defaultPalette = [
@@ -911,27 +911,29 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     ];
     const paletteLen = defaultPalette.length;
 
-    // Reactの画面更新ラッシュが終わる150ミリ秒後を狙って、お祝いスタート
+    // 💡 1. 【お掃除】もし前のゲームや古いループの計算が残っていたら、今すぐ全てを強制消去！
+    if (window.confettiLoop) {
+      clearInterval(window.confettiLoop);
+      window.confettiLoop = null;
+    }
+    if (typeof confetti.reset === 'function') {
+      confetti.reset(); // 👈 画面の裏に残っている見えない紙吹雪の計算をすべて完全消滅させます
+    }
+
+    // 💡 2. 【完全無風状態の確保】Reactの余韻が100%静止するのを待ってから着火
     setTimeout(function() {
 
       /* ==========================================================================
-         🚀 🎉 【大迫力維持 ＆ 着火ずらしパラレル分散版】
+         🎉 👑 【完全リセット ＆ 左右同時ドカン大爆発 100%完全復活版】
          ========================================================================== */
-      // 💡 解決策：左右の「同時着火」をやめ、わずか「0.06秒（60ms）」だけ時間をずらします！
-      // 人間の目には【同時に左右からドカンと大爆発した】ようにしか見えませんが、
-      // スマホにとっては一瞬の負荷が「半分」に分散されるため、出る瞬間のカクつきが完全に消滅します！
+      // 画面の重い計算が一度完全に「ゼロ」にリセットされた状態なので、
+      // 左右から同時に大爆発（計400枚規模）を打ち上げても、スマホがカクつくことなく綺麗に弾けます！
 
-      // 💥 1発目：まず左下から大爆発！ (寿命を50に制限してお掃除も完璧)
+      // 💥 左右同時にドカンと大爆発！（寿命50制限をかけて、出た後も一生軽くするお守り付き）
       confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 50 });
+      confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 50 });
 
-      // 💥 2発目：そのわずか0.06秒後（60ミリ秒後）に、右下から大爆発！
-      setTimeout(function() {
-        confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 50 });
-      }, 60);
-
-      // 3. 降り続けるループ（寿命50制限付きで、出た後も一生軽い！）
-      if (window.confettiLoop) clearInterval(window.confettiLoop);
-
+      // 3. 上からパラパラ降り続けるループ（寿命50制限で上からも確実に降らせます！）
       window.confettiLoop = setInterval(function() {
         const randomColor1 = defaultPalette[(Math.random() * paletteLen) | 0];
         const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
@@ -942,7 +944,7 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
         confetti({ angle: 140, spread: 60, startVelocity: 28, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 50, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
       }, intervalSpeed);
 
-    }, 150); 
+    }, 200); // 💡 Reactが完全にお片付けを終えて静止する、確実な200ミリ秒（0.2秒）のディレイ
   }
 
 
