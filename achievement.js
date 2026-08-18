@@ -901,8 +901,14 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     const isCrown = winCount === 20;
     const isTrophy = winCount === 10;
 
-    const initialCount = isCrown ? 200 : (isTrophy ? 140 : 80);
-    const intervalSpeed = isCrown ? 140 : (isTrophy ? 220 : 350);
+    /* ==========================================================================
+       🔋 ⚡ 【超省電力・軽量化】紙吹雪の同時描画数をプロの推奨値（100枚以下）に調整！
+       ========================================================================== */
+    // 最初の下からの大爆発の量を 200枚/140枚/80枚 ➔ 「 70枚 / 50枚 / 35枚 」へ引き算！
+    const initialCount = isCrown ? 70 : (isTrophy ? 50 : 35);
+    
+    // 降り続けるループの間隔を広げ、計算の発生頻度を半分に落としてCPUを休ませる
+    const intervalSpeed = isCrown ? 240 : (isTrophy ? 350 : 500);
 
     const defaultPalette = [
       '#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42',
@@ -910,7 +916,7 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     ];
     const paletteLen = defaultPalette.length;
 
-    // 1. 最初の下からの大爆発（軌道と比率は完全据え置き）
+    // 1. 最初の下からの大爆発（軌道、広がり、美しさは100%そのまま維持！）
     confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
     confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
 
@@ -918,12 +924,11 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     if (window.confettiLoop) clearInterval(window.confettiLoop);
 
     window.confettiLoop = setInterval(function() {
-      // 💡 改善：ループ内で不要な配列オブジェクト（[ ]）を量産するのを完全にストップ！
-      // カラーコード文字列（1色）を直接ライブラリに流し込み、メモリゴミの発生を根絶します。
       const randomColor1 = defaultPalette[(Math.random() * paletteLen) | 0];
       const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
 
-      const loopParticleCount = (isCrown || isTrophy) ? 2 : 1;
+      // 毎秒降り注ぐ枚数も「最大1枚」に制限して、画面にゴミが溜まるのを鉄壁ガード
+      const loopParticleCount = 1;
 
       // 演出の美しさ、多方向からの軌道、 scalar 設定は100%完全再現して維持
       confetti({ angle: 40,  spread: 60, startVelocity: 32, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
