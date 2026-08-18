@@ -897,12 +897,11 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
 
   closeRewardModal();
 
-   if (typeof confetti === 'function') {
+    if (typeof confetti === 'function') {
     const isCrown = winCount === 20;
     const isTrophy = winCount === 10;
     
-    // 💥 左右から同時にドカンと出る「大迫力」を100%キープできる、スマホ最速の黄金枚数（120枚/80枚/50枚）
-    const initialCount = isCrown ? 120 : (isTrophy ? 80 : 50);
+    const initialCount = isCrown ? 200 : (isTrophy ? 140 : 80);
     const intervalSpeed = isCrown ? 240 : (isTrophy ? 350 : 500);
 
     const defaultPalette = [
@@ -920,14 +919,16 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
       confetti.reset(); 
     }
 
-    // 💡 2. 【250msの黄金ディレイ】Reactの画面書き換えラッシュが100%完全に眠りにつくのを待ちます
+    // 💡 2. 【最速100msディレイ】
+    // 待ち時間を 250 ➔ 100（0.1秒）にギュッと短縮しました！
+    // 画面が切り替わった勢いのまま、タイムラグなしで大爆発が爽快に炸裂します。
     setTimeout(function() {
 
       /* ==========================================================================
-         🎉 👑 【大迫力復活 ＆ 上からのパラパラ完全復活版】
+         🎉 👑 【テンポ最速 ＆ 大迫力100%完全復活版】
          ========================================================================== */
 
-      // 💥 最初の左右同時大爆発！（下から上へ吹き飛ぶので、ここは命を短めの 60 にしてお掃除を最速化）
+      // 💥 最初の左右同時大爆発（100%の迫力・命を60に制限して爆速お掃除）
       confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 60 });
       confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 60 });
 
@@ -937,16 +938,16 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
         const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
         const loopParticleCount = 1;
 
-        // 💡 ⭕ 【バグ修復】寿命の ticks を 50 ➔ 180（約3秒間）に大幅に引き伸ばし！
-        // これにより、上から降ってくる紙吹雪が途中で消えることなく、画面の下まで「ハラハラ」と美しく舞い降ります。
-        // かつ、3秒後には画面外で自動消滅するため、出た後にゴミが無限に溜まるのを完璧に防ぎます。
+        // 上からハラハラと綺麗に降らせるために寿命は180（約3秒）をキープし、画面外での自動消滅も完全継続！
         confetti({ angle: 40,  spread: 60, startVelocity: 28, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 180, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
         confetti({ angle: 90,  spread: 90, startVelocity: 16, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 180, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
         confetti({ angle: 140, spread: 60, startVelocity: 28, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 180, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
       }, intervalSpeed);
 
-    }, 250); // 💡 完全な無風状態を作り出す、確実な250ミリ秒のディレイ
+    }, 100); // 💡 テンポ感を極限まで引き上げる 100ミリ秒（0.1秒）
   }
+
+
 
 
 
