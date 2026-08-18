@@ -1882,13 +1882,21 @@ function InstructionScreen({ onBack, hasActiveGame, onResumeGame }) {
       <div className="space-y-6 text-[14px] leading-relaxed">
         {/* 🏆 基本ルール */}
         <div className="instruction-section">
-          <h3 className="instruction-title">🏆 基本ルール（勝利条件）</h3>
-          <p>
-            上から見て、自分の持ち駒を縦、横、斜めのいずれかに、<strong>先に3つ並べた方が勝ち</strong>となります。<br />
-            <span className="text-[0.9em] text-amber-500 mt-1 inline-block">
-              ⏱️ 思考時間は<strong>1分（60秒）</strong>まで！時間を過ぎると負けになります。
-            </span>
+                   <h3 className="instruction-title">🏆 基本ルール（勝利条件）</h3>
+          <p className="mb-2">
+            上から見て、自分の持ち駒を縦、横、斜めのいずれかに、<strong>先に3つ並べた方が勝ち</strong>となります。
           </p>
+          
+          {/* 💡 ==========================================================================
+             ⏱️ 【社長公認】難易度ごとの思考時間を分かりやすくテキストに追加！
+             ========================================================================== */}
+          <div className="text-[12px] text-amber-400/90 font-bold  p-3 mt-2 space-y-1">
+            <p className="flex items-center gap-1 text-[13px] text-amber-300 mb-1">⏱️ 思考時間（時間を過ぎると負け）</p>
+            <p className="pl-1">🟢 難易度：よわい ── <strong className="text-white">1分（ 60秒 ）</strong></p>
+            <p className="pl-1">🟠 難易度：ふつう ── <strong className="text-white">3分（ 180秒 ）</strong></p>
+            <p className="pl-1">🔴 難易度：つよい ── <strong className="text-white">5分（ 300秒 ）</strong></p>
+          </div>
+
         </div>
 
         {/* 🛠 ルールポイント */}
