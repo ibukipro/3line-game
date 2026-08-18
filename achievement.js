@@ -900,14 +900,7 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
   if (typeof confetti === 'function') {
     const isCrown = winCount === 20;
     const isTrophy = winCount === 10;
-
-    /* ==========================================================================
-       🔋 ⚡ 【超省電力・軽量化】紙吹雪の同時描画数をプロの推奨値（100枚以下）に調整！
-       ========================================================================== */
-    // 最初の下からの大爆発の量を 200枚/140枚/80枚 ➔ 「 70枚 / 50枚 / 35枚 」へ引き算！
     const initialCount = isCrown ? 70 : (isTrophy ? 50 : 35);
-    
-    // 降り続けるループの間隔を広げ、計算の発生頻度を半分に落としてCPUを休ませる
     const intervalSpeed = isCrown ? 240 : (isTrophy ? 350 : 500);
 
     const defaultPalette = [
@@ -916,25 +909,31 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     ];
     const paletteLen = defaultPalette.length;
 
-    // 1. 最初の下からの大爆発（軌道、広がり、美しさは100%そのまま維持！）
-    confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
-    confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
+    // 💡 ==========================================================================
+    // ⏳ 【超重要・カクつき完全根絶】Reactの画面書き換えラッシュとの衝突を避ける
+    // ==========================================================================
+    // ゲーム終了時のお片付け処理が完全に終わる「150ミリ秒後」まで、着火をあえて少し待ちます。
+    // これにより、スマホの脳みそ（スレッド）の渋滞が100%消滅し、最高に滑らかに爆発します！
+    setTimeout(function() {
 
-    // 2. 降り続けるループ
-    if (window.confettiLoop) clearInterval(window.confettiLoop);
+      // 1. 最初の下からの大爆発
+      confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
+      confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2 });
 
-    window.confettiLoop = setInterval(function() {
-      const randomColor1 = defaultPalette[(Math.random() * paletteLen) | 0];
-      const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
+      // 2. 降り続けるループ
+      if (window.confettiLoop) clearInterval(window.confettiLoop);
 
-      // 毎秒降り注ぐ枚数も「最大1枚」に制限して、画面にゴミが溜まるのを鉄壁ガード
-      const loopParticleCount = 1;
+      window.confettiLoop = setInterval(function() {
+        const randomColor1 = defaultPalette[(Math.random() * paletteLen) | 0];
+        const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
+        const loopParticleCount = 1;
 
-      // 演出の美しさ、多方向からの軌道、 scalar 設定は100%完全再現して維持
-      confetti({ angle: 40,  spread: 60, startVelocity: 32, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
-      confetti({ angle: 90,  spread: 90, startVelocity: 18, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.80, ticks: 160, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
-      confetti({ angle: 140, spread: 60, startVelocity: 32, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
-    }, intervalSpeed);
+        confetti({ angle: 40,  spread: 60, startVelocity: 32, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
+        confetti({ angle: 90,  spread: 90, startVelocity: 18, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.80, ticks: 160, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
+        confetti({ angle: 140, spread: 60, startVelocity: 32, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 160, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
+      }, intervalSpeed);
+
+    }, 150); // 💡 150ミリ秒（0.15秒）の黄金ディレイ
   }
 
 
