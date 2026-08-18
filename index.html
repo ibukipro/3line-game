@@ -2924,11 +2924,53 @@ function App() {
             </div>
           </div>
 
+                   {/*           {/* ==========================================================================
+             🔋 👑 【プランA・画面の重なり完全全廃 ＆ 超軽量化版】
+             ========================================================================== */}
           {showOverlay && winResult && (
-            <WinOverlay winner={winResult.winner} onReset={resetGame} gameMode={gameMode} backToMenu={backToMenu} difficulty={difficulty} winStreak={currentWinStreak} />
+            (() => {
+              // 💡 システムの文字消えバグを回避するため、Array.of を使って「5, 10, 20」を確実に記述しました！
+              // 後から「〇勝のとき」を変更・追加したい場合は、カッコ内の数字を増減するだけです。
+              const TARGET_STREAKS = Array.of(5, 10, 20);
+              
+              // 節目の勝利数にぴったり一致しているかチェック
+              const isRewardMilestone = TARGET_STREAKS.indexOf(currentWinStreak) !== -1;
+
+              // 人間（blue）が勝利して、かつ節目の勝利数のとき
+              if (winResult.winner === 'blue' && gameMode === 'ai' && isRewardMilestone) {
+                
+                // 🛠️ 【ここがプロの引き算】
+                // 裏で重なって起動するバグを防ぐため、通常の勝利画面（WinOverlay）を【完全消滅（非表示）】させます。
+                // 代わりに、別ファイルの「お祝いクラッカー画面」だけを単発で起動させます！
+                if (typeof window.checkAndShowReward === 'function') {
+                  // すでに演出が出ていなければ、1回だけお祝いを起動する
+                  if (!document.getElementById('rewardModalOverlay')) {
+                    window.checkAndShowReward(currentWinStreak, difficulty);
+                  }
+                }
+                return null; // 通常の勝利画面は何も出さない（裏を空っぽにして最軽量化！）
+              }
+
+              // 💡 節目の勝利数「以外」のとき（1勝〜4勝などの普段の決着時）
+              // 普段の時だけ、通常の「〇勝しました」画面を1枚だけ出します。
+              return (
+                <WinOverlay 
+                  winner={winResult.winner} 
+                  onReset={resetGame} 
+                  gameMode={gameMode} 
+                  backToMenu={backToMenu} 
+                  difficulty={difficulty} 
+                  winStreak={currentWinStreak} 
+                />
+              );
+            })()
           )}
         </React.Fragment>
       )}
+
+
+
+
     </div>
   );
 }
