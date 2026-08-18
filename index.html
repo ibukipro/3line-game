@@ -1,27 +1,42 @@
 <!DOCTYPE html>
 <html lang="ja">
 
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-
   <title>3（スリー）ライン！</title>
-
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-
-<!-- クラッカー用ライブラリ -->
+  <!-- クラッカー用ライブラリ -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <!-- ★追加：別ファイルにした連勝演出パック -->
   <script src="./achievement.js"></script>
-</body>
+  
+  <!-- 💡 ここに新しくタップ改善用のCSSを追加します！ -->
+  <style>
+    /* 1. ゲーム画面全体の長押し・文字選択を完全に禁止して誤作動を防ぐ */
+    .app-screen {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* 2. 駒、ボードのマス、手札の隙間など、タップするエリアの「拡大待ち遅延」を全廃する */
+    .cell-3d, .puck-svg-container, .hand-piece-slot, .board-iso-grid {
+      touch-action: manipulation;
+      cursor: pointer; /* パソコンでも押しやすくするお守り */
+    }
+  </style>
+</head>
+
+<body>
+ 
 
 
 
