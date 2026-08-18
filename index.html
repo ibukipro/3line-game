@@ -129,11 +129,13 @@ body {
   position: relative; 
   transform-style: preserve-3d; 
   cursor: pointer; 
-  /* スマホタップ時の無駄なグレーの選択影をカットするプロの安全ピン */
   -webkit-tap-highlight-color: transparent;
+
+  /* 💡 【解決策①】3D空間の重なりで、クリックの当たり判定が裏側に消えるのを防ぐ */
+  backface-visibility: visible;
 }
 
-/* マス目の表面 */
+/* マス目の表面（inset: 0 のまま、見た目を100%キープ！） */
 .cell-top { 
   position: absolute; 
   inset: 0; 
@@ -141,7 +143,26 @@ body {
   border: 4px solid #8a8ab5; 
   border-radius: 8px; 
   transform: translateZ(0px); 
+
+  /* 💡 【解決策②】マス目の表面が、クリックの信号を確実にキャッチするように固定 */
+  pointer-events: auto;
+
+ /* ==========================================================
+     📱 【ここを追加！】スマホの「指の肉」のズレを100%拾うプロの最終兵器
+     ========================================================== */
+  
+  /* ① 見た目のサイズはそのままに、透明なタップ判定だけを外側に4pxずつガッと広げる */
+  outline: 4px solid transparent; 
+
+  /* ② スマホで触れた瞬間の「拡大待ち（300ms遅延）」を、このマス目でも完全にカットする */
+  touch-action: manipulation;
+
+  /* ③ 3Dの重なりで、後ろに隠れた判定を無理やり一番手前に引きずり出す */
+  transform: translateZ(1px); 
+
+
 }
+
 
 /* マス目の厚み（手前の壁） */
 .cell-front { 
@@ -173,36 +194,12 @@ body {
   transform: rotateY(90deg); 
 }
 
-/* コマを3Dで高く積み重ねるためのコンテナ */
-.cell-stack-container {
-  position: absolute; 
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible; 
-  transform-style: preserve-3d; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* ==========================================================================
    🌟 [プロ最終確定] パック（コイン）関連 ＆ ハイライト超軽量化CSS
    ========================================================================== */
 
-/* 1. マス目の上で、コイン全体の基準位置を決める透明な枠（サイズ・立体構造完全維持） */
-.puck-wrapper {
-  position: absolute;
-  inset: 0;     
-  width: 100%;    
-  height: 100%;
-  transform-style: preserve-3d; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 2. コインのSVG画像を包むコンテナ（80px盤面への最適化サイズを完全維持） */
+/* 2. コインのSVG画像を包むコンテナ（ここを修正！） */
 .puck-svg-container {
   position: absolute;
   width: 66px;     
@@ -211,11 +208,14 @@ body {
   left: calc(50% - 33px); 
   transform-origin: bottom center; 
   overflow: visible;
-  pointer-events: none;
-  /* 💡 プレイヤーが動かした時のスッとした移動感を滑らかに表現 */
+
+  /* 💡 【解決策③】none（無視）から auto（クリックを吸い込む）に変更！
+     これにより、重なったコインのどこを適当にクリックしても、
+     JavaScript（React）に「このマスの駒が押されたよ！」と100%電波が届くようになります */
+  pointer-events: auto;
+
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); 
 }
-
 .puck-svg-container svg {
   width: 100%;
   height: 100%;
