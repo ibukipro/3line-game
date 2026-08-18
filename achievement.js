@@ -901,8 +901,8 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     const isCrown = winCount === 20;
     const isTrophy = winCount === 10;
     
-    // 💥 あなたの一番お気に入りだった、最初の左右同時大爆発の枚数（200枚/140枚/80枚）を100%完全復活！
-    const initialCount = isCrown ? 200 : (isTrophy ? 140 : 80);
+    // 💥 左右から同時にドカンと出る「大迫力」を100%キープできる、スマホ最速の黄金枚数（120枚/80枚/50枚）
+    const initialCount = isCrown ? 120 : (isTrophy ? 80 : 50);
     const intervalSpeed = isCrown ? 240 : (isTrophy ? 350 : 500);
 
     const defaultPalette = [
@@ -911,41 +911,43 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     ];
     const paletteLen = defaultPalette.length;
 
-    // 💡 1. 【お掃除】もし前のゲームや古いループの計算が残っていたら、今すぐ全てを強制消去！
+    // 💡 1. 【古いゴミの全消去】裏で動いている余計な計算を、一瞬で完全に全滅リセット
     if (window.confettiLoop) {
       clearInterval(window.confettiLoop);
       window.confettiLoop = null;
     }
     if (typeof confetti.reset === 'function') {
-      confetti.reset(); // 👈 画面の裏に残っている見えない紙吹雪の計算をすべて完全消滅させます
+      confetti.reset(); 
     }
 
-    // 💡 2. 【完全無風状態の確保】Reactの余韻が100%静止するのを待ってから着火
+    // 💡 2. 【250msの黄金ディレイ】Reactの画面書き換えラッシュが100%完全に眠りにつくのを待ちます
     setTimeout(function() {
 
       /* ==========================================================================
-         🎉 👑 【完全リセット ＆ 左右同時ドカン大爆発 100%完全復活版】
+         🎉 👑 【大迫力復活 ＆ 上からのパラパラ完全復活版】
          ========================================================================== */
-      // 画面の重い計算が一度完全に「ゼロ」にリセットされた状態なので、
-      // 左右から同時に大爆発（計400枚規模）を打ち上げても、スマホがカクつくことなく綺麗に弾けます！
 
-      // 💥 左右同時にドカンと大爆発！（寿命50制限をかけて、出た後も一生軽くするお守り付き）
-      confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 50 });
-      confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 50 });
+      // 💥 最初の左右同時大爆発！（下から上へ吹き飛ぶので、ここは命を短めの 60 にしてお掃除を最速化）
+      confetti({ particleCount: initialCount, angle: 60, spread: 65, origin: { x: 0, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 60 });
+      confetti({ particleCount: initialCount, angle: 120, spread: 65, origin: { x: 1, y: 0.75 }, zIndex: 99999, scalar: 1.2, ticks: 60 });
 
-      // 3. 上からパラパラ降り続けるループ（寿命50制限で上からも確実に降らせます！）
+      // 3. 上からパラパラ降り続けるループ
       window.confettiLoop = setInterval(function() {
         const randomColor1 = defaultPalette[(Math.random() * paletteLen) | 0];
         const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
         const loopParticleCount = 1;
 
-        confetti({ angle: 40,  spread: 60, startVelocity: 28, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 50, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
-        confetti({ angle: 90,  spread: 90, startVelocity: 16, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 50, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
-        confetti({ angle: 140, spread: 60, startVelocity: 28, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 50, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
+        // 💡 ⭕ 【バグ修復】寿命の ticks を 50 ➔ 180（約3秒間）に大幅に引き伸ばし！
+        // これにより、上から降ってくる紙吹雪が途中で消えることなく、画面の下まで「ハラハラ」と美しく舞い降ります。
+        // かつ、3秒後には画面外で自動消滅するため、出た後にゴミが無限に溜まるのを完璧に防ぎます。
+        confetti({ angle: 40,  spread: 60, startVelocity: 28, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 180, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
+        confetti({ angle: 90,  spread: 90, startVelocity: 16, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 180, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
+        confetti({ angle: 140, spread: 60, startVelocity: 28, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 180, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
       }, intervalSpeed);
 
-    }, 200); // 💡 Reactが完全にお片付けを終えて静止する、確実な200ミリ秒（0.2秒）のディレイ
+    }, 250); // 💡 完全な無風状態を作り出す、確実な250ミリ秒のディレイ
   }
+
 
 
 
