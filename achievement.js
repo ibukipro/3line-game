@@ -910,7 +910,7 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
     ];
     const paletteLen = defaultPalette.length;
 
-    // 💡 1. 【古いゴミの全消去】裏で動いている余計な計算を、一瞬で完全に全滅リセット
+     // 💡 1. 【古いゴミの全消去】裏で動いている余計な計算を、一瞬で完全に全滅リセット
     if (window.confettiLoop) {
       clearInterval(window.confettiLoop);
       window.confettiLoop = null;
@@ -919,13 +919,14 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
       confetti.reset(); 
     }
 
-    // 💡 2. 【最速100msディレイ】
-    // 待ち時間を 250 ➔ 100（0.1秒）にギュッと短縮しました！
-    // 画面が切り替わった勢いのまま、タイムラグなしで大爆発が爽快に炸裂します。
+    // 💡 2. 【極限最速 50ms ディレイ】
+    // 待ち時間を 100 ➔ 50（0.05秒）に極限まで短縮しました！
+    // 画面が切り替わった瞬間に、1ミリのタイムラグも感じさせずに左右同時大爆発が爽快に炸裂します。
+    // 裏画面をCSSで眠らせているため、これだけ早くしてもカクつく心配は一切ありません！
     setTimeout(function() {
 
       /* ==========================================================================
-         🎉 👑 【テンポ最速 ＆ 大迫力100%完全復活版】
+         🎉 👑 【テンポ極限最速 ＆ 大迫力100%完全復活版】
          ========================================================================== */
 
       // 💥 最初の左右同時大爆発（100%の迫力・命を60に制限して爆速お掃除）
@@ -938,14 +939,14 @@ function checkAndShowReward(winCount, difficulty = 'easy') {
         const randomColor2 = defaultPalette[(Math.random() * paletteLen) | 0];
         const loopParticleCount = 1;
 
-        // 上からハラハラと綺麗に降らせるために寿命は180（約3秒）をキープし、画面外での自動消滅も完全継続！
         confetti({ angle: 40,  spread: 60, startVelocity: 28, origin: { x: -0.05, y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 180, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
         confetti({ angle: 90,  spread: 90, startVelocity: 16, origin: { x: 0.5,   y: -0.15 }, particleCount: loopParticleCount, gravity: 0.85, ticks: 180, colors: [randomColor2], zIndex: 99999, scalar: isCrown ? 1.35 : 1.15 });
         confetti({ angle: 140, spread: 60, startVelocity: 28, origin: { x: 1.05,  y: -0.15 }, particleCount: loopParticleCount, gravity: 0.9, ticks: 180, colors: [randomColor1], zIndex: 99999, scalar: 1.1 });
       }, intervalSpeed);
 
-    }, 100); // 💡 テンポ感を極限まで引き上げる 100ミリ秒（0.1秒）
+    }, 50); // 💡 人間の脳波の限界に挑む 50ミリ秒（0.05秒）
   }
+
 
 
 
