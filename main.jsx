@@ -1,4 +1,6 @@
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { createRoot } from 'react-dom/client';
+
 
 
 
@@ -1384,7 +1386,6 @@ const PHASE_MESSAGES_BASE = {
   moveTargetSelect: '移動先のマスを選択してください',
 };
 
-const { useState, useCallback, useMemo, useEffect, useRef } = React;
 
 function App() {
   // --- 🚪 画面遷移とゲームモード（頻繁に変わらないコア状態） ---
@@ -1856,4 +1857,4 @@ function App() {
 // ==========================================================================
 // 🚀 React アプリケーションのエントリーポイント起動
 // ==========================================================================
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById('root')).render(<App />);
