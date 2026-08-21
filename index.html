@@ -1444,7 +1444,7 @@ function minimax(board, hands, player, depth, alpha, beta, aiColor, maximizing, 
 }
 
 // ==========================================================================
-// 💡 ④ ファンクション ゲットAIムーブ（元の難易度バランスを100%維持）
+// 4. ファンクション ゲットAIムーブ（難易度調整パラメータ集約版）
 // ==========================================================================
 function getAIMove(board, hands, aiColor, difficulty, lastMove) {
   const moves = getAllMoves(board, hands, aiColor, lastMove);
@@ -1452,15 +1452,51 @@ function getAIMove(board, hands, aiColor, difficulty, lastMove) {
   if (movesLen === 0) return null;
   const opColor = aiColor === 'blue' ? 'yellow' : 'blue';
 
+  // ==========================================================================
+  // 難易度調整パラメータ（ここを書き換えて強さを自由に調整してください）
+  // ==========================================================================
+  
+  // 1. 勝ち筋・守りの見逃し確率（1.00で100%成功、0.00で100%見落とす）
+  const successRates = {
+ easy: 1.00,    // よわいが勝ちを確実に見つける確率（元の挙動：1.00固定）
+ medium: 1.00,  // ふつうが勝ち・ピンチに気づく確率（例：0.50なら半分うっかり見落とす）
+ hard: 1.00     // つよいが勝ち・ピンチに気づく確率（1.00で鉄壁固定）
+  };
+
+  // 2. ランダムに打っちゃう確率（1.00で100%ランダム、0.00で思考をスキップしない）
+  const randomRates = {
+    easy: 0.60,    // よわいが思考を放棄して完全にランダムに打つ確率（元の設定：0.60）
+    medium: 0.30,  // ふつうが思考を放棄して完全にランダムに打つ確率（元の設定：0.75）
+    hard: 0.00     // つよいが完全にランダムに打つ確率（0.00で常に最善手を考える）
+  };
+
+  // 3. AIが読む深さ（数字が大きいほど賢くなりますが、処理が重くなります）
+  const depthMap = {
+    easy: 1,       // よわいの探索深度（元の設定：1）
+    medium: 2,     // ふつうの探索深度（元の設定：2）
+    hard: 4        // つよいの探索深度（元の設定：4）
+  };
+
+  // 各難易度ごとの成否判定（乱数とパラメータの比較）
+  const currentSuccess = Math.random() < (successRates[difficulty] ?? 1.00);
+  const currentRandom  = Math.random() < (randomRates[difficulty] ?? 0.00);
+  const depth          = depthMap[difficulty] ?? 2;
+
+  // ==========================================================================
+
   // 1. 勝ち筋があれば即座に打つ
-  for (let i = 0; i < movesLen; i++) {
-    const nextState = applyMove(board, hands, aiColor, moves[i]);
-    const winInfo = checkWinner(nextState.board);
-    if (winInfo && winInfo.winner === aiColor) return moves[i]; 
+  // 設定された確率（currentSuccess）に当選した場合のみ、勝ちを確定させる
+  if (difficulty === 'hard' || currentSuccess) {
+    for (let i = 0; i < movesLen; i++) {
+      const nextState = applyMove(board, hands, aiColor, moves[i]);
+      const winInfo = checkWinner(nextState.board);
+      if (winInfo && winInfo.winner === aiColor) return moves[i]; 
+    }
   }
 
   // 2. 守りのロジック
-  if (difficulty !== 'easy') {
+  // よわいは元々100%スルー。それ以外は確率（currentSuccess）で守る
+  if (difficulty !== 'easy' && (difficulty === 'hard' || currentSuccess)) {
     const enemyMoves = getAllMoves(board, hands, opColor, null);
     const enemyLen = enemyMoves.length;
     let lethalEnemyMove = null;
@@ -1493,16 +1529,11 @@ function getAIMove(board, hands, aiColor, difficulty, lastMove) {
     }
   }
 
-  // 3. ⭐️ 元の確率設定（0.60 と 0.75）を完全に復元して据え置き
-  if (difficulty === 'easy' && Math.random() < 0.60) {
+  // 3. 確率設定（ランダムに打つ処理）
+  // 設定したrandomRatesの確率で、ここを通過して即座にランダム着手します
+  if (currentRandom) {
     return moves[Math.floor(Math.random() * movesLen)];
   }
-  if (difficulty === 'medium' && Math.random() < 0.75) {
-    return moves[Math.floor(Math.random() * movesLen)];
-  }
-
-  const depthMap = { easy: 1, medium: 2, hard: 4 };
-  const depth = depthMap[difficulty] || 2;
 
   // 4. Minimax法による最善手の探索
   let bestScore = -Infinity;
